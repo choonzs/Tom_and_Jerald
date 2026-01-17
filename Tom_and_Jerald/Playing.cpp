@@ -8,7 +8,7 @@
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
 
-Player player = {};
+Player base_player = {};
 Obstacle obstacles[k_obstacle_count] = {};
 namespace {
 	s8 font_id;
@@ -21,7 +21,7 @@ static void drawHealthBar(AEGfxVertexList* mesh, const Player* player);
 
 void Playing_Load() {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
-	resetStage(&player, obstacles, &stage_timer, &damage_timer);
+	resetStage(&base_player, obstacles, &stage_timer, &damage_timer);
 }
 
 void Playing_Initialize() {
@@ -40,23 +40,23 @@ void Playing_Update() {
 	if (damage_timer > 0.0f)
 		damage_timer -= delta_time;
 
-	handlePlayerMovement(&player, delta_time);
+	handlePlayerMovement(&base_player, delta_time);
 	// Your own rendering logic goes here
 	updateObstacles(obstacles, delta_time);
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
-		if (checkOverlap(&player.position, &player.half_size, &obstacles[i].position, &obstacles[i].half_size))
+		if (checkOverlap(&base_player.position, &base_player.half_size, &obstacles[i].position, &obstacles[i].half_size))
 		{
 			if (damage_timer <= 0.0f)
 			{
-				player.health -= 1;
+				base_player.health -= 1;
 				damage_timer = k_damage_cooldown;
 			}
 		}
 	}
 	// Informing the system about the loop's end
-	if (player.health <= 0)
+	if (base_player.health <= 0)
 		next = GAME_STATE_GAME_OVER;
 	else if (stage_timer >= k_stage_duration)
 		next = GAME_STATE_VICTORY;
@@ -72,14 +72,14 @@ void Playing_Draw() {
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
 
-	drawQuad(unit_square, player.position.x, player.position.y, player.half_size.x * 2.0f, player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
+	drawQuad(unit_square, base_player.position.x, base_player.position.y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
 		Obstacle* obstacle = &obstacles[i];
 		drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 0.4f, 0.35f, 1.0f);
 	}
-	drawHealthBar(unit_square, &player);
+	drawHealthBar(unit_square, &base_player);
 	
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	char timer_text[64];
@@ -98,7 +98,7 @@ void Playing_Unload() {
 }
 
 
-void resetStage(Player* player, Obstacle* obstacles, f32* stage_timer, f32* damage_timer) {
+void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage_time) {
 	f32 min_x = AEGfxGetWinMinX();
 	f32 max_x = AEGfxGetWinMaxX();
 	f32 min_y = AEGfxGetWinMinY();
@@ -107,25 +107,25 @@ void resetStage(Player* player, Obstacle* obstacles, f32* stage_timer, f32* dama
 	AEVec2Set(&player->position, 0.0f, 0.0f);
 	AEVec2Set(&player->half_size, 25.0f, 25.0f);
 	player->health = k_max_health;
-	*stage_timer = 0.0f;
-	*damage_timer = 0.0f;
+	*stage_time = 0.0f;
+	*damage_time = 0.0f;
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
 		f32 size_value = randomRange(25.0f, 70.0f);
-		AEVec2Set(&obstacles[i].half_size, size_value, size_value);
+		AEVec2Set(&obstacle[i].half_size, size_value, size_value);
 		AEVec2Set(
-			&obstacles[i].position,
+			&obstacle[i].position,
 			randomRange(min_x + size_value, max_x - size_value),
 			randomRange(min_y + size_value, max_y - size_value));
 		AEVec2Set(
-			&obstacles[i].velocity,
+			&obstacle[i].velocity,
 			randomRange(-220.0f, 220.0f),
 			randomRange(-220.0f, 220.0f));
 	}
 }
 
-void updateObstacles(Obstacle* obstacles, f32 delta_time)
+void updateObstacles(Obstacle* Obstacles, f32 delta_time)
 {
 	f32 min_x = AEGfxGetWinMinX();
 	f32 max_x = AEGfxGetWinMaxX();
@@ -134,7 +134,7 @@ void updateObstacles(Obstacle* obstacles, f32 delta_time)
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
-		Obstacle* obstacle = &obstacles[i];
+		Obstacle* obstacle = &Obstacles[i];
 		obstacle->position.x += obstacle->velocity.x * delta_time;
 		obstacle->position.y += obstacle->velocity.y * delta_time;
 
