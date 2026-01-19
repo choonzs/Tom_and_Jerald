@@ -7,7 +7,7 @@
 
 namespace {
 	s8 font_id;
-	AEGfxVertexList* unit_square = NULL;
+	AEGfxVertexList* unit_square = nullptr;
 }
 
 void Victory_Load() {
@@ -19,7 +19,7 @@ void Victory_Initialize() {
 	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxTextureSet(NULL, 0.0f, 0.0f);
+	AEGfxTextureSet(nullptr, 0.0f, 0.0f);
 	AEGfxSetCamPosition(0.0f, 0.0f);
 }
 

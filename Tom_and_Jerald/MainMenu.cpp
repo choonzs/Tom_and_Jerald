@@ -19,6 +19,7 @@ void MainMenu_Load() {
 
 void MainMenu_Initialize() {
 	createUnitSquare(&unit_square);
+
 	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -29,7 +30,6 @@ void MainMenu_Initialize() {
 void MainMenu_Update() {
 	if (AEInputCheckTriggered(AEVK_RETURN))
 	{
-		//resetStage(&player, obstacles, &stage_timer, &damage_timer);
 		// Moving to playing state
 		next = GAME_STATE_PLAYING;
 	}

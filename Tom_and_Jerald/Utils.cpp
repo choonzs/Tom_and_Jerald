@@ -23,6 +23,28 @@ void createUnitSquare(AEGfxVertexList** out_mesh)
 	*out_mesh = AEGfxMeshEnd();
 }
 
+void createUnitCircles(AEGfxVertexList** out_mesh) {
+	AEGfxMeshStart();
+		f32 radius = 0.5f;
+		u8 segments = 100;
+	float angle_increment = (2.0f * 3.14159f) / segments;
+	for (u8 i = 0; i < segments; ++i) {
+		float angle1 = i * angle_increment;
+		float angle2 = (i + 1) % segments * angle_increment;
+		float x1 = radius * cosf(angle1);
+		float y1 = radius * sinf(angle1);
+		float x2 = radius * cosf(angle2);
+		float y2 = radius * sinf(angle2);
+		AEGfxTriAdd(
+			0.0f, 0.0f, 0xFFFFFFFF, 0.5f, 0.5f,
+			x1, y1, 0xFFFFFFFF, (cosf(angle1) + 1.0f) * 0.5f, (sinf(angle1) + 1.0f) * 0.5f,
+			x2, y2, 0xFFFFFFFF, (cosf(angle2) + 1.0f) * 0.5f, (sinf(angle2) + 1.0f) * 0.5f
+		);
+	}
+	// Saving the mesh (list of triangles) in pMesh
+	*out_mesh = AEGfxMeshEnd();
+}
+
 void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha)
 {
 	AEMtx33 scale;
@@ -40,6 +62,7 @@ void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 
 
 bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEVec2* position_b, const AEVec2* half_size_b)
 {
+
 	if (fabsf(position_a->x - position_b->x) > (half_size_a->x + half_size_b->x))
 		return false;
 
@@ -53,4 +76,3 @@ f32 randomRange(f32 min_value, f32 max_value)
 {
 	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
 }
-
