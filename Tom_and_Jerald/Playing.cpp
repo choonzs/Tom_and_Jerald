@@ -5,6 +5,7 @@
 #include "GameStateList.h"
 #include "PlayerMovement.h"
 #include "GameStateManager.h"
+#include "Credits.h"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -43,6 +44,8 @@ void Playing_Update() {
 	// Your own rendering logic goes here
 	updateObstacles(obstacles, delta_time);
 
+	bool took_damage = false;
+
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
 		if (checkOverlap(&base_player.position, &base_player.half_size, &obstacles[i].position, &obstacles[i].half_size))
@@ -51,9 +54,18 @@ void Playing_Update() {
 			{
 				base_player.health -= 1;
 				damage_timer = k_damage_cooldown;
+				took_damage = true;
 			}
 		}
 	}
+
+	if (took_damage)
+	{
+		Credits_OnDamage();
+	}
+
+	bool game_active = (base_player.health > 0) && (stage_timer < k_stage_duration);
+	Credits_Update(delta_time, game_active);
 	// Informing the system about the loop's end
 	if (base_player.health <= 0)
 		next = GAME_STATE_GAME_OVER;
@@ -106,6 +118,7 @@ void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage
 	player->health = k_max_health;
 	*stage_time = 0.0f;
 	*damage_time = 0.0f;
+	Credits_ResetRound();
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
