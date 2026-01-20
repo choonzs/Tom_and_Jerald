@@ -46,7 +46,9 @@ void handlePlayerMovement(Player* player, f32 delta_time)
 		new_velo = old_velo = net_accel = 0.0f;
 	}
 	if (player->position.y < min_y) {
-		new_velo = old_velo = net_accel = 0.0f;
+		new_velo /= -gravity * 0.3;
+		old_velo /= -gravity * 0.3;
+		net_accel /= -gravity * 0.3;
 	}
 
 
