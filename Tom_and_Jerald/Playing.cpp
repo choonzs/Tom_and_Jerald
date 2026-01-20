@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "utils.h"
 #include "Playing.h"
+#include "Obstacle.h"
 #include "GameStateList.h"
 #include "PlayerMovement.h"
 #include "GameStateManager.h"
@@ -15,9 +16,6 @@ namespace {
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
 }
 void resetStage(Player* player, Obstacle* obstacles, f32* stage_timer, f32* damage_timer);
-void updateObstacles(Obstacle* obstacles, f32 delta_time);
-static void drawHealthBar(AEGfxVertexList* mesh, const Player* player);
-
 
 void Playing_Load() {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
@@ -61,9 +59,11 @@ void Playing_Update() {
 		next = GAME_STATE_GAME_OVER;
 	else if (stage_timer >= k_stage_duration)
 		next = GAME_STATE_VICTORY;
+	else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) 
+		next = GAME_STATE_QUIT;
 	else {
 		// Loop back on same scene
-		next = GAME_STATE_RESTART;
+		//next = GAME_STATE_RESTART;
 	}
 
 }
@@ -98,22 +98,7 @@ void Playing_Unload() {
 	AEGfxDestroyFont(font_id);
 }
 
-void resetObstacle(Obstacle* obstacle) {
-	f32 max_x = AEGfxGetWinMaxX();
-	f32 min_y = AEGfxGetWinMinY();
-	f32 max_y = AEGfxGetWinMaxY();
-	f32 size_value = randomRange(25.0f, 70.0f);
-	AEVec2Set(&obstacle->half_size, size_value, size_value);
-	AEVec2Set(
-		&obstacle->position,
-		//move it a little offscreen
-		max_x + obstacle->half_size.x,
-		randomRange(min_y + size_value, max_y - size_value));
-	AEVec2Set(
-		&obstacle->velocity,
-		randomRange(-220.0f, 220.0f),
-		randomRange(-220.0f, 220.0f));
-}
+
 
 void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage_time) {
 	AEVec2Set(&player->position, 0.0f, 0.0f);
@@ -127,74 +112,3 @@ void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage
 		resetObstacle(obstacle + i);
 	}
 }
-
-
-
-void updateObstacles(Obstacle* Obstacles, f32 delta_time)
-{
-	f32 min_x = AEGfxGetWinMinX();
-	f32 max_x = AEGfxGetWinMaxX();
-	f32 min_y = AEGfxGetWinMinY();
-	f32 max_y = AEGfxGetWinMaxY();
-
-	for (int i = 0; i < k_obstacle_count; ++i)
-	{
-		Obstacle* obstacle = &Obstacles[i];
-		obstacle->position.x += obstacle->velocity.x * delta_time;
-		obstacle->position.y += obstacle->velocity.y * delta_time;
-
-		// Bounce off walls left boundary
-		if (obstacle->position.x - obstacle->half_size.x < min_x - (3 * obstacle->half_size.x))
-		{
-			// Reset obj positon
-			resetObstacle(obstacle);
-		}
-
-		/*if (obstacle->position.x - obstacle->half_size.x < min_x)
-		{
-			obstacle->position.x = min_x + obstacle->half_size.x;
-			obstacle->velocity.x *= -1.0f;
-		}*/
-
-		// Bounce off walls right boundary
-		if (obstacle->position.x + obstacle->half_size.x > max_x + (3 * obstacle->half_size.x))
-		{
-			obstacle->velocity.x *= -1.0f;
-		}
-
-		// Bounce off walls bottom boundary
-		if (obstacle->position.y - obstacle->half_size.y < min_y)
-		{
-			obstacle->position.y = min_y + obstacle->half_size.y;
-			obstacle->velocity.y *= -1.0f;
-		}
-
-		// Bounce off walls top boundary
-		if (obstacle->position.y + obstacle->half_size.y > max_y)
-		{
-			obstacle->position.y = max_y - obstacle->half_size.y;
-			obstacle->velocity.y *= -1.0f;
-		}
-	}
-}
-
-static void drawHealthBar(AEGfxVertexList* mesh, const Player* player)
-{
-	f32 min_x = AEGfxGetWinMinX();
-	f32 max_y = AEGfxGetWinMaxY();
-	f32 bar_width = 32.0f;
-	f32 bar_height = 12.0f;
-	f32 spacing = 6.0f;
-	f32 start_x = min_x + 30.0f;
-	f32 start_y = max_y - 30.0f;
-
-	for (int i{}; i < k_max_health; ++i)
-	{
-		f32 center_x = start_x + (bar_width + spacing) * i;
-		f32 center_y = start_y;
-		drawQuad(mesh, center_x, center_y, bar_width, bar_height, 0.15f, 0.15f, 0.15f, 1.0f);
-		if (i < player->health)
-			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
-	}
-}
-

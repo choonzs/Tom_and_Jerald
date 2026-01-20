@@ -27,8 +27,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// GSM LOOP
 		while (current != GAME_STATE_QUIT)
 		{
-			// Informing the system about the loop's start
-			AESysFrameStart();
 
 			// when ESCAPE is hit or when the window is closed
 			if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
@@ -37,17 +35,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			else {
 				if (current != GAME_STATE_RESTART) {
 					GSM_Update();
+					AEFrameRateControllerReset();
 					fpLoad();
 				}
 				else {
 					next = previous;
 					current = previous;
 				}
-				fpInitialize();
+				fpInitialize();	
 				// GAME LOOP
 				while (current == next) {
+					// Informing the system about the loop's start
+					AESysFrameStart();
 					fpUpdate();
 					fpDraw();
+					AESysFrameEnd();
 				}
 				fpFree();
 				if (next != GAME_STATE_RESTART) {
@@ -56,7 +58,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				previous = current;
 				current = next;
 			}
-			AESysFrameEnd();
 		}
 	// free the system
 	AESysExit();

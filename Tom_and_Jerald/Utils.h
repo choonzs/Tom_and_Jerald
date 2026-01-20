@@ -1,11 +1,12 @@
 #include "pch.h"
+#include "playing.h"
 
 #ifndef UTILS_H
 #define UTILS_H
 
 
 
-void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale);
+void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x = 0.0f, f32 cam_pos_y = 0.0f);
 
 void createUnitSquare(AEGfxVertexList** out_mesh);
 void createUnitCircles(AEGfxVertexList** out_mesh);
@@ -15,5 +16,7 @@ void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 
 bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEVec2* position_b, const AEVec2* half_size_b);
 
 f32 randomRange(f32 min_value, f32 max_value);
+
+void drawHealthBar(AEGfxVertexList* mesh, const Player* player);
 
 #endif // !UTILS_H

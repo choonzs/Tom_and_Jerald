@@ -2,12 +2,7 @@
 #define PLAYING_H
 #include "pch.h"
 
-struct Obstacle
-{
-	AEVec2 position;
-	AEVec2 velocity;
-	AEVec2 half_size;
-};
+
 
 struct Player
 {

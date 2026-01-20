@@ -37,7 +37,7 @@ void GameOver_Update() {
 		next = GAME_STATE_QUIT;
 	}
 	else {
-		next = GAME_STATE_RESTART;
+		//next = GAME_STATE_RESTART;
 	}
 }
 

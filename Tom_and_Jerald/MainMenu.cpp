@@ -10,6 +10,7 @@ namespace {
 	AEGfxVertexList* unit_square = NULL;
 
 	int counter{};
+	f32 cam_pos_x, cam_pos_y;
 }
 
 
@@ -25,6 +26,8 @@ void MainMenu_Initialize() {
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetCamPosition(0.0f, 0.0f);
+	AEGfxGetCamPosition(&cam_pos_x, &cam_pos_y);
+
 }
 
 void MainMenu_Update() {
@@ -32,16 +35,24 @@ void MainMenu_Update() {
 	{
 		// Moving to playing state
 		next = GAME_STATE_PLAYING;
+	} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
+	{
+		// Quitting the game
+		next = GAME_STATE_QUIT;
 	}
 	else {
+		current = GAME_STATE_MENU;
 		// Refreshing the next state to stay in menu
-		next = GAME_STATE_RESTART;
+		//next = GAME_STATE_RESTART;
 	}
 
+
+	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
+	cam_pos_x -= 0.1f * delta_time;
 }
 
 void MainMenu_Draw() {
-	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
+	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f, cam_pos_x, cam_pos_y);
 	drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
 	drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
 	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);

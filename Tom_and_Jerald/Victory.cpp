@@ -32,12 +32,12 @@ void Victory_Update() {
 	{
 		next = GAME_STATE_MENU;
 	}
-	else if (AEInputCheckTriggered(AEVK_3))
+	else if (AEInputCheckTriggered(AEVK_3) || 0 == AESysDoesWindowExist())
 	{
 		next = GAME_STATE_QUIT;
 	}
 	else {
-		next = GAME_STATE_RESTART;
+		//next = GAME_STATE_RESTART;
 	}
 }
 

@@ -1,12 +1,13 @@
 #include "pch.h"
+#include "Playing.h"
 
 
-void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale)
+void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
-	AEGfxPrint(font_id, text, -width * 0.5f, y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
+	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void createUnitSquare(AEGfxVertexList** out_mesh)
@@ -75,4 +76,25 @@ bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEV
 f32 randomRange(f32 min_value, f32 max_value)
 {
 	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
+}
+
+
+void drawHealthBar(AEGfxVertexList* mesh, const Player* player)
+{
+	f32 min_x = AEGfxGetWinMinX();
+	f32 max_y = AEGfxGetWinMaxY();
+	f32 bar_width = 32.0f;
+	f32 bar_height = 12.0f;
+	f32 spacing = 6.0f;
+	f32 start_x = min_x + 30.0f;
+	f32 start_y = max_y - 30.0f;
+
+	for (int i{}; i < k_max_health; ++i)
+	{
+		f32 center_x = start_x + (bar_width + spacing) * i;
+		f32 center_y = start_y;
+		drawQuad(mesh, center_x, center_y, bar_width, bar_height, 0.15f, 0.15f, 0.15f, 1.0f);
+		if (i < player->health)
+			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
+	}
 }
