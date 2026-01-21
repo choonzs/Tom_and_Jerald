@@ -28,8 +28,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		while (current != GAME_STATE_QUIT)
 		{
 
-			// when ESCAPE is hit or when the window is closed
-			if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+			// when the window is closed
+			if (0 == AESysDoesWindowExist()) {
 				current = GAME_STATE_QUIT;
 			}
 			else {

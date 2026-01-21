@@ -32,6 +32,10 @@ void Victory_Update() {
 	{
 		next = GAME_STATE_MENU;
 	}
+	else if (AEInputCheckTriggered(AEVK_S))
+	{
+		next = GAME_STATE_SHOP;
+	}
 	else if (AEInputCheckTriggered(AEVK_3) || 0 == AESysDoesWindowExist())
 	{
 		next = GAME_STATE_QUIT;
@@ -45,7 +49,8 @@ void Victory_Draw() {
 	drawCenteredText(font_id, "CONGRATULATIONS!", 0.35f, 1.0f);
 	drawCenteredText(font_id, "PROCEED TO NEXT STAGE (N)", 0.05f, 0.7f);
 	drawCenteredText(font_id, "SAVE AND RETURN TO MAIN MENU (M)", -0.1f, 0.7f);
-	drawCenteredText(font_id, "EXIT (ESC)", -0.25f, 0.7f);
+	drawCenteredText(font_id, "SHOP (S)", -0.2f, 0.7f);
+	drawCenteredText(font_id, "EXIT (ESC)", -0.3f, 0.7f);
 }
 
 void Victory_Free() {
