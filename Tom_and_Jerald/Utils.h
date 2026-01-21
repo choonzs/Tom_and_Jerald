@@ -17,6 +17,6 @@ bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEV
 
 f32 randomRange(f32 min_value, f32 max_value);
 
-void drawHealthBar(AEGfxVertexList* mesh, const Player* player);
+void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health);
 
 #endif // !UTILS_H

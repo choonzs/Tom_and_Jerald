@@ -6,6 +6,7 @@
 #include "GameOver.h"
 #include "Playing.h"
 #include "Victory.h"
+#include "Shop.hpp"
 
 int current{}, previous{}, next{};
 
@@ -26,6 +27,14 @@ void GSM_Update()
 		fpDraw = MainMenu_Draw;
 		fpFree = MainMenu_Free;
 		fpUnload = MainMenu_Unload;
+		break;
+	case GAME_STATE_SHOP:
+		fpLoad = Shop_Load;
+		fpInitialize = Shop_Initialize;
+		fpUpdate = Shop_Update;
+		fpDraw = Shop_Draw;
+		fpFree = Shop_Free;
+		fpUnload = Shop_Unload;
 		break;
 	case GAME_STATE_GAME_OVER:
 		fpLoad = GameOver_Load;

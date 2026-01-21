@@ -35,6 +35,10 @@ void MainMenu_Update() {
 	{
 		// Moving to playing state
 		next = GAME_STATE_PLAYING;
+	}
+	else if (AEInputCheckTriggered(AEVK_S))
+	{
+		next = GAME_STATE_SHOP;
 	} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 	{
 		// Quitting the game
@@ -54,6 +58,7 @@ void MainMenu_Update() {
 void MainMenu_Draw() {
 	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f, cam_pos_x, cam_pos_y);
 	drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
+	drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
 	drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
 	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
 	drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);

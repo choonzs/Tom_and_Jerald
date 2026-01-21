@@ -109,6 +109,8 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="PlayerMovement.cpp" />
     <ClCompile Include="Playing.cpp" />
     <ClCompile Include="Credits.cpp" />
+    <ClCompile Include="Shop.cpp" />
+    <ClCompile Include="Upgrades.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Victory.cpp" />
     <ClCompile Include="Victory.h" />
@@ -123,6 +125,8 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerMovement.h" />
     <ClInclude Include="Playing.h" />
+    <ClInclude Include="Shop.hpp" />
+    <ClInclude Include="Upgrades.hpp" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

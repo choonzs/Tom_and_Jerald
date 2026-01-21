@@ -2,7 +2,7 @@
 #include "Credits.h"
 
 namespace {
-	int credits = 0;
+	int credits = 1000;
 	f32 no_damage_timer = 0.0f;
 }
 

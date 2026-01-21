@@ -6,6 +6,7 @@
 #include "PlayerMovement.h"
 #include "GameStateManager.h"
 #include "Credits.h"
+#include "Upgrades.hpp"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -17,6 +18,7 @@ namespace {
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
 }
 void resetStage(Player* player, Obstacle* obstacles, f32* stage_timer, f32* damage_timer);
+int getMaxHealthFromUpgrades();
 
 void Playing_Load() {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
@@ -92,7 +94,10 @@ void Playing_Draw() {
 		Obstacle* obstacle = &obstacles[i];
 		drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 0.4f, 0.35f, 1.0f);
 	}
-	drawHealthBar(unit_square, &base_player);
+	drawHealthBar(unit_square, &base_player, getMaxHealthFromUpgrades());
+	char cheese_text[64];
+	sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
+	AEGfxPrint(font_id, cheese_text, -0.95f, 0.75f, 0.4f, 0.95f, 0.9f, 0.2f, 1.0f);
 	
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	char timer_text[64];
@@ -114,8 +119,12 @@ void Playing_Unload() {
 
 void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage_time) {
 	AEVec2Set(&player->position, 0.0f, 0.0f);
-	AEVec2Set(&player->half_size, 25.0f, 25.0f);
-	player->health = k_max_health;
+	f32 size_reduction = Upgrades_GetSizeReduction();
+	f32 upgraded_half_size = k_player_base_half_size - size_reduction;
+	if (upgraded_half_size < 1.0f)
+		upgraded_half_size = 1.0f;
+	AEVec2Set(&player->half_size, upgraded_half_size, upgraded_half_size);
+	player->health = getMaxHealthFromUpgrades();
 	*stage_time = 0.0f;
 	*damage_time = 0.0f;
 	Credits_ResetRound();
@@ -124,4 +133,16 @@ void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage
 	{
 		resetObstacle(obstacle + i);
 	}
+}
+
+int getMaxHealthFromUpgrades()
+{
+	f32 reduction = Upgrades_GetHealthReduction();
+	f32 multiplier = 1.0f - reduction;
+	if (multiplier < 0.0f)
+		multiplier = 0.0f;
+	int max_health = (int)floorf(k_max_health * multiplier);
+	if (max_health < 1)
+		max_health = 1;
+	return max_health;
 }

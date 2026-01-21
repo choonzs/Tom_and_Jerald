@@ -32,6 +32,10 @@ void GameOver_Update() {
 	{
 		next = GAME_STATE_MENU;
 	}
+	else if (AEInputCheckTriggered(AEVK_S))
+	{
+		next = GAME_STATE_SHOP;
+	}
 	else if (AEInputCheckTriggered(AEVK_3))
 	{
 		next = GAME_STATE_QUIT;
@@ -45,7 +49,8 @@ void GameOver_Draw() {
 	drawCenteredText(font_id, "GAME OVER", 0.35f, 1.0f);
 	drawCenteredText(font_id, "TRY AGAIN (1)", 0.05f, 0.7f);
 	drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.1f, 0.7f);
-	drawCenteredText(font_id, "EXIT (3)", -0.25f, 0.7f);
+	drawCenteredText(font_id, "SHOP (S)", -0.2f, 0.7f);
+	drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
 }
 
 void GameOver_Free() {

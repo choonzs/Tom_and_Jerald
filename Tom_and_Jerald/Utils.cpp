@@ -79,7 +79,7 @@ f32 randomRange(f32 min_value, f32 max_value)
 }
 
 
-void drawHealthBar(AEGfxVertexList* mesh, const Player* player)
+void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health)
 {
 	f32 min_x = AEGfxGetWinMinX();
 	f32 max_y = AEGfxGetWinMaxY();
@@ -89,7 +89,7 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player* player)
 	f32 start_x = min_x + 30.0f;
 	f32 start_y = max_y - 30.0f;
 
-	for (int i{}; i < k_max_health; ++i)
+	for (int i{}; i < max_health; ++i)
 	{
 		f32 center_x = start_x + (bar_width + spacing) * i;
 		f32 center_y = start_y;
