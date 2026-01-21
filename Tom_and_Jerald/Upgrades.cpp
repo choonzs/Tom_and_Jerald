@@ -27,7 +27,7 @@ f32 Upgrades_GetSizeReduction()
 	return size_level * k_size_upgrade_step;
 }
 
-f32 Upgrades_GetHealthReduction()
+f32 Upgrades_GetHealthIncrease()
 {
 	return health_level * k_health_upgrade_step;
 }

@@ -94,7 +94,7 @@ void Shop_Update()
 
 	char health_text[128];
 	char size_text[128];
-	sprintf_s(health_text, "UPGRADE HEALTH (-5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
+	sprintf_s(health_text, "UPGRADE HEALTH (+5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
 	sprintf_s(size_text, "UPGRADE SIZE (-0.1) [LEVEL %d/%d]", Upgrades_GetSizeLevel(), k_size_upgrade_max_level);
 
 	if (AEInputCheckTriggered(AEVK_LBUTTON))
@@ -141,7 +141,7 @@ void Shop_Draw()
 	char health_text[128];
 	char size_text[128];
 	
-	sprintf_s(health_text, "UPGRADE HEALTH (-5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
+	sprintf_s(health_text, "UPGRADE HEALTH (+5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
 	sprintf_s(size_text, "UPGRADE SIZE (-0.1) [LEVEL %d/%d]", Upgrades_GetSizeLevel(), k_size_upgrade_max_level);
 
 	drawButtonBackground(health_text, k_health_button_y, k_button_scale, 0.08f, 0.2f, 0.35f, 0.55f);

@@ -137,10 +137,8 @@ void resetStage(Player* player, Obstacle* obstacle, f32* stage_time, f32* damage
 
 int getMaxHealthFromUpgrades()
 {
-	f32 reduction = Upgrades_GetHealthReduction();
-	f32 multiplier = 1.0f - reduction;
-	if (multiplier < 0.0f)
-		multiplier = 0.0f;
+	f32 increase = Upgrades_GetHealthIncrease();
+	f32 multiplier = 1.0f + increase;
 	int max_health = (int)floorf(k_max_health * multiplier);
 	if (max_health < 1)
 		max_health = 1;

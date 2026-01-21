@@ -15,7 +15,7 @@ int Upgrades_GetSizeLevel();
 int Upgrades_GetHealthLevel();
 
 f32 Upgrades_GetSizeReduction();
-f32 Upgrades_GetHealthReduction();
+f32 Upgrades_GetHealthIncrease();
 
 bool Upgrades_CanUpgradeSize();
 bool Upgrades_CanUpgradeHealth();
