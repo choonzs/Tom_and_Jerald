@@ -19,4 +19,27 @@ f32 randomRange(f32 min_value, f32 max_value);
 
 void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health);
 
+/*// comment out first, will work on this later
+na mespace graphics{
+
+	//Structure for particle system
+	struct particleSys {
+		float posX;
+		float posY;
+		float scale;
+		int lifetime;
+		AEGfxMesh;
+		AEGfxTexture;
+	};
+
+
+	//function for particle system
+	void particleInit()
+	void particleDraw()
+
+	//Function for pixeltext
+	void pixelTextInit()
+	void pixelTextDraw()
+}*/
+
 #endif // !UTILS_H
