@@ -4,13 +4,15 @@
 #include "GameStateList.h"
 #include "Utils.h"
 #include "GameStateManager.h"
+#include "Camera.hpp"
 
 namespace {
 	s8 font_id;
 	AEGfxVertexList* unit_square = NULL;
 
 	int counter{};
-	f32 cam_pos_x, cam_pos_y;
+	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
+	Camera* camera = nullptr;
 }
 
 
@@ -25,12 +27,14 @@ void MainMenu_Initialize() {
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
-	AEGfxSetCamPosition(0.0f, 0.0f);
-	AEGfxGetCamPosition(&cam_pos_x, &cam_pos_y);
 
+	camera = CAMERA::Initialize_Camera();
+	AEGfxSetCamPosition(camera->x,camera->y);
 }
 
 void MainMenu_Update() {
+	CAMERA::Update_Camera(*camera);
+	CAMERA::Set_Camera_Shake();
 	if (AEInputCheckTriggered(AEVK_RETURN))
 	{
 		// Moving to playing state
@@ -50,22 +54,32 @@ void MainMenu_Update() {
 		//next = GAME_STATE_RESTART;
 	}
 
-
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
-	cam_pos_x -= 0.1f * delta_time;
+	
+	if (AEInputCheckTriggered(AEVK_A)) {
+		// Shift left
+		camera->x += 10.0f * delta_time;
+	}
+
 }
 
 void MainMenu_Draw() {
-	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f, cam_pos_x, cam_pos_y);
+	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
 	drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
 	drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
 	drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
 	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
 	drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
+
+
+	drawText(font_id, "67", 0.4f, 1.1f, camera->x, camera->y);
+	drawText(font_id, "6", 0.4f, 1.1f, 0.2f + camera->x, 0.2f + camera->y);
+	drawText(font_id, "7", 0.4f, 1.1f, -0.2f - camera->x, -0.2f - camera->y);
 }
 
 void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
+	CAMERA::Free_Camera(camera);
 }
 void MainMenu_Unload() {
 	AEGfxDestroyFont(font_id);

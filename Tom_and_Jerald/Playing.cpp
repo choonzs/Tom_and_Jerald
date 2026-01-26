@@ -7,6 +7,7 @@
 #include "GameStateManager.h"
 #include "Credits.h"
 #include "Upgrades.hpp"
+#include "Camera.hpp"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -14,6 +15,7 @@ f32 damage_timer = 0.0f;
 Player base_player = {};
 Obstacle obstacles[k_obstacle_count] = {};
 namespace {
+	Camera* camera = nullptr;
 	s8 font_id;
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
 }
@@ -33,12 +35,17 @@ void Playing_Initialize() {
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
-	AEGfxSetCamPosition(0.0f, 0.0f);
+
+	camera = CAMERA::Initialize_Camera();
+	camera->magnitude = 15.0f;
+	AEGfxSetCamPosition(camera->x, camera->y);
 }
 
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
+	CAMERA::Update_Camera(*camera);
 	stage_timer += delta_time;
+	
 	if (damage_timer > 0.0f)
 		damage_timer -= delta_time;
 
@@ -63,6 +70,7 @@ void Playing_Update() {
 
 	if (took_damage)
 	{
+		CAMERA::Set_Camera_Shake();
 		Credits_OnDamage();
 	}
 
@@ -87,7 +95,7 @@ void Playing_Draw() {
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
 
-	drawQuad(unit_circle, base_player.position.x, base_player.position.y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
+	drawQuad(unit_circle, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
@@ -109,6 +117,7 @@ void Playing_Draw() {
 
 void Playing_Free() {
 	AEGfxMeshFree(unit_square);
+	CAMERA::Free_Camera(camera);
 }
 
 void Playing_Unload() {

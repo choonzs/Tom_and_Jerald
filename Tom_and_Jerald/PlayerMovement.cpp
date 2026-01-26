@@ -7,7 +7,6 @@ namespace {
 	f32 max_energy{};
 }
 
-
 void handlePlayerMovement(Player* player, f32 delta_time)
 {
 	f32 move_x = 0.0f;

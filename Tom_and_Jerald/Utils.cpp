@@ -9,6 +9,13 @@ void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_po
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
 	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 }
+void drawText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
+{
+	f32 width = 0.0f;
+	f32 height = 0.0f;
+	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
+	AEGfxPrint(font_id, text, cam_pos_x, cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
+}
 
 void createUnitSquare(AEGfxVertexList** out_mesh)
 {
