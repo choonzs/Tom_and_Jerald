@@ -17,7 +17,8 @@ void handlePlayerMovement(Player* player, f32 delta_time)
 		/*move_y += 1.0f;*/
 		thrust_accel = 20.0f;
 	if (AEInputCheckCurr(AEVK_S) || AEInputCheckCurr(AEVK_DOWN))
-		thrust_accel = -20.0f;
+		thrust_accel = gravity;//move_y -= 1.0f;
+		
 	if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT))
 		move_x -= 1.0f;
 	if (AEInputCheckCurr(AEVK_D) || AEInputCheckCurr(AEVK_RIGHT))
@@ -41,7 +42,7 @@ void handlePlayerMovement(Player* player, f32 delta_time)
 	
 	player->position.y += k_player_speed * (new_velo * delta_time);
 
-	if (player->position.y < min_y || player->position.y > max_y) {
+	if (player->position.y < min_y) {
 		new_velo /= -gravity * 0.3;
 		old_velo /= -gravity * 0.3;
 		net_accel /= -gravity * 0.3;

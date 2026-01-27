@@ -2,9 +2,10 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 struct Camera {
-	f32 x;
-	f32 y;
-	f32 magnitude;
+	f32 x, y,
+		set_x, set_y,
+		speed,
+		magnitude;
 };
 
 namespace CAMERA {

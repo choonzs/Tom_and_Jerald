@@ -37,7 +37,7 @@ void Playing_Initialize() {
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 
 	camera = CAMERA::Initialize_Camera();
-	camera->magnitude = 15.0f;
+	camera->magnitude = 5.0f;
 	AEGfxSetCamPosition(camera->x, camera->y);
 }
 
@@ -94,6 +94,8 @@ void Playing_Draw() {
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
+	// Test camera shake (using background)
+	AEGfxSetCamPosition(camera->x, camera->y);
 
 	drawQuad(unit_circle, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
 
@@ -113,6 +115,7 @@ void Playing_Draw() {
 	if (time_left < 0.0f) time_left = 0.0f;
 	sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
 	AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
+
 }
 
 void Playing_Free() {

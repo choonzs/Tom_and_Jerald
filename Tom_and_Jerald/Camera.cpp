@@ -13,6 +13,8 @@ namespace CAMERA {
 
 		camera->x = 0.0f;
 		camera->y = 0.0f;
+		camera->set_x = camera->x;
+		camera->set_y = camera->y;
 
 		camera->magnitude = 0.3f;
 		return camera;
@@ -22,8 +24,9 @@ namespace CAMERA {
 	}
 
 	void Update_Camera(Camera& camera) {
+		f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 		if (camera_shaking) {
-			timer += (f32)AEFrameRateControllerGetFrameTime();
+			timer += delta_time;
 			if (timer >= 2.0f) {
 				camera_shaking = false;
 				timer = 0.0f;
