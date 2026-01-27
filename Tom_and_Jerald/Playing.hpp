@@ -1,6 +1,6 @@
-#ifndef PLAYING_H
-#define PLAYING_H
-#include "pch.h"
+#ifndef PLAYING_HPP
+#define PLAYING_HPP
+#include "pch.hpp"
 
 
 
@@ -32,4 +32,4 @@ void Playing_Free();
 void Playing_Unload();
 
 
-#endif // !PLAYING_H
+#endif // !PLAYING_HPP

@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Credits.h"
+#include "pch.hpp"
+#include "Credits.hpp"
 
 namespace {
 	int credits = 1000;

@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "pch.hpp"
 
-#include "GameStateList.h"
-#include "GameStateManager.h"
-#include "MainMenu.h"
-#include "GameOver.h"
-#include "Playing.h"
-#include "Victory.h"
+#include "GameStateList.hpp"
+#include "GameStateManager.hpp"
+#include "MainMenu.hpp"
+#include "GameOver.hpp"
+#include "Playing.hpp"
+#include "Victory.hpp"
 #include "Shop.hpp"
 
 int current{}, previous{}, next{};

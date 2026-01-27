@@ -1,5 +1,5 @@
-#ifndef OBSTACLE_H
-#define OBSTACLE_H
+#ifndef OBSTACLE_HPP
+#define OBSTACLE_HPP
 struct Obstacle
 {
 	AEVec2 position;
@@ -9,5 +9,5 @@ struct Obstacle
 
 void resetObstacle(Obstacle* obstacle);
 void updateObstacles(Obstacle* Obstacles, f32 delta_time);
-#endif // !OBSTACLE_H
+#endif // !OBSTACLE_HPP
 

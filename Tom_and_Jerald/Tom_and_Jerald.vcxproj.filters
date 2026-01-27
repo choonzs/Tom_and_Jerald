@@ -45,7 +45,7 @@
     <ClCompile Include="Victory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Victory.h">
+    <ClCompile Include="Victory.hpp">
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="Credits.cpp">
@@ -62,34 +62,34 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameOver.h">
+    <ClInclude Include="GameOver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameStateList.h">
+    <ClInclude Include="GameStateList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameStateManager.h">
+    <ClInclude Include="GameStateManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenu.h">
+    <ClInclude Include="MainMenu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Obstacle.h">
+    <ClInclude Include="Obstacle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
+    <ClInclude Include="pch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerMovement.h">
+    <ClInclude Include="PlayerMovement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Playing.h">
+    <ClInclude Include="Playing.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="Utils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Credits.h">
+    <ClInclude Include="Credits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Upgrades.hpp">

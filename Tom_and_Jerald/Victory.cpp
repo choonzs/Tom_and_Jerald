@@ -1,9 +1,9 @@
-#include "pch.h"
+#include "pch.hpp"
 
 // For testing
-#include "GameStateList.h"
-#include "Utils.h"
-#include "GameStateManager.h"
+#include "GameStateList.hpp"
+#include "Utils.hpp"
+#include "GameStateManager.hpp"
 
 namespace {
 	s8 font_id;

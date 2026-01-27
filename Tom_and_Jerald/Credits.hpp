@@ -1,8 +1,8 @@
 #pragma once
-#ifndef CREDITS_H
-#define CREDITS_H
+#ifndef CREDITS_HPP
+#define CREDITS_HPP
 
-#include "pch.h"
+#include "pch.hpp"
 
 const int k_credit_reward = 10;
 const f32 k_credit_interval = 2.0f;
@@ -16,4 +16,4 @@ bool Credits_CanAfford(int cost);
 bool Credits_Spend(int cost);
 void Credits_Add(int amount);
 
-#endif // CREDITS_H
+#endif // CREDITS_HPP

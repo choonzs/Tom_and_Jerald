@@ -4,8 +4,8 @@
 // However, files listed here are ALL re-compiled if any one of them is updated between builds.
 // Do not add files here that you will be updating frequently as this negates the performance advantage.
 
-#ifndef PCH_H
-#define PCH_H
+#ifndef PCH_HPP
+#define PCH_HPP
 
 //Basically, just put libraries you want to pre-compile in here, not like code that you are changing often
 
@@ -16,8 +16,8 @@
 #include <fstream>
 #include <AEMath.h>
 #include <crtdbg.h> // To check for memory leaks
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 #include "AEEngine.h"
 
 #endif //PCH_H

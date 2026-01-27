@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Playing.h"
+#include "pch.hpp"
+#include "Playing.hpp"
 namespace {
 	//Earth grav 9.81, testing with 5.0f
 	f32 net_accel{}, thrust_accel{}, gravity = 5.0f;

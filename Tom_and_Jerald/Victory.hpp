@@ -1,5 +1,5 @@
-#ifndef VICTORY_H
-#define VICTORY_H
+#ifndef VICTORY_HPP
+#define VICTORY_HPP
 
 void Victory_Load();
 

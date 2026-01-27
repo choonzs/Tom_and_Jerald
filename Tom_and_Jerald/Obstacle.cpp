@@ -1,7 +1,7 @@
-#include "pch.h"
-#include "playing.h"
-#include "utils.h"
-#include "Obstacle.h"
+#include "pch.hpp"
+#include "playing.hpp"
+#include "utils.hpp"
+#include "Obstacle.hpp"
 
 void resetObstacle(Obstacle* obstacle) {
 	f32 max_x = AEGfxGetWinMaxX();

@@ -1,5 +1,5 @@
-#ifndef GAME_STATE_MANAGER_H
-#define GAME_STATE_MANAGER_H
+#ifndef GAME_STATE_MANAGER_HPP
+#define GAME_STATE_MANAGER_HPP
 
 typedef void(*FP)(void);
 

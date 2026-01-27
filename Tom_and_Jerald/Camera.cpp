@@ -1,6 +1,6 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "Camera.hpp"
-#include "Utils.h"
+#include "Utils.hpp"
 // TODO Shake Camera
 
 

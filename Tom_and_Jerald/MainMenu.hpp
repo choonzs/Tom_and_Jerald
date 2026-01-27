@@ -1,5 +1,5 @@
-#ifndef MAINMENU_H
-#define MAINMENU_H
+#ifndef MAINMENU_HPP
+#define MAINMENU_HPP
 void MainMenu_Load();
 
 void MainMenu_Initialize();

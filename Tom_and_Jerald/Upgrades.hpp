@@ -1,8 +1,8 @@
 #pragma once
-#ifndef UPGRADES_H
-#define UPGRADES_H
+#ifndef UPGRADES_HPP
+#define UPGRADES_HPP
 
-#include "pch.h"
+#include "pch.hpp"
 
 const int k_size_upgrade_max_level = 10;
 const int k_health_upgrade_max_level = 5;

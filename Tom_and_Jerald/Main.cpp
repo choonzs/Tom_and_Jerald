@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
 // includes test test 123 32323
 // main
-#include "pch.h"
-#include "GameStateList.h"
-#include "GameStateManager.h"
+#include "pch.hpp"
+#include "GameStateList.hpp"
+#include "GameStateManager.hpp"
 
 // ---------------------------------------------------------------------------
 // main

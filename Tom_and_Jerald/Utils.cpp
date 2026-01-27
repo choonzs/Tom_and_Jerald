@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Playing.h"
+#include "pch.hpp"
+#include "Playing.hpp"
 
 
 void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)

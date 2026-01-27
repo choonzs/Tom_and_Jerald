@@ -1,4 +1,4 @@
-#include "pch.h"
+#include "pch.hpp"
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 struct Camera {

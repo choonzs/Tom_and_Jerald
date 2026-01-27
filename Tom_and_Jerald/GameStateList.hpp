@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // main
-#ifndef GAME_STATE_LIST_H
-#define GAME_STATE_LIST_H
+#ifndef GAME_STATE_LIST_HPP
+#define GAME_STATE_LIST_HPP
 
 enum GameState
 {
@@ -14,4 +14,4 @@ enum GameState
 	GAME_STATE_QUIT
 };
 
-#endif // !GAME_STATE_LIST_H
+#endif // !GAME_STATE_LIST_HPP

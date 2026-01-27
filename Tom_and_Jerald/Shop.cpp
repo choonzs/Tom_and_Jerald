@@ -1,11 +1,11 @@
-#include "pch.h"
+#include "pch.hpp"
 
 #include "Shop.hpp"
-#include "Credits.h"
+#include "Credits.hpp"
 #include "Upgrades.hpp"
-#include "Utils.h"
-#include "GameStateList.h"
-#include "GameStateManager.h"
+#include "Utils.hpp"
+#include "GameStateList.hpp"
+#include "GameStateManager.hpp"
 
 namespace {
 	s8 font_id;
