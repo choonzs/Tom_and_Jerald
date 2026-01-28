@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "Playing.hpp"
+#include "Utils.hpp"
 
 
 void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
@@ -105,3 +106,4 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health)
 			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
 	}
 }
+
