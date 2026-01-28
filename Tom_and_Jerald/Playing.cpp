@@ -8,6 +8,7 @@
 #include "Credits.hpp"
 #include "Upgrades.hpp"
 #include "Camera.hpp"
+#include "Animation.hpp"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -18,23 +19,28 @@ namespace {
 	Camera* camera = nullptr;
 	s8 font_id;
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
+
 }
 void resetStage(Player* player, Obstacle* obstacles, f32* stage_timer, f32* damage_timer);
 int getMaxHealthFromUpgrades();
 
 void Playing_Load() {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	base_player.texture = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 	resetStage(&base_player, obstacles, &stage_timer, &damage_timer);
+
 }
 
 void Playing_Initialize() {
 	createUnitSquare(&unit_square);
 	createUnitCircles(&unit_circle);
+	createUnitSquare(&base_player.mesh, .5f, .5f);
 
 	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
+
 
 	camera = CAMERA::Initialize_Camera();
 	camera->magnitude = 5.0f;
@@ -43,6 +49,9 @@ void Playing_Initialize() {
 
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
+
+	ANIMATION::player_sprite_update(delta_time);
+	
 	CAMERA::Update_Camera(*camera);
 	stage_timer += delta_time;
 	
@@ -91,13 +100,18 @@ void Playing_Update() {
 }
 
 void Playing_Draw() {
+	//Drawing Player
+	ANIMATION::set_player_sprite_texture(base_player.texture, base_player.mesh);
+	drawQuad(base_player.mesh, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 1.f, 1.f, 1.f, 1.f);
+
+
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
 	// Test camera shake (using background)
 	AEGfxSetCamPosition(camera->x, camera->y);
 
-	drawQuad(unit_circle, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 0.25f, 0.7f, 1.0f, 1.0f);
+
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
@@ -125,6 +139,7 @@ void Playing_Free() {
 
 void Playing_Unload() {
 	AEGfxDestroyFont(font_id);
+
 }
 
 

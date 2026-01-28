@@ -1,7 +1,7 @@
+#pragma once
 #ifndef PLAYING_HPP
 #define PLAYING_HPP
 #include "pch.hpp"
-
 
 
 struct Player
@@ -9,6 +9,8 @@ struct Player
 	AEVec2 position;
 	AEVec2 half_size;
 	int health;
+	AEGfxTexture* texture;
+	AEGfxVertexList* mesh;
 };
 // Temp placement of stuff until asiohjfioheiohodeiqj
 const int k_max_health = 10;
