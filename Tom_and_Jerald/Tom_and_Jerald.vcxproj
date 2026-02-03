@@ -105,6 +105,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="GameOver.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="img_font_init.cpp" />
+    <ClCompile Include="Jetpack Fuel.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Obstacle.cpp" />
@@ -127,6 +128,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="Credits.hpp" />
     <ClInclude Include="img_font_init.hpp" />
+    <ClInclude Include="JetpackFuel.hpp" />
     <ClInclude Include="MainMenu.hpp" />
     <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Particles.hpp" />

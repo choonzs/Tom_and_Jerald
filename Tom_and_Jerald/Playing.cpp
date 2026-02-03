@@ -9,10 +9,11 @@
 #include "Upgrades.hpp"
 #include "Camera.hpp"
 #include "Animation.hpp"
+#include "JetpackFuel.hpp"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
-
+JetpackFuel* pFuel = nullptr;
 Player base_player = {};
 Obstacle obstacles[k_obstacle_count] = {};
 namespace {
@@ -40,7 +41,7 @@ void Playing_Initialize() {
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
-
+	pFuel = new JetpackFuel(100.0f, 30.0f, 2.0f);
 
 	camera = CAMERA::Initialize_Camera();
 	camera->magnitude = 5.0f;
@@ -50,6 +51,12 @@ void Playing_Initialize() {
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 
+	float dt = (float)AEFrameRateControllerGetFrameTime();
+	bool isFlying = AEInputCheckCurr(AEVK_SPACE);
+
+	if (pFuel) {
+		pFuel->Update(dt, isFlying);
+	}
 	ANIMATION::player_sprite_update(delta_time);
 	
 	CAMERA::Update_Camera(*camera);
@@ -104,7 +111,6 @@ void Playing_Draw() {
 	ANIMATION::set_player_sprite_texture(base_player.texture, base_player.mesh);
 	drawQuad(base_player.mesh, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 1.f, 1.f, 1.f, 1.f);
 
-
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
@@ -130,11 +136,21 @@ void Playing_Draw() {
 	sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
 	AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
+	if (pFuel) {
+		float screenX = base_player.position.x - camera->x;
+		float screenY = base_player.position.y - camera->y;
+		float verticalOffset = base_player.half_size.y + 20.0f;
+		pFuel->Draw(screenX, screenY + verticalOffset, 50.0f, 8.0f);
+	}
 }
 
 void Playing_Free() {
 	AEGfxMeshFree(unit_square);
 	CAMERA::Free_Camera(camera);
+	if (pFuel) {
+		delete pFuel;
+		pFuel = nullptr;
+	}
 }
 
 void Playing_Unload() {
