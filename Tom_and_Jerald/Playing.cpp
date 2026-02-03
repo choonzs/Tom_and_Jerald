@@ -44,7 +44,7 @@ void Playing_Initialize() {
 	pFuel = new JetpackFuel(100.0f, 30.0f, 2.0f);
 
 	camera = CAMERA::Initialize_Camera();
-	camera->magnitude = 5.0f;
+	camera->magnitude = 20.0f;
 	AEGfxSetCamPosition(camera->x, camera->y);
 }
 
@@ -109,7 +109,7 @@ void Playing_Update() {
 void Playing_Draw() {
 	//Drawing Player
 	ANIMATION::set_player_sprite_texture(base_player.texture, base_player.mesh);
-	drawQuad(base_player.mesh, base_player.position.x - camera->x, base_player.position.y - camera-> y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 1.f, 1.f, 1.f, 1.f);
+	drawQuad(base_player.mesh, base_player.position.x, base_player.position.y, base_player.half_size.x * 2.0f, base_player.half_size.y * 2.0f, 1.f, 1.f, 1.f, 1.f);
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
@@ -117,10 +117,10 @@ void Playing_Draw() {
 	// Test camera shake (using background)
 	AEGfxSetCamPosition(camera->x, camera->y);
 
-
-
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
+		AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 		Obstacle* obstacle = &obstacles[i];
 		drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 0.4f, 0.35f, 1.0f);
 	}

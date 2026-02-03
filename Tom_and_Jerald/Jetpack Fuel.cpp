@@ -37,10 +37,15 @@ void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHe
     AEMtx33 transform, mTrans, mScale;
 
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxTextureSet(NULL, 0.0f, 0.0f);
+
     AEMtx33Trans(&mTrans, screenX, screenY);
     AEMtx33Scale(&mScale, barWidth + 2.0f, barHeight + 2.0f);
     AEMtx33Concat(&transform, &mTrans, &mScale);
     AEGfxSetTransform(transform.m);
+
+	AEGfxSetColorToMultiply(0, 0, 0, 1);
+    AEGfxSetColorToAdd(0, 0, 1, 1);
     AEGfxMeshDraw(mpMesh, AE_GFX_MDM_TRIANGLES);
 
     float currentWidth = barWidth * ratio;
@@ -50,5 +55,7 @@ void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHe
     AEMtx33Scale(&mScale, currentWidth , barHeight);
     AEMtx33Concat(&transform, &mTrans, &mScale);
     AEGfxSetTransform(transform.m); 
+
+    AEGfxSetColorToAdd(0, 1, 0, 1);
     AEGfxMeshDraw(mpMesh, AE_GFX_MDM_TRIANGLES);
 }

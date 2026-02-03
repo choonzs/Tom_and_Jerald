@@ -71,10 +71,6 @@ void MainMenu_Draw() {
 	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
 	drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
 
-
-	drawText(font_id, "67", 0.4f, 1.1f, camera->x, camera->y);
-	drawText(font_id, "6", 0.4f, 1.1f, 0.2f + camera->x, 0.2f + camera->y);
-	drawText(font_id, "7", 0.4f, 1.1f, -0.2f - camera->x, -0.2f - camera->y);
 }
 
 void MainMenu_Free() {
