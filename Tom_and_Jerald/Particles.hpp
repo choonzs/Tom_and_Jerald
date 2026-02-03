@@ -16,12 +16,12 @@ namespace graphics {
 		float lifetime;
 	};
 
-#define MAX_PARTICLES 200
-	particleSys effects[MAX_PARTICLES];
+	#define MAX_PARTICLES 200
+	extern particleSys effects[MAX_PARTICLES];  // declaration only
 
 	//function for particle system
-	void particleInit(float x, float y, float spawnAmount); //Spawn particles
-	void particleDraw(void); //Update particles
+	void particleInit(float x, float y, int spawnAmount); //Spawn particles
+	void particleDraw(AEGfxVertexList* circle); //Update particles
 
 	//Function for pixeltext
 	//void pixelTextInit();

@@ -10,6 +10,7 @@
 #include "Camera.hpp"
 #include "Animation.hpp"
 #include "JetpackFuel.hpp"
+#include "Particles.hpp"
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -88,6 +89,11 @@ void Playing_Update() {
 	{
 		CAMERA::Set_Camera_Shake();
 		Credits_OnDamage();
+
+		//Particle initialize
+		graphics::particleInit(base_player.position.x,
+			base_player.position.y,
+			25);   // spawn 25 particles
 	}
 
 	bool game_active = (base_player.health > 0) && (stage_timer < k_stage_duration);
@@ -142,6 +148,9 @@ void Playing_Draw() {
 		float verticalOffset = base_player.half_size.y + 20.0f;
 		pFuel->Draw(screenX, screenY + verticalOffset, 50.0f, 8.0f);
 	}
+
+	//Particle render
+	graphics::particleDraw(unit_circle);
 }
 
 void Playing_Free() {
