@@ -8,8 +8,6 @@
 #include "GameStateManager.hpp"
 
 namespace {
-	s8 font_id;
-	AEGfxVertexList* unit_square = nullptr;
 
 	const f32 k_title_y = 0.65f;
 	const f32 k_credits_y = 0.5f;
@@ -18,9 +16,11 @@ namespace {
 	const f32 k_footer_y = -0.55f;
 	const f32 k_button_scale = 0.55f;
 	const int k_upgrade_cost = 10;
+
+	ShopState g_shop;
 }
 
-static void getCursorNormalized(f32* out_x, f32* out_y)
+void ShopState::getCursorNormalized(f32* out_x, f32* out_y) const
 {
 	s32 cursor_x = 0;
 	s32 cursor_y = 0;
@@ -33,7 +33,7 @@ static void getCursorNormalized(f32* out_x, f32* out_y)
 	*out_y = 1.0f - (cursor_y / height) * 2.0f;
 }
 
-static bool isCursorOverText(const char* text, f32 center_y, f32 scale, f32 cursor_x, f32 cursor_y)
+bool ShopState::isCursorOverText(const char* text, f32 center_y, f32 scale, f32 cursor_x, f32 cursor_y) const
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;
@@ -47,7 +47,7 @@ static bool isCursorOverText(const char* text, f32 center_y, f32 scale, f32 curs
 	return cursor_x >= left && cursor_x <= right && cursor_y >= bottom && cursor_y <= top;
 }
 
-static void drawButtonBackground(const char* text, f32 center_y, f32 scale, f32 padding, f32 red, f32 green, f32 blue)
+void ShopState::drawButtonBackground(const char* text, f32 center_y, f32 scale, f32 padding, f32 red, f32 green, f32 blue) const
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;
@@ -64,12 +64,12 @@ static void drawButtonBackground(const char* text, f32 center_y, f32 scale, f32 
 	drawQuad(unit_square, center_x_world, center_y_world, button_width_world, button_height_world, red, green, blue, 0.35f);
 }
 
-void Shop_Load()
+void ShopState::Load()
 {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 }
 
-void Shop_Initialize()
+void ShopState::Initialize()
 {
 	createUnitSquare(&unit_square);
 	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
@@ -80,7 +80,7 @@ void Shop_Initialize()
 	AEInputShowCursor(1);
 }
 
-void Shop_Update()
+void ShopState::Update()
 {
 	if (AEInputCheckTriggered(AEVK_ESCAPE))
 	{
@@ -126,7 +126,7 @@ void Shop_Update()
 	}
 }
 
-void Shop_Draw()
+void ShopState::Draw()
 {
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(nullptr, 0.0f, 0.0f);
@@ -140,7 +140,7 @@ void Shop_Draw()
 
 	char health_text[128];
 	char size_text[128];
-	
+
 	sprintf_s(health_text, "UPGRADE HEALTH (+5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
 	sprintf_s(size_text, "UPGRADE SIZE (-0.1) [LEVEL %d/%d]", Upgrades_GetSizeLevel(), k_size_upgrade_max_level);
 
@@ -158,13 +158,45 @@ void Shop_Draw()
 	drawCenteredText(font_id, "RETURN (ESC)", k_footer_y - 0.1f, 0.5f);
 }
 
-void Shop_Free()
+void ShopState::Free()
 {
 	AEGfxMeshFree(unit_square);
+	unit_square = nullptr;
 	AEInputShowCursor(0);
+}
+
+void ShopState::Unload()
+{
+	AEGfxDestroyFont(font_id);
+	font_id = -1;
+}
+
+void Shop_Load()
+{
+	g_shop.Load();
+}
+
+void Shop_Initialize()
+{
+	g_shop.Initialize();
+}
+
+void Shop_Update()
+{
+	g_shop.Update();
+}
+
+void Shop_Draw()
+{
+	g_shop.Draw();
+}
+
+void Shop_Free()
+{
+	g_shop.Free();
 }
 
 void Shop_Unload()
 {
-	AEGfxDestroyFont(font_id);
+	g_shop.Unload();
 }
