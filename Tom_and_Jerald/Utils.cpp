@@ -1,4 +1,5 @@
 #include "pch.hpp"
+#include "Player.hpp"
 #include "Playing.hpp"
 #include "Utils.hpp"
 
@@ -10,7 +11,7 @@ void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_po
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
 	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 }
-void drawText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
+void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;
@@ -89,7 +90,7 @@ f32 randomRange(f32 min_value, f32 max_value)
 }
 
 
-void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health)
+void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 {
 	f32 min_x = AEGfxGetWinMinX();
 	f32 max_y = AEGfxGetWinMaxY();
@@ -104,7 +105,7 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player* player, int max_health)
 		f32 center_x = start_x + (bar_width + spacing) * i;
 		f32 center_y = start_y;
 		drawQuad(mesh, center_x, center_y, bar_width, bar_height, 0.15f, 0.15f, 0.15f, 1.0f);
-		if (i < player->health)
+		if (i < player.Health())
 			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
 	}
 }

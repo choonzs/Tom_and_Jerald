@@ -17,7 +17,7 @@ namespace ANIMATION {
     f32 current_sprite_uv_offset_x = 0.f;
     f32 current_sprite_uv_offset_y = 0.f;
 
-	void player_sprite_update(f32 delta_time) {
+	void sprite_update(f32 delta_time) {
 		animation_timer += delta_time;
 
         if (animation_timer >= animation_duration_per_frame) {
@@ -37,7 +37,7 @@ namespace ANIMATION {
         }
 	}
 
-    void set_player_sprite_texture(AEGfxTexture* playerTexture, AEGfxVertexList* playerMesh) {
+    void set_sprite_texture(AEGfxTexture* Texture) {
         
         // Tell the engine to get ready to draw something with texture.
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -53,6 +53,6 @@ namespace ANIMATION {
         AEGfxSetTransparency(1.0f);
 
         // Set the texture to pTex
-        AEGfxTextureSet(playerTexture, current_sprite_uv_offset_x, current_sprite_uv_offset_y);
+        AEGfxTextureSet(Texture, current_sprite_uv_offset_x, current_sprite_uv_offset_y);
     }
 }

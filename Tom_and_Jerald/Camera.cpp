@@ -27,7 +27,7 @@ namespace CAMERA {
 		f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 		if (camera_shaking) {
 			timer += delta_time;
-			if (timer >= 2.0f) {
+			if (timer >= 0.4f) {
 				camera_shaking = false;
 				timer = 0.0f;
 			}
@@ -44,6 +44,6 @@ namespace CAMERA {
 
 	void Free_Camera(Camera* camera) {
 		camera_shaking = false;
-		delete camera;
+		delete[] camera;
 	}
 }

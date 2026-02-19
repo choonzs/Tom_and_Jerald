@@ -33,7 +33,6 @@ void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHe
     if (!mpMesh) return;
 
     float ratio = mCurrentFuel / mMaxFuel;
-    std::cout << ratio << "\n";
     AEMtx33 transform, mTrans, mScale;
 
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -49,7 +48,6 @@ void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHe
     AEGfxMeshDraw(mpMesh, AE_GFX_MDM_TRIANGLES);
 
     float currentWidth = barWidth * ratio;
-    std::cout << currentWidth << "\n";
     float xOffset = (barWidth - currentWidth) / 2.0f;
     AEMtx33Trans(&mTrans, screenX - xOffset, screenY);
     AEMtx33Scale(&mScale, currentWidth , barHeight);
