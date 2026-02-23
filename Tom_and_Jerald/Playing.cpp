@@ -115,7 +115,7 @@ void Playing_Draw() {
 	//Drawing Background
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	ANIMATION::set_sprite_texture(background_texture);
-	drawQuad(unit_square, camera.Position().x, camera.Position().y, 1.1 * (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), 1.1 * (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
+	drawQuad(unit_square, camera.Position().x, camera.Position().y, (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
 	
 	//Drawing Player
 	ANIMATION::set_sprite_texture(base_player.Texture());

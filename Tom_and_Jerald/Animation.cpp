@@ -19,10 +19,10 @@ namespace ANIMATION {
     f32 current_sprite_uv_offset_y = 0.f;
     
     // Reading Data for this script only
-    int ImportDataFromFile(const char* filename) {
+    bool ImportDataFromFile(const char* filename) {
         std::ifstream ifs(filename);
 
-        if (!ifs) { return 0; }
+        if (!ifs) { return false; }
 
         std::string tmp;
         ifs >> tmp;
@@ -31,6 +31,8 @@ namespace ANIMATION {
         ifs >> spritesheet.cols;
         ifs >> tmp;
         ifs >> spritesheet.max_sprites;
+
+        return true;
     }
 
     void sprite_Initialize() {

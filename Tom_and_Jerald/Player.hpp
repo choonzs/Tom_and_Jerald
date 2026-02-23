@@ -34,7 +34,7 @@ class Player {
 		//ctor
 		Player() : position{ 0.0f, 0.0f }, prev_position{ position }, 
 			velocity{ 0.0f, 0.0f },
-			half_size{ 40.0f, 40.0f }, health(10), 
+			half_size{ 40.0f, 40.0f }, health(config.MaxHealth()), 
 			texture(nullptr), mesh(nullptr) {
 			config.LoadFromFile("PlayerConfig.txt");
 		}
