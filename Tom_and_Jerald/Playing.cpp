@@ -18,12 +18,11 @@ f32 damage_timer = 0.0f;
 JetpackFuel* pFuel = nullptr;
 Obstacle obstacles[k_obstacle_count] = {};
 Player base_player;
-AEGfxTexture* background_texture = nullptr;
+AEGfxTexture* background_texture = nullptr, *asteroid_texture = nullptr;
 namespace {
 	Camera camera; 
 	s8 font_id;
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
-
 }
 void resetStage(Player& player, Obstacle* obstacles, f32* stage_timer, f32* damage_timer);
 int getMaxHealthFromUpgrades();
@@ -33,6 +32,9 @@ void Playing_Load() {
 	base_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 	background_texture = AEGfxTextureLoad("Assets/Game_Background.png");
 
+	//TMP asset for asteroid
+	asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
+
 	resetStage(base_player, obstacles, &stage_timer, &damage_timer);
 }
 
@@ -41,29 +43,20 @@ void Playing_Initialize() {
 	createUnitCircles(&unit_circle);
 	createUnitSquare(&(base_player.Mesh()), .5f, .5f);
 
-	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
-	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	pFuel = new JetpackFuel(100.0f, 30.0f, 2.0f);
 
-	
+	ANIMATION::sprite_Initialize();
+
 	camera.Magnitude() = 20.0f;
 	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 }
 
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
-
-	float dt = (float)AEFrameRateControllerGetFrameTime();
-
-	// FPS Meter for other use
-	// Used for debug menu ltr
-	std::cout << "Frame Rate: " << 1 / dt << std::endl;
 	bool isFlying = AEInputCheckCurr(AEVK_SPACE);
 
 	if (pFuel) {
-		pFuel->Update(dt, isFlying);
+		pFuel->Update(delta_time, isFlying);
 	}
 	ANIMATION::sprite_update(delta_time);
 	
@@ -91,9 +84,9 @@ void Playing_Update() {
 			}
 		}
 	}
-
 	if (took_damage)
 	{
+		// Set camera to shake
 		camera.Set_Shaking();
 		Credits_OnDamage();
 
@@ -102,10 +95,8 @@ void Playing_Update() {
 			base_player.Position().y,
 			25);   // spawn 25 particles
 	}
-
 	bool game_active = (base_player.Health() > 0) && (stage_timer < k_stage_duration);
 	Credits_Update(delta_time, game_active);
-
 
 	// Informing the system about the loop's end
 	if (base_player.Health() <= 0)
@@ -118,38 +109,42 @@ void Playing_Update() {
 		// Loop back on same scene
 		//next = GAME_STATE_RESTART;
 	}
-
 }
 
 void Playing_Draw() {
+	//Drawing Background
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	ANIMATION::set_sprite_texture(background_texture);
-	// ayo i dont think this is safe
 	drawQuad(unit_square, camera.Position().x, camera.Position().y, 1.1 * (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), 1.1 * (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
 	
 	//Drawing Player
 	ANIMATION::set_sprite_texture(base_player.Texture());
-	
 	drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
-
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	
+	/*AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
-	AEGfxSetTransparency(1.0f);
-	// Test camera shake (using background)
-	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+	AEGfxSetTransparency(1.0f);*/
 
+	ANIMATION::set_sprite_texture(asteroid_texture);
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
-		AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-		AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 		Obstacle* obstacle = &obstacles[i];
 		drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 0.4f, 0.35f, 1.0f);
 	}
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+	// Drawing Health Bar
 	drawHealthBar(unit_square, base_player, getMaxHealthFromUpgrades());
+	// Text Cheese Credits
 	char cheese_text[64];
 	sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
-	AEGfxPrint(font_id, cheese_text, -0.95f, 0.75f, 0.4f, 0.95f, 0.9f, 0.2f, 1.0f);
+	AEGfxPrint(font_id, cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
 	
+	char fps_text[64];
+	sprintf_s(fps_text, "%.1f FPS", 1 / (f32)AEFrameRateControllerGetFrameTime());
+	AEGfxPrint(font_id, fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
+
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	char timer_text[64];
 	f32 time_left = k_stage_duration - stage_timer;
@@ -157,7 +152,6 @@ void Playing_Draw() {
 	sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
 	AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
-	// Todo ltr
 	if (pFuel) {
 		float screenX = base_player.Position().x - camera.Position().x;
 		float screenY = base_player.Position().y - camera.Position().y;
@@ -190,7 +184,7 @@ void Playing_Unload() {
 void resetStage(Player& player, Obstacle* obstacle, f32* stage_time, f32* damage_time) {
 	AEVec2Set(&(player.Position()), 0.0f, 0.0f);
 	f32 size_reduction = Upgrades_GetSizeReduction();
-	f32 upgraded_half_size = k_player_base_half_size - size_reduction;
+	f32 upgraded_half_size = player.Half_Size().x - size_reduction;
 	if (upgraded_half_size < 1.0f)
 		upgraded_half_size = 1.0f;
 	AEVec2Set(&(player.Half_Size()), upgraded_half_size, upgraded_half_size);
@@ -209,7 +203,7 @@ int getMaxHealthFromUpgrades()
 {
 	f32 increase = Upgrades_GetHealthIncrease();
 	f32 multiplier = 1.0f + increase;
-	int max_health = (int)floorf(k_max_health * multiplier);
+	int max_health = (int)floorf(base_player.Config().MaxHealth() * multiplier);
 	if (max_health < 1)
 		max_health = 1;
 	return max_health;

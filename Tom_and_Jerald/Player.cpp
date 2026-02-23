@@ -9,7 +9,22 @@ namespace {
 	bool w_released{ false };
 }
 
+// Import player configurations from file
+bool PlayerConfig::LoadFromFile(const char* filename) {
+	std::ifstream ifs(filename);
 
+	if (!ifs) { return false; }
+	std::string tmp;
+
+	ifs >> tmp;
+	ifs >> speed;
+	ifs >> tmp;
+	ifs >> acceleration;
+	ifs >> tmp;
+	ifs >> maxHealth;
+
+	return true;
+}
 
 Player::~Player() {
 	if (mesh) AEGfxMeshFree(mesh);
@@ -32,10 +47,10 @@ void Player::Movement(f32 dt) {
 
 	if (AEInputCheckCurr(AEVK_W)) {
 		// Fwd Angle + accel * dt
-		AEVec2Set(&added, 0, static_cast<f32>(k_acceleration * dt));
+		AEVec2Set(&added, 0, static_cast<f32>(config.Acceleration() * dt));
 	}	
 	if (AEInputCheckCurr(AEVK_S)) {
-		AEVec2Set(&added, 0, static_cast<f32>(-k_acceleration * dt));
+		AEVec2Set(&added, 0, static_cast<f32>(-config.Acceleration() * dt));
 	}
 
 	if (AEInputCheckTriggered(AEVK_W) && w_released) {

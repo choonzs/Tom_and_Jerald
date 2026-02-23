@@ -3,15 +3,29 @@
 #define PLAYER_HPP
 namespace {
 	// Temp placement of stuff until asiohjfioheiohodeiqj
-	const int k_max_health = 10;
 	const int k_obstacle_count = 10;
 	const f32 k_stage_duration = 30.0f;
-	const f32 k_player_speed = 500.0f;
 	const f32 k_damage_cooldown = 1.0f;
+
+
+	const int k_max_health = 10; //player
+	const f32 k_player_speed = 500.0f;
 	const f32 k_player_base_half_size = 40.0f;
 
-	const f32 k_acceleration = 500.0f;
 }
+class PlayerConfig {
+public:
+	bool LoadFromFile(const char* filename);
+
+	f32 Speed() const { return speed; }
+	f32 Acceleration() const { return acceleration; }
+	int MaxHealth() const { return maxHealth; }
+
+private:
+	f32 speed = 500.0f;        // default values
+	f32 acceleration = 500.0f;
+	int maxHealth = 10;
+};
 
 
 
@@ -20,8 +34,10 @@ class Player {
 		//ctor
 		Player() : position{ 0.0f, 0.0f }, prev_position{ position }, 
 			velocity{ 0.0f, 0.0f },
-			half_size{ 40.0f, 40.0f }, health(k_max_health), 
-			texture(nullptr), mesh(nullptr) {}
+			half_size{ 40.0f, 40.0f }, health(10), 
+			texture(nullptr), mesh(nullptr) {
+			config.LoadFromFile("PlayerConfig.txt");
+		}
 		//dtor
 		~Player();
 
@@ -32,6 +48,8 @@ class Player {
 		int Health() const { return health; }
 		AEGfxTexture* Texture() const { return texture; }
 		AEGfxVertexList* Mesh() const { return mesh; }
+
+		PlayerConfig Config() const { return config; }
 
 
 		// mutators
@@ -57,6 +75,8 @@ class Player {
 
 		bool boost_rocket{ true };
 		f32 boost_timer{};
+
+		PlayerConfig config;
 
 };
 

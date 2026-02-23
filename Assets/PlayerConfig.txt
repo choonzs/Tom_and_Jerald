@@ -1,0 +1,3 @@
+Player_Speed 500.0
+Acceleration 500.0
+Max_Health 10
