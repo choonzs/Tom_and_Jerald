@@ -12,7 +12,7 @@ namespace {
 
 	int counter{};
 	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
-	Camera* camera = nullptr;
+	Camera camera;
 }
 
 
@@ -28,13 +28,12 @@ void MainMenu_Initialize() {
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 
-	camera = CAMERA::Initialize_Camera();
-	AEGfxSetCamPosition(camera->x,camera->y);
+	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 }
 
 void MainMenu_Update() {
-	CAMERA::Update_Camera(*camera);
-	CAMERA::Set_Camera_Shake();
+	camera.Update();
+	camera.Set_Shaking();
 	if (AEInputCheckTriggered(AEVK_RETURN))
 	{
 		// Moving to playing state
@@ -58,7 +57,7 @@ void MainMenu_Update() {
 	
 	if (AEInputCheckTriggered(AEVK_A)) {
 		// Shift left
-		camera->x += 10.0f * delta_time;
+		camera.Position().x += 10.0f * delta_time;
 	}
 
 }
@@ -75,7 +74,6 @@ void MainMenu_Draw() {
 
 void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
-	CAMERA::Free_Camera(camera);
 }
 void MainMenu_Unload() {
 	AEGfxDestroyFont(font_id);

@@ -20,7 +20,7 @@ Obstacle obstacles[k_obstacle_count] = {};
 Player base_player;
 AEGfxTexture* background_texture = nullptr;
 namespace {
-	Camera* camera = nullptr;
+	Camera camera; 
 	s8 font_id;
 	AEGfxVertexList* unit_square = nullptr, *unit_circle = nullptr;
 
@@ -34,11 +34,10 @@ void Playing_Load() {
 	background_texture = AEGfxTextureLoad("Assets/Game_Background.png");
 
 	resetStage(base_player, obstacles, &stage_timer, &damage_timer);
-
 }
 
 void Playing_Initialize() {
-	createUnitSquare(&unit_square);
+	createUnitSquare(&unit_square, .5f, .5f);
 	createUnitCircles(&unit_circle);
 	createUnitSquare(&(base_player.Mesh()), .5f, .5f);
 
@@ -48,15 +47,19 @@ void Playing_Initialize() {
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	pFuel = new JetpackFuel(100.0f, 30.0f, 2.0f);
 
-	camera = CAMERA::Initialize_Camera();
-	camera->magnitude = 20.0f;
-	AEGfxSetCamPosition(camera->x, camera->y);
+	
+	camera.Magnitude() = 20.0f;
+	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 }
 
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 
 	float dt = (float)AEFrameRateControllerGetFrameTime();
+
+	// FPS Meter for other use
+	// Used for debug menu ltr
+	std::cout << "Frame Rate: " << 1 / dt << std::endl;
 	bool isFlying = AEInputCheckCurr(AEVK_SPACE);
 
 	if (pFuel) {
@@ -64,7 +67,7 @@ void Playing_Update() {
 	}
 	ANIMATION::sprite_update(delta_time);
 	
-	CAMERA::Update_Camera(*camera);
+	camera.Update();
 	stage_timer += delta_time;
 	
 	if (damage_timer > 0.0f)
@@ -91,7 +94,7 @@ void Playing_Update() {
 
 	if (took_damage)
 	{
-		CAMERA::Set_Camera_Shake();
+		camera.Set_Shaking();
 		Credits_OnDamage();
 
 		//Particle initialize
@@ -122,7 +125,7 @@ void Playing_Draw() {
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	ANIMATION::set_sprite_texture(background_texture);
 	// ayo i dont think this is safe
-	drawQuad(base_player.Mesh(), camera->x, camera->y, 1.1 * (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), 1.1 * (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
+	drawQuad(unit_square, camera.Position().x, camera.Position().y, 1.1 * (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), 1.1 * (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
 	
 	//Drawing Player
 	ANIMATION::set_sprite_texture(base_player.Texture());
@@ -133,7 +136,7 @@ void Playing_Draw() {
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetTransparency(1.0f);
 	// Test camera shake (using background)
-	AEGfxSetCamPosition(camera->x, camera->y);
+	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
 	for (int i = 0; i < k_obstacle_count; ++i)
 	{
@@ -156,8 +159,8 @@ void Playing_Draw() {
 
 	// Todo ltr
 	if (pFuel) {
-		float screenX = base_player.Position().x - camera->x;
-		float screenY = base_player.Position().y - camera->y;
+		float screenX = base_player.Position().x - camera.Position().x;
+		float screenY = base_player.Position().y - camera.Position().y;
 		float verticalOffset = base_player.Half_Size().y + 20.0f;
 		pFuel->Draw(screenX, screenY + verticalOffset, 50.0f, 8.0f);
 	}
@@ -169,7 +172,7 @@ void Playing_Draw() {
 void Playing_Free() {
 	AEGfxMeshFree(unit_square);
 	AEGfxMeshFree(unit_circle);
-	CAMERA::Free_Camera(camera);
+	
 	if (pFuel) {
 		delete pFuel;
 		pFuel = nullptr;

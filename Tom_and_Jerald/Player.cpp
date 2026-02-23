@@ -1,7 +1,7 @@
 #include "Player.hpp"
 namespace {
 	//Earth grav 9.81, testing with 5.0f
-	f32 gravity = 98.1f;
+	f32 gravity = 981.f;
 	f32 max_energy{};
 
 	f32 tap_timer{ 0.0f };
@@ -26,11 +26,6 @@ void Player::Movement(f32 dt) {
 		}
 	}
 
-	/*f32 move_x = 0.0f;
-	f32 move_y = 0.0f;
-
-	thrust_accel = 0.0f;*/
-
 	AEVec2 added;
 	// If no input by default gravity will pull the player down
 	AEVec2Set(&added, 0.0f, static_cast<f32>(-gravity * dt));
@@ -46,7 +41,7 @@ void Player::Movement(f32 dt) {
 	if (AEInputCheckTriggered(AEVK_W) && w_released) {
 		// If the player double taps W, give them a boost
 		if (wait_double_tap) {
-			float burstStrength = 300.0f;
+			float burstStrength = 500.0f;
 
 			AEVec2 burst;
 			AEVec2Set(&burst, 0.0f, burstStrength);

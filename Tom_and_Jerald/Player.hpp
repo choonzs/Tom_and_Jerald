@@ -7,7 +7,7 @@ namespace {
 	const int k_obstacle_count = 10;
 	const f32 k_stage_duration = 30.0f;
 	const f32 k_player_speed = 500.0f;
-	const f32 k_damage_cooldown = 0.4f;
+	const f32 k_damage_cooldown = 1.0f;
 	const f32 k_player_base_half_size = 40.0f;
 
 	const f32 k_acceleration = 500.0f;
