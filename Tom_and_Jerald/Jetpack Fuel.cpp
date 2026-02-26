@@ -1,5 +1,6 @@
 #include "JetpackFuel.hpp"
 #include "pch.hpp"
+
 JetpackFuel::JetpackFuel(float maxFuel, float burnRate, float passiveDrain)
     : mMaxFuel(maxFuel), mCurrentFuel(maxFuel),
     mBurnRate(burnRate), mPassiveDrain(passiveDrain), mpMesh(nullptr)
@@ -29,6 +30,11 @@ void JetpackFuel::Update(float dt, bool isThrusting) {
     if (mCurrentFuel > mMaxFuel) mCurrentFuel = mMaxFuel;
 }
 
+void JetpackFuel::RestoreFuel(float amount) {
+    mCurrentFuel += amount;
+    if (mCurrentFuel > mMaxFuel) mCurrentFuel = mMaxFuel;
+}
+
 void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHeight) {
     if (!mpMesh) return;
 
@@ -43,16 +49,16 @@ void JetpackFuel::Draw(float screenX, float screenY, float barWidth, float barHe
     AEMtx33Concat(&transform, &mTrans, &mScale);
     AEGfxSetTransform(transform.m);
 
-	AEGfxSetColorToMultiply(0, 0, 0, 1);
+    AEGfxSetColorToMultiply(0, 0, 0, 1);
     AEGfxSetColorToAdd(0, 0, 1, 1);
     AEGfxMeshDraw(mpMesh, AE_GFX_MDM_TRIANGLES);
 
     float currentWidth = barWidth * ratio;
     float xOffset = (barWidth - currentWidth) / 2.0f;
     AEMtx33Trans(&mTrans, screenX - xOffset, screenY);
-    AEMtx33Scale(&mScale, currentWidth , barHeight);
+    AEMtx33Scale(&mScale, currentWidth, barHeight);
     AEMtx33Concat(&transform, &mTrans, &mScale);
-    AEGfxSetTransform(transform.m); 
+    AEGfxSetTransform(transform.m);
 
     AEGfxSetColorToAdd(0, 1, 0, 1);
     AEGfxMeshDraw(mpMesh, AE_GFX_MDM_TRIANGLES);

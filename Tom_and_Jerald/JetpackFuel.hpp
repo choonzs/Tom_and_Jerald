@@ -11,13 +11,17 @@ public:
     void Update(float dt, bool isThrusting);
     void Draw(float screenX, float screenY, float barWidth, float barHeight);
 
+    void RestoreFuel(float amount);
+
     bool HasFuel() const { return mCurrentFuel > 0.0f; }
+    float GetCurrentFuel() const { return mCurrentFuel; }
+    float GetMaxFuel() const { return mMaxFuel; }
 
 private:
     float mMaxFuel;
     float mCurrentFuel;
     float mBurnRate;
-    float mPassiveDrain; 
+    float mPassiveDrain;
 
     AEGfxVertexList* mpMesh;
 };
