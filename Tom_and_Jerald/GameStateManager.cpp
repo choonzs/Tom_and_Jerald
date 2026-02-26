@@ -7,6 +7,8 @@
 #include "Playing.hpp"
 #include "Victory.hpp"
 #include "Shop.hpp"
+#include "LevelEditor.hpp"
+#include "CustomLevel.hpp"
 
 int current{}, previous{}, next{};
 
@@ -59,6 +61,22 @@ void GSM_Update()
 		fpDraw = Victory_Draw;
 		fpFree = Victory_Free;
 		fpUnload = Victory_Unload;
+		break;
+	case GAME_STATE_LEVEL_EDITOR: // Added Level Editor routing
+		fpLoad = LevelEditor_Load;
+		fpInitialize = LevelEditor_Initialize;
+		fpUpdate = LevelEditor_Update;
+		fpDraw = LevelEditor_Draw;
+		fpFree = LevelEditor_Free;
+		fpUnload = LevelEditor_Unload;
+		break;
+	case GAME_STATE_CUSTOM_PLAY:
+		fpLoad = CustomLevel_Load;
+		fpInitialize = CustomLevel_Initialize;
+		fpUpdate = CustomLevel_Update;
+		fpDraw = CustomLevel_Draw;
+		fpFree = CustomLevel_Free;
+		fpUnload = CustomLevel_Unload;
 		break;
 	case GAME_STATE_RESTART:
 		break;

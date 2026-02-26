@@ -3,8 +3,17 @@
 
 #include "pch.hpp"
 
-class VictoryState
-{
+// The GameStateManager looks for these specific C-style global functions.
+// They must be declared here so they can be "seen" by GameStateManager.cpp.
+
+void Victory_Load();
+void Victory_Initialize();
+void Victory_Update();
+void Victory_Draw();
+void Victory_Free();
+void Victory_Unload();
+
+class VictoryState {
 public:
     void Load();
     void Initialize();
@@ -18,11 +27,4 @@ private:
     AEGfxVertexList* unit_square = nullptr;
 };
 
-void Victory_Load();
-void Victory_Initialize();
-void Victory_Update();
-void Victory_Draw();
-void Victory_Free();
-void Victory_Unload();
-
-#endif // VICTORY_HPP
+#endif // !VICTORY_HPP
