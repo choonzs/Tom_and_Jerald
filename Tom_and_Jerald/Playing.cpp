@@ -10,6 +10,7 @@
 #include "Animation.hpp"
 #include "JetpackFuel.hpp"
 #include "Particles.hpp"
+#include "Audio.hpp"
 
 #include "Player.hpp"
 
@@ -133,6 +134,7 @@ void Playing_Update() {
 		{
 			if (damage_timer <= 0.0f)
 			{
+				PlayRatSqueak();
 				base_player.Health() -= 1;
 				damage_timer = k_damage_cooldown;
 				took_damage = true;

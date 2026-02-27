@@ -3,6 +3,7 @@
 #include "GameStateList.hpp"
 #include "Utils.hpp"
 #include "GameStateManager.hpp"
+#include "Audio.hpp"
 
 namespace {
     // This instance lives only within this file
@@ -26,15 +27,19 @@ void VictoryState::Initialize() {
 
 void VictoryState::Update() {
     if (AEInputCheckTriggered(AEVK_N)) {
+        PlayClick();
         next = GAME_STATE_PLAYING;
     }
     else if (AEInputCheckTriggered(AEVK_M)) {
+        PlayClick();
         next = GAME_STATE_MENU;
     }
     else if (AEInputCheckTriggered(AEVK_S)) {
+        PlayClick();
         next = GAME_STATE_SHOP;
     }
     else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+        PlayClick();
         next = GAME_STATE_QUIT;
     }
 }

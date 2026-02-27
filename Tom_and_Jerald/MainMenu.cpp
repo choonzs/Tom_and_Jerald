@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 #include "GameStateManager.hpp"
 #include "Camera.hpp"
+#include "Audio.hpp"
 
 namespace {
 	s8 font_id;
@@ -36,23 +37,28 @@ void MainMenu_Update() {
 	camera.Set_Shaking();
 	if (AEInputCheckTriggered(AEVK_RETURN))
 	{
+		PlayClick();
 		// Moving to playing state
 		next = GAME_STATE_PLAYING;
 	}
 	else if (AEInputCheckTriggered(AEVK_S))
 	{
+		PlayClick();
 		next = GAME_STATE_SHOP;
 	}
 	else if (AEInputCheckTriggered(AEVK_E))
 	{
+		PlayClick();
 		next = GAME_STATE_LEVEL_EDITOR;
 	} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 	{
+		PlayClick();
 		// Quitting the game
 		next = GAME_STATE_QUIT;
 	}
 	else if (AEInputCheckTriggered(AEVK_C))
 	{
+		PlayClick();
 		next = GAME_STATE_CUSTOM_PLAY;
 	}
 	else {

@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
+#include "Audio.hpp"
 
 namespace {
 	const f32 k_title_y = 0.75f;
@@ -73,6 +74,7 @@ void ShopState::Initialize() {
 
 void ShopState::Update() {
 	if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+		PlayClick();
 		next = previous;
 		return;
 	}
@@ -88,6 +90,7 @@ void ShopState::Update() {
 	sprintf_s(restore_text, "UPGRADE FUEL RECOVERY (+5%%) [LEVEL %d/%d]", Upgrades_GetFuelRestoreLevel(), k_fuel_upgrade_max_level);
 
 	if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+		PlayClick();
 		if (isCursorOverText(hp_text, k_health_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeHealth() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeHealth();
 		}

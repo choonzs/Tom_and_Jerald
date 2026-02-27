@@ -101,6 +101,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CustomLevel.cpp" />
     <ClCompile Include="GameOver.cpp" />
@@ -124,6 +125,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.hpp" />
+    <ClInclude Include="Audio.hpp" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="CustomLevel.hpp" />
     <ClInclude Include="GameOver.hpp" />

@@ -4,6 +4,7 @@
 #include "pch.hpp"
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
+#include "Audio.hpp"
 
 // ---------------------------------------------------------------------------
 // main
@@ -24,6 +25,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
 	AESysSetWindowTitle("Tom and Jerald - Prototype");
 	AESysReset();
+
+	// initialize all audio assets before the GSM loop starts
+	AudioInit();
 	// GSM LOOP
 		while (current != GAME_STATE_QUIT)
 		{
@@ -47,6 +51,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				while (current == next) {
 					// Informing the system about the loop's start
 					AESysFrameStart();
+					PlayBackgroundAudio();
 					fpUpdate();
 					fpDraw();
 					AESysFrameEnd();
@@ -59,6 +64,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				current = next;
 			}
 		}
+
+	// free all audio assets after the GSM loop ends
+	AudioFree();
+
 	// free the system
 	AESysExit();
 }

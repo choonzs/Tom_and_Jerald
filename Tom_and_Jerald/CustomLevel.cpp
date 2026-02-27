@@ -6,6 +6,7 @@
 #include "GameStateList.hpp"
 #include "utils.hpp"
 #include "Animation.hpp"
+#include "Audio.hpp"
 #include <vector>
 #include <fstream>
 #include <cmath>
@@ -99,6 +100,7 @@ void CustomLevel_Update() {
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 
     if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+        PlayClick();
         next = GAME_STATE_MENU;
         return;
     }

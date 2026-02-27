@@ -2,6 +2,7 @@
 #include "LevelEditor.hpp"
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
+#include "Audio.hpp"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -67,12 +68,24 @@ void LevelEditor_Initialize() {
     isDragging = false;
     currentTool = TILE_SQUARE;
 
+    // reset transition flag every time this state is entered
+    // without this the state will be permanently locked after first transition
+    static bool isTransitioning = false;
+    isTransitioning = false;
+
     AEGfxSetCamPosition(0.0f, 0.0f);
     AEGfxSetBackgroundColor(0.15f, 0.15f, 0.15f); // Darker background for canvas
 }
 
 void LevelEditor_Update() {
+    // prevents any input after state change is triggered
+    static bool isTransitioning = false;
+    if (isTransitioning) return; // block all input if already transitioning
+
     if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+        PlayClick();
+        // lock input immediately
+        isTransitioning = true;
         next = GAME_STATE_MENU;
         return;
     }
@@ -123,6 +136,8 @@ void LevelEditor_Update() {
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
             if (gridX >= 0 && gridX < MAX_COLS && gridY >= 0 && gridY < VIEW_ROWS) {
+                PlayClick();
+                isTransitioning = true;
                 mapData[gridY][gridX] = TILE_EMPTY; // Erase tile
             }
         }
@@ -134,6 +149,8 @@ void LevelEditor_Update() {
 
     // Exporting
     if (AEInputCheckTriggered(AEVK_E)) {
+        PlayClick();          // play click sound once
+        isTransitioning = true; // lock input so click doesnt repeat
         std::ofstream outFile("ExportedLevel.txt");
         if (outFile.is_open()) {
             outFile << MAX_COLS << " " << VIEW_ROWS << "\n";
