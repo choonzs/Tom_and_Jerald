@@ -7,12 +7,13 @@ const int k_obstacle_count = 100;
 
 void Obstacle::Reset()
 {
-    f32 max_x = AEGfxGetWinMaxX();
+    // temp
+    f32 max_x = AEGfxGetWinMaxX() + 200.0f;
     f32 min_y = AEGfxGetWinMinY();
     f32 max_y = AEGfxGetWinMaxY();
     f32 size_value = randomRange(25.0f, 70.0f);
 
-    AEVec2Set(&half_size, size_value, size_value);
+	AEVec2Set(&half_size, size_value, size_value);
     AEVec2Set(
         &position,
         // move it a little offscreen
@@ -20,7 +21,7 @@ void Obstacle::Reset()
         randomRange(min_y + size_value, max_y - size_value));
     AEVec2Set(
         &velocity,
-        randomRange(-220.0f, 220.0f),
+        randomRange(-220.0f, 0.0f),
         randomRange(-220.0f, 220.0f));
 }
 

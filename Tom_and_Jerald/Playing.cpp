@@ -107,14 +107,17 @@ void Playing_Update() {
     stage_timer += delta_time;
     if (damage_timer > 0.0f) damage_timer -= delta_time;
 
-    base_player.Movement(delta_time);
+    if (pFuel) {
+        base_player.Movement(delta_time);
+    }
 
 	camera.Follow(base_player.Position());
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 camX = camera.Position().x;
-    f32 offscreen_limit = AEGfxGetWinMaxX() + 150.0f;
+    // change this to based on player world pos
+	f32 offscreen_limit_left{ AEGfxGetWinMinX() - 100.0f };
 
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
         obstacles[i].position.x += obstacles[i].velocity.x * delta_time;
@@ -123,21 +126,8 @@ void Playing_Update() {
         if (obstacles[i].position.y > AEGfxGetWinMaxY() - 20.0f) obstacles[i].velocity.y *= -1;
         if (obstacles[i].position.y < AEGfxGetWinMinY() + 20.0f) obstacles[i].velocity.y *= -1;
 
-        if (obstacles[i].position.x < camX - offscreen_limit) {
-            obstacles[i].position.x = camX + AEGfxGetWinMaxX() + randFloat(50.0f, 250.0f);
-            obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            obstacles[i].velocity.x = randFloat(-100.0f, 20.0f);
-            obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            obstacles[i].half_size.x = size; obstacles[i].half_size.y = size;
-        }
-        else if (obstacles[i].position.x > camX + offscreen_limit) {
-            obstacles[i].position.x = camX - AEGfxGetWinMaxX() - randFloat(50.0f, 250.0f);
-            obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            obstacles[i].velocity.x = randFloat(-20.0f, 100.0f);
-            obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            obstacles[i].half_size.x = size; obstacles[i].half_size.y = size;
+        if (obstacles[i].position.x < offscreen_limit_left) {
+            obstacles[i].Reset();
         }
     }
 
