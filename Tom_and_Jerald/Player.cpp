@@ -3,6 +3,8 @@
 
 Player::~Player() {
     // Empty Destructor
+    if (mesh) AEGfxMeshFree(mesh);
+    if (texture) AEGfxTextureUnload(texture);
 }
 
 // FIX: Commented out the parameter name to bypass the unreferenced parameter error

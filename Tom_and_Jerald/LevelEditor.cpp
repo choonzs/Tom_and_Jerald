@@ -42,12 +42,6 @@ namespace {
 void LevelEditor_Load() {
     texSquare = AEGfxTextureLoad("Assets/Square.png");
     texSpike = AEGfxTextureLoad("Assets/Spike.png");
-
-    meshWhite = CreateSquareMesh(0xFFFFFFFF);
-    meshUIBg = CreateSquareMesh(0xFF2A2D34);
-    meshSlotBg = CreateSquareMesh(0xFF3E434C);
-    meshSlotBorder = CreateSquareMesh(0xFFF9A03F);
-    meshGrid = CreateSquareMesh(0x1AFFFFFF);
 }
 
 void LevelEditor_Initialize() {
@@ -59,6 +53,12 @@ void LevelEditor_Initialize() {
 
     AEGfxSetCamPosition(0.0f, 0.0f);
     AEGfxSetBackgroundColor(0.15f, 0.15f, 0.15f);
+
+    meshWhite = CreateSquareMesh(0xFFFFFFFF);
+    meshUIBg = CreateSquareMesh(0xFF2A2D34);
+    meshSlotBg = CreateSquareMesh(0xFF3E434C);
+    meshSlotBorder = CreateSquareMesh(0xFFF9A03F);
+    meshGrid = CreateSquareMesh(0x1AFFFFFF);
 }
 
 void LevelEditor_Update() {
@@ -258,15 +258,15 @@ void LevelEditor_Draw() {
 
 void LevelEditor_Free() {
     mapData.clear();
-}
-
-void LevelEditor_Unload() {
-    if (texSquare) AEGfxTextureUnload(texSquare);
-    if (texSpike) AEGfxTextureUnload(texSpike);
 
     if (meshWhite) AEGfxMeshFree(meshWhite);
     if (meshUIBg) AEGfxMeshFree(meshUIBg);
     if (meshSlotBg) AEGfxMeshFree(meshSlotBg);
     if (meshSlotBorder) AEGfxMeshFree(meshSlotBorder);
     if (meshGrid) AEGfxMeshFree(meshGrid);
+}
+
+void LevelEditor_Unload() {
+    if (texSquare) AEGfxTextureUnload(texSquare);
+    if (texSpike) AEGfxTextureUnload(texSpike);
 }
