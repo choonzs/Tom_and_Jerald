@@ -137,6 +137,7 @@ void CustomLevel_Update() {
 
     camera.Position().x = custom_player.Position().x;
     camera.Update();
+	camera.Follow(custom_player.Position());
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 camX = camera.Position().x;
@@ -319,5 +320,4 @@ void CustomLevel_Unload() {
     if (texBackground) AEGfxTextureUnload(texBackground);
     if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
     if (asteroid_texture) AEGfxTextureUnload(asteroid_texture);
-    AEGfxTextureUnload(custom_player.Texture());
 }

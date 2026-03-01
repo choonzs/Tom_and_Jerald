@@ -272,6 +272,7 @@ void Playing_Unload() {
     AEGfxTextureUnload(background_texture);
     AEGfxTextureUnload(asteroid_texture);
     if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
+    /*Player Unloaded using dtor, no need to do anything*/
 }
 
 int getMaxHealthFromUpgrades() {
