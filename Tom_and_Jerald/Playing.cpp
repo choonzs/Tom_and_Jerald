@@ -11,8 +11,6 @@
 #include "JetpackFuel.hpp"
 #include "Particles.hpp"
 #include "Player.hpp"
-#include <cstdlib>
-#include <cmath>
 
 // --- FIX: RESTORED MISSING CONSTANTS ---
 const f32 k_stage_duration = 120.0f;
@@ -84,8 +82,8 @@ void Playing_Initialize() {
 
     ANIMATION::sprite_Initialize();
     camera.Magnitude() = 20.0f;
-    camera.Position().x = 0.0f;
-    camera.Position().y = 0.0f;
+    camera.Position().x = base_player.Position().x;
+    camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
@@ -111,7 +109,7 @@ void Playing_Update() {
 
     base_player.Movement(delta_time);
 
-    camera.Position().x = base_player.Position().x;
+	camera.Follow(base_player.Position());
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 

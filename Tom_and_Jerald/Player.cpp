@@ -26,30 +26,42 @@ bool PlayerConfig::LoadFromFile(const char* filename) {
 }
 
 
-void Player::Movement(f32 delta_time) {
+void Player::Movement(f32 dt) {
+    
+    AEVec2 added{};
+    // If no input by default gravity will pull the player down
+    AEVec2Set(&added, 0.0f, 0.0f);
+
     // 1. VERTICAL MOVEMENT (Jetpack / Gravity)
     if (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) {
-        velocity.y = config.Speed();
+		added.y += static_cast<f32>(Config().Acceleration() * dt);
     }
     else {
-        velocity.y -= config.Acceleration() * delta_time;
+        added.y += -static_cast<f32>(Config().Acceleration() * dt);
     }
-
+    
     // 2. HORIZONTAL MOVEMENT (True Side Scroller)
     if (AEInputCheckCurr(AEVK_D) || AEInputCheckCurr(AEVK_RIGHT)) {
-        velocity.x = config.Speed();
+		added.x = static_cast<f32>(Config().Acceleration() * dt);
     }
     else if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
-        velocity.x = -config.Speed();
+		added.x = -static_cast<f32>(Config().Acceleration() * dt);
     }
     else {
-        velocity.x = 0.0f;
+		added.x = 0.0f; // No horizontal input, no horizontal acceleration
     }
 
-    // 3. APPLY VELOCITY TO POSITION
-    position.x += velocity.x * delta_time;
-    position.y += velocity.y * delta_time;
+    // Find the velocity according to the acceleration
+    AEVec2 newVel;
+    AEVec2Add(&newVel, &added, &velocity);
+	// Apply simple air resistance to slow down the player when not accelerating
+    AEVec2Scale(&newVel, &newVel, 0.99f);
+    // Set current velocity to new velocity
+    AEVec2Set(&velocity, newVel.x, newVel.y);
 
+    // 3. APPLY VELOCITY TO POSITION
+    AEVec2Set(&position, f32(position.x + velocity.x * dt), f32(position.y + velocity.y * dt));
+    
     // 4. PREVENT FALLING INTO THE VOID
     f32 bottomBoundary = AEGfxGetWinMinY() + half_size.y;
     if (position.y < bottomBoundary) {

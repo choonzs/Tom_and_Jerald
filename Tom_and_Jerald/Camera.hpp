@@ -14,6 +14,7 @@ public:
 	void Set_Shaking();
 	void Update();
 	void Shake();
+	void Follow(const AEVec2& target);
 	~Camera() = default;
 
 	//Accessors & Mutator
