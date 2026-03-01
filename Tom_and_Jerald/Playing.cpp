@@ -10,9 +10,9 @@
 #include "Animation.hpp"
 #include "JetpackFuel.hpp"
 #include "Particles.hpp"
-#include "Audio.hpp"
-
 #include "Player.hpp"
+#include <cstdlib>
+#include <cmath>
 
 f32 stage_timer = 0.0f;
 f32 damage_timer = 0.0f;
@@ -29,7 +29,6 @@ namespace {
 	AEGfxVertexList* unit_square = nullptr;
 	AEGfxVertexList* unit_circle = nullptr;
 
-	// Fuel Pickup Logic
 	struct FuelPickup {
 		AEVec2 pos;
 		bool active = false;
@@ -45,8 +44,6 @@ void Playing_Load() {
 	base_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 	background_texture = AEGfxTextureLoad("Assets/Game_Background.png");
 	asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
-
-	// Attempt to load fuel pickup texture (will just draw a colored box if missing)
 	fuel_pickup_texture = AEGfxTextureLoad("Assets/FuelPickup.png");
 
 	resetStage(base_player, obstacles, &stage_timer, &damage_timer);
@@ -57,92 +54,111 @@ void Playing_Initialize() {
 	createUnitCircles(&unit_circle);
 	createUnitSquare(&(base_player.Mesh()), .5f, .5f);
 
-	// Apply MAX FUEL Upgrade logic when creating JetpackFuel
 	f32 base_capacity = 100.0f;
 	f32 upgraded_capacity = base_capacity * Upgrades_GetMaxFuelMultiplier();
 	pFuel = new JetpackFuel(upgraded_capacity, 30.0f, 2.0f);
-
 	g_fuel_pickup.active = false;
 
 	ANIMATION::sprite_Initialize();
 	camera.Magnitude() = 20.0f;
+	camera.Position().x = 0.0f;
+	camera.Position().y = 0.0f;
 	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
+	// --- INITIALIZE INFINITE OBSTACLES ---
+	f32 current_spawn_x = AEGfxGetWinMaxX(); // Start spawning on the right edge
+	for (int i = 0; i < k_obstacle_count; ++i) {
+		obstacles[i].position.x = current_spawn_x;
+		f32 minY = AEGfxGetWinMinY() + 50.0f;
+		f32 maxY = AEGfxGetWinMaxY() - 50.0f;
+		obstacles[i].position.y = minY + (maxY - minY) * ((f32)rand() / RAND_MAX);
+		obstacles[i].half_size.x = 25.0f;
+		obstacles[i].half_size.y = 25.0f;
+		obstacles[i].velocity.x = 0.0f; // STATIONARY in world
+		obstacles[i].velocity.y = 0.0f;
+
+		current_spawn_x += 300.0f + 200.0f * ((f32)rand() / RAND_MAX); // Gap
+	}
 }
 
 void Playing_Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 	bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
 
-	if (pFuel) {
-		pFuel->Update(delta_time, isFlying);
-	}
+	if (pFuel) pFuel->Update(delta_time, isFlying);
+
 	ANIMATION::sprite_update(delta_time);
-
-	camera.Update();
 	stage_timer += delta_time;
+	if (damage_timer > 0.0f) damage_timer -= delta_time;
 
-	if (damage_timer > 0.0f)
-		damage_timer -= delta_time;
-
+	// 1. Move Player
 	base_player.Movement(delta_time);
-	updateObstacles(obstacles, delta_time);
 
-	// --- FUEL PICKUP SPAWNING & COLLISION ---
+	// 2. Camera Strictly Follows Player X Position
+	camera.Position().x = base_player.Position().x;
+	camera.Update();
+	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
+	// 3. INFINITE OBSTACLE GENERATION (Object Pooling)
+	f32 max_x = camera.Position().x; // Find the furthest obstacle
+	for (int i = 0; i < k_obstacle_count; ++i) {
+		if (obstacles[i].position.x > max_x) {
+			max_x = obstacles[i].position.x;
+		}
+	}
+
+	for (int i = 0; i < k_obstacle_count; ++i) {
+		// If an obstacle goes off-screen to the LEFT...
+		if (obstacles[i].position.x < camera.Position().x - AEGfxGetWinMaxX() - 150.0f) {
+			// Teleport it to the far RIGHT, ahead of everything else!
+			obstacles[i].position.x = max_x + 300.0f + 250.0f * ((f32)rand() / RAND_MAX);
+			f32 minY = AEGfxGetWinMinY() + 50.0f;
+			f32 maxY = AEGfxGetWinMaxY() - 50.0f;
+			obstacles[i].position.y = minY + (maxY - minY) * ((f32)rand() / RAND_MAX);
+			max_x = obstacles[i].position.x; // Update max_x for the next loop
+		}
+	}
+
+	// 4. FUEL PICKUP LOGIC
 	if (pFuel) {
 		f32 fuel_ratio = pFuel->GetCurrentFuel() / pFuel->GetMaxFuel();
 		f32 spawn_threshold = 0.50f + Upgrades_GetFuelSpawnBonus();
 
-		// Spawn logic: If active fuel is low enough, spawn off-screen to the RIGHT
 		if (!g_fuel_pickup.active && fuel_ratio < spawn_threshold) {
-			// Start just outside the right edge of the screen
-			g_fuel_pickup.pos.x = AEGfxGetWinMaxX() + 100.0f;
-
-			// Random Y between top and bottom screen bounds
+			// Spawn far right, ahead of the camera view
+			g_fuel_pickup.pos.x = camera.Position().x + AEGfxGetWinMaxX() + 300.0f;
 			f32 minY = AEGfxGetWinMinY() + 50.0f;
 			f32 maxY = AEGfxGetWinMaxY() - 50.0f;
 			g_fuel_pickup.pos.y = minY + (maxY - minY) * ((f32)rand() / RAND_MAX);
-
 			g_fuel_pickup.active = true;
 		}
 
-		// Movement, Collision Check & Collection
 		if (g_fuel_pickup.active) {
-			// FIX: Make the pickup move to the left! 
-			// (You can adjust the 350.0f to match how fast your asteroids move)
-			g_fuel_pickup.pos.x -= 350.0f * delta_time;
-
+			// Pickup is now stationary in world space! You have to run into it.
 			AEVec2 p_half = { g_fuel_pickup.size / 2.0f, g_fuel_pickup.size / 2.0f };
 			if (checkOverlap(&base_player.Position(), &base_player.Half_Size(), &g_fuel_pickup.pos, &p_half)) {
-				// Collect pickup, restore fuel
-				f32 restore_amt = pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage();
-				pFuel->RestoreFuel(restore_amt);
+				pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
 				g_fuel_pickup.active = false;
 			}
-
-			// FIX: Despawn if it falls off the LEFT side of the screen
-			if (g_fuel_pickup.pos.x < AEGfxGetWinMinX() - 100.0f) {
+			if (g_fuel_pickup.pos.x < camera.Position().x - AEGfxGetWinMaxX() - 100.0f) {
 				g_fuel_pickup.active = false;
 			}
 		}
 	}
 
-	// --- OBSTACLE COLLISION ---
+	// 5. COLLISION
 	bool took_damage = false;
-	for (int i = 0; i < k_obstacle_count; ++i)
-	{
-		if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacles[i].position, &obstacles[i].half_size))
-		{
-			if (damage_timer <= 0.0f)
-			{
-				PlayRatSqueak();
+	for (int i = 0; i < k_obstacle_count; ++i) {
+		if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacles[i].position, &obstacles[i].half_size)) {
+			if (damage_timer <= 0.0f) {
 				base_player.Health() -= 1;
 				damage_timer = k_damage_cooldown;
 				took_damage = true;
 			}
 		}
 	}
-	if (took_damage)
-	{
+
+	if (took_damage) {
 		camera.Set_Shaking();
 		Credits_OnDamage();
 		graphics::particleInit(base_player.Position().x, base_player.Position().y, 25);
@@ -151,17 +167,29 @@ void Playing_Update() {
 	bool game_active = (base_player.Health() > 0) && (stage_timer < k_stage_duration);
 	Credits_Update(delta_time, game_active);
 
-	// State Transitions
 	if (base_player.Health() <= 0) next = GAME_STATE_GAME_OVER;
 	else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
 	else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
 }
 
 void Playing_Draw() {
-	// Background
+	// --- SEAMLESS INFINITE BACKGROUND TILING ---
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	ANIMATION::set_sprite_texture(background_texture);
-	drawQuad(unit_square, camera.Position().x, camera.Position().y, (AEGfxGetWinMaxX() - AEGfxGetWinMinX()), (AEGfxGetWinMaxY() - AEGfxGetWinMinY()), 1.f, 1.f, 1.f, 1.f);
+
+	f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+	f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
+	f32 cam_x = camera.Position().x;
+
+	// Calculate the mathematical offset to keep the texture snapped cleanly to screen edges
+	f32 offset = fmodf(cam_x, bg_width);
+	if (offset < 0) offset += bg_width;
+
+	f32 draw_start_x = cam_x - offset;
+
+	// Draw two background panels side by side to create the illusion of an infinite un-stretched image
+	drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+	drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
 
 	// Player
 	if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
@@ -171,13 +199,12 @@ void Playing_Draw() {
 
 	// Obstacles
 	ANIMATION::set_sprite_texture(asteroid_texture);
-	for (int i = 0; i < k_obstacle_count; ++i)
-	{
+	for (int i = 0; i < k_obstacle_count; ++i) {
 		Obstacle* obstacle = &obstacles[i];
 		drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 0.4f, 0.35f, 1.0f);
 	}
 
-	// Fuel Pickup Render
+	// Fuel Pickup
 	if (g_fuel_pickup.active) {
 		if (fuel_pickup_texture) {
 			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
@@ -185,7 +212,6 @@ void Playing_Draw() {
 			drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 1.0f, 1.0f, 1.0f);
 		}
 		else {
-			// Fallback yellow box if no texture found
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxTextureSet(NULL, 0.0f, 0.0f);
 			drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 0.9f, 0.0f, 1.0f);
@@ -213,7 +239,6 @@ void Playing_Draw() {
 	sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
 	AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
-	// Jetpack fuel gauge
 	if (pFuel) {
 		float screenX = base_player.Position().x - camera.Position().x;
 		float screenY = base_player.Position().y - camera.Position().y;
@@ -227,10 +252,7 @@ void Playing_Draw() {
 void Playing_Free() {
 	AEGfxMeshFree(unit_square);
 	AEGfxMeshFree(unit_circle);
-	if (pFuel) {
-		delete pFuel;
-		pFuel = nullptr;
-	}
+	if (pFuel) { delete pFuel; pFuel = nullptr; }
 }
 
 void Playing_Unload() {
@@ -243,26 +265,18 @@ void resetStage(Player& player, Obstacle* obstacle, f32* stage_time, f32* damage
 	AEVec2Set(&(player.Position()), 0.0f, 0.0f);
 	f32 size_reduction = Upgrades_GetSizeReduction();
 	f32 upgraded_half_size = player.Half_Size().x - size_reduction;
-	if (upgraded_half_size < 1.0f)
-		upgraded_half_size = 1.0f;
+	if (upgraded_half_size < 1.0f) upgraded_half_size = 1.0f;
 	AEVec2Set(&(player.Half_Size()), upgraded_half_size, upgraded_half_size);
 	player.Health() = getMaxHealthFromUpgrades();
 	*stage_time = 0.0f;
 	*damage_time = 0.0f;
 	Credits_ResetRound();
-
-	for (int i = 0; i < k_obstacle_count; ++i)
-	{
-		resetObstacle(obstacle + i);
-	}
 }
 
-int getMaxHealthFromUpgrades()
-{
+int getMaxHealthFromUpgrades() {
 	f32 increase = Upgrades_GetHealthIncrease();
 	f32 multiplier = 1.0f + increase;
 	int max_health = (int)floorf(base_player.Config().MaxHealth() * multiplier);
-	if (max_health < 1)
-		max_health = 1;
+	if (max_health < 1) max_health = 1;
 	return max_health;
 }

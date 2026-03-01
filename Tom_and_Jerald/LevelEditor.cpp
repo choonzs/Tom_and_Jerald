@@ -2,50 +2,39 @@
 #include "LevelEditor.hpp"
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
-#include "Audio.hpp"
 #include <vector>
 #include <iostream>
 #include <fstream>
 
 namespace {
-    // Dynamic Editor Configuration
-    int VIEW_COLS = 0;              // Will be calculated dynamically based on screen width
-    const int VIEW_ROWS = 36;       // The fixed vertical height of your level logic
-    const int MAX_COLS = 200;       // Total map length
-
-    f32 TILE_SIZE = 0.0f;           // Will stretch to fit screen vertically
-    f32 uiWidth = 240.0f;           // The width of our new polished left toolbar
+    int VIEW_COLS = 0;
+    const int VIEW_ROWS = 36;
+    f32 TILE_SIZE = 0.0f;
+    f32 uiWidth = 240.0f;
 
     std::vector<std::vector<int>> mapData;
     int viewOffsetX = 0;
+    f32 scrollTimer = 0.0f; // Controls smooth scrolling speed
 
     // Tool Selection State
     bool isDragging = false;
-    int currentTool = TILE_SQUARE;  // Default selected tool
+    int currentTool = 1;  // 1 = TILE_SQUARE
     f32 mouseX, mouseY;
 
-    // Textures
+    // Textures & Meshes
     AEGfxTexture* texSquare = nullptr;
     AEGfxTexture* texSpike = nullptr;
 
-    // Meshes for UI Styling
-    AEGfxVertexList* meshWhite = nullptr;       // For Textures
-    AEGfxVertexList* meshUIBg = nullptr;        // Dark grey toolbar background
-    AEGfxVertexList* meshSlotBg = nullptr;      // Lighter grey for asset boxes
-    AEGfxVertexList* meshSlotBorder = nullptr;  // Orange highlight for selected tool
-    AEGfxVertexList* meshGrid = nullptr;        // Faint grid lines
+    AEGfxVertexList* meshWhite = nullptr;
+    AEGfxVertexList* meshUIBg = nullptr;
+    AEGfxVertexList* meshSlotBg = nullptr;
+    AEGfxVertexList* meshSlotBorder = nullptr;
+    AEGfxVertexList* meshGrid = nullptr;
 
-    // Helper function to easily generate colored square meshes
     AEGfxVertexList* CreateSquareMesh(u32 color) {
         AEGfxMeshStart();
-        AEGfxTriAdd(
-            -0.5f, -0.5f, color, 0.0f, 1.0f,
-            0.5f, -0.5f, color, 1.0f, 1.0f,
-            -0.5f, 0.5f, color, 0.0f, 0.0f);
-        AEGfxTriAdd(
-            0.5f, -0.5f, color, 1.0f, 1.0f,
-            0.5f, 0.5f, color, 1.0f, 0.0f,
-            -0.5f, 0.5f, color, 0.0f, 0.0f);
+        AEGfxTriAdd(-0.5f, -0.5f, color, 0.0f, 1.0f, 0.5f, -0.5f, color, 1.0f, 1.0f, -0.5f, 0.5f, color, 0.0f, 0.0f);
+        AEGfxTriAdd(0.5f, -0.5f, color, 1.0f, 1.0f, 0.5f, 0.5f, color, 1.0f, 0.0f, -0.5f, 0.5f, color, 0.0f, 0.0f);
         return AEGfxMeshEnd();
     }
 }
@@ -54,77 +43,80 @@ void LevelEditor_Load() {
     texSquare = AEGfxTextureLoad("Assets/Square.png");
     texSpike = AEGfxTextureLoad("Assets/Spike.png");
 
-    // Initialize styling meshes (Colors are ARGB hex format)
-    meshWhite = CreateSquareMesh(0xFFFFFFFF); // Solid White
-    meshUIBg = CreateSquareMesh(0xFF2A2D34); // Slate Grey
-    meshSlotBg = CreateSquareMesh(0xFF3E434C); // Lighter Grey
-    meshSlotBorder = CreateSquareMesh(0xFFF9A03F); // Vibrant Orange
-    meshGrid = CreateSquareMesh(0x1AFFFFFF); // 10% Opacity White
+    meshWhite = CreateSquareMesh(0xFFFFFFFF);
+    meshUIBg = CreateSquareMesh(0xFF2A2D34);
+    meshSlotBg = CreateSquareMesh(0xFF3E434C);
+    meshSlotBorder = CreateSquareMesh(0xFFF9A03F);
+    meshGrid = CreateSquareMesh(0x1AFFFFFF);
 }
 
 void LevelEditor_Initialize() {
-    mapData.assign(VIEW_ROWS, std::vector<int>(MAX_COLS, TILE_EMPTY));
+    // Start with 100 columns. It will grow infinitely as you scroll right!
+    mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
     viewOffsetX = 0;
     isDragging = false;
-    currentTool = TILE_SQUARE;
-
-    // reset transition flag every time this state is entered
-    // without this the state will be permanently locked after first transition
-    static bool isTransitioning = false;
-    isTransitioning = false;
+    currentTool = 1;
 
     AEGfxSetCamPosition(0.0f, 0.0f);
-    AEGfxSetBackgroundColor(0.15f, 0.15f, 0.15f); // Darker background for canvas
+    AEGfxSetBackgroundColor(0.15f, 0.15f, 0.15f);
 }
 
 void LevelEditor_Update() {
-    // prevents any input after state change is triggered
-    static bool isTransitioning = false;
-    if (isTransitioning) return; // block all input if already transitioning
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
 
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) {
-        PlayClick();
-        // lock input immediately
-        isTransitioning = true;
-        next = GAME_STATE_MENU;
-        return;
-    }
-
-    // Camera Scrolling
-    if (AEInputCheckTriggered(AEVK_RIGHT) && viewOffsetX < MAX_COLS - VIEW_COLS) viewOffsetX++;
-    if (AEInputCheckTriggered(AEVK_LEFT) && viewOffsetX > 0) viewOffsetX--;
-
+    f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     s32 mx, my;
     AEInputGetCursorPosition(&mx, &my);
 
     f32 halfW = AEGfxGetWinMaxX();
     f32 halfH = AEGfxGetWinMaxY();
 
-    // Dynamically scale tile size so that the 36 rows perfectly fit the window height
     TILE_SIZE = (halfH * 2.0f) / VIEW_ROWS;
     VIEW_COLS = (int)(((halfW * 2.0f) - uiWidth) / TILE_SIZE) + 1;
 
     mouseX = (f32)mx - halfW;
     mouseY = -(f32)my + halfH;
 
+    // --- SMOOTH SCROLLING & INFINITE DYNAMIC GENERATION ---
+    if (AEInputCheckCurr(AEVK_RIGHT)) {
+        scrollTimer += dt;
+        if (scrollTimer > 0.05f) { // Scroll speed limit
+            viewOffsetX++;
+            scrollTimer = 0.0f;
+
+            // DYNAMIC GENERATION: Append a new empty column if we reach the map's boundary
+            if (viewOffsetX + VIEW_COLS >= mapData[0].size()) {
+                for (int r = 0; r < VIEW_ROWS; ++r) {
+                    mapData[r].push_back(0); // 0 = Empty tile
+                }
+            }
+        }
+    }
+    else if (AEInputCheckCurr(AEVK_LEFT) && viewOffsetX > 0) {
+        scrollTimer += dt;
+        if (scrollTimer > 0.05f) {
+            viewOffsetX--;
+            scrollTimer = 0.0f;
+        }
+    }
+    else {
+        scrollTimer = 0.05f;
+    }
+
     // --- LEFT MOUSE LOGIC: UI Selection & Painting ---
     if (AEInputCheckCurr(AEVK_LBUTTON)) {
         if (mouseX < -halfW + uiWidth) {
-            // Clicked inside UI Sidebar (Only register initial clicks to prevent spam)
             if (AEInputCheckTriggered(AEVK_LBUTTON)) {
                 f32 slot1Y = halfH - 120.0f;
                 f32 slot2Y = halfH - 260.0f;
-
-                // Check collision with the UI tool boxes
-                if (mouseY < slot1Y + 50.0f && mouseY > slot1Y - 50.0f) { currentTool = TILE_SQUARE; isDragging = true; }
-                if (mouseY < slot2Y + 50.0f && mouseY > slot2Y - 50.0f) { currentTool = TILE_SPIKE; isDragging = true; }
+                if (mouseY < slot1Y + 50.0f && mouseY > slot1Y - 50.0f) { currentTool = 1; isDragging = true; } // SQUARE
+                if (mouseY < slot2Y + 50.0f && mouseY > slot2Y - 50.0f) { currentTool = 2; isDragging = true; } // SPIKE
             }
         }
         else {
-            // Clicked inside Grid Canvas - Paint the current tool!
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
-            if (gridX >= 0 && gridX < MAX_COLS && gridY >= 0 && gridY < VIEW_ROWS) {
+            if (gridX >= 0 && gridX < mapData[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
                 mapData[gridY][gridX] = currentTool;
             }
         }
@@ -135,33 +127,28 @@ void LevelEditor_Update() {
         if (mouseX >= -halfW + uiWidth) {
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
-            if (gridX >= 0 && gridX < MAX_COLS && gridY >= 0 && gridY < VIEW_ROWS) {
-                PlayClick();
-                isTransitioning = true;
-                mapData[gridY][gridX] = TILE_EMPTY; // Erase tile
+            if (gridX >= 0 && gridX < mapData[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
+                mapData[gridY][gridX] = 0; // 0 = Empty Tile
             }
         }
     }
 
-    if (AEInputCheckReleased(AEVK_LBUTTON)) {
-        isDragging = false; // Stop drawing tool attached to cursor
-    }
+    if (AEInputCheckReleased(AEVK_LBUTTON)) isDragging = false;
 
-    // Exporting
+    // --- EXPORTING ---
     if (AEInputCheckTriggered(AEVK_E)) {
-        PlayClick();          // play click sound once
-        isTransitioning = true; // lock input so click doesnt repeat
-        std::ofstream outFile("ExportedLevel.txt");
+        std::ofstream outFile("Level1.txt"); // Saves exactly what Level 1 will read
         if (outFile.is_open()) {
-            outFile << MAX_COLS << " " << VIEW_ROWS << "\n";
+            int currentMaxCols = mapData[0].size();
+            outFile << currentMaxCols << " " << VIEW_ROWS << "\n";
             for (int r = 0; r < VIEW_ROWS; ++r) {
-                for (int c = 0; c < MAX_COLS; ++c) {
+                for (int c = 0; c < currentMaxCols; ++c) {
                     outFile << mapData[r][c] << " ";
                 }
                 outFile << "\n";
             }
             outFile.close();
-            std::cout << "Level Exported!\n";
+            std::cout << "Level Exported dynamically with " << currentMaxCols << " columns!\n";
         }
     }
 }
@@ -171,7 +158,7 @@ void LevelEditor_Draw() {
     f32 halfW = AEGfxGetWinMaxX();
     f32 halfH = AEGfxGetWinMaxY();
 
-    f32 startX = -halfW + uiWidth; // Grid starts AFTER the UI panel
+    f32 startX = -halfW + uiWidth;
     f32 startY = -halfH;
 
     AEMtx33 scale, trans, transform;
@@ -180,7 +167,7 @@ void LevelEditor_Draw() {
     for (int r = 0; r < VIEW_ROWS; ++r) {
         for (int c = 0; c < VIEW_COLS; ++c) {
             int mapCol = c + viewOffsetX;
-            if (mapCol >= MAX_COLS) continue; // Don't draw past map bounds
+            if (mapCol >= mapData[0].size()) continue;
 
             int tile = mapData[r][mapCol];
 
@@ -188,33 +175,22 @@ void LevelEditor_Draw() {
             f32 pY = startY + (r * TILE_SIZE) + (TILE_SIZE / 2.0f);
             AEMtx33Trans(&trans, pX, pY);
 
-            if (tile == TILE_EMPTY) {
-                // Draw faint grid wireframe
+            if (tile == 0) {
                 AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                 AEGfxTextureSet(NULL, 0, 0);
-                AEMtx33Scale(&scale, TILE_SIZE - 2.0f, TILE_SIZE - 2.0f); // -2 to create grid lines
+                AEMtx33Scale(&scale, TILE_SIZE - 2.0f, TILE_SIZE - 2.0f);
                 AEMtx33Concat(&transform, &trans, &scale);
                 AEGfxSetTransform(transform.m);
                 AEGfxMeshDraw(meshGrid, AE_GFX_MDM_TRIANGLES);
             }
             else {
-                // Draw placed physical tiles
                 AEMtx33Scale(&scale, TILE_SIZE, TILE_SIZE);
                 AEMtx33Concat(&transform, &trans, &scale);
                 AEGfxSetTransform(transform.m);
 
-                if (tile == TILE_SQUARE && texSquare) {
-                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-                    AEGfxTextureSet(texSquare, 0, 0);
-                }
-                else if (tile == TILE_SPIKE && texSpike) {
-                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-                    AEGfxTextureSet(texSpike, 0, 0);
-                }
-                else {
-                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-                    AEGfxTextureSet(NULL, 0, 0); // Fallback solid white
-                }
+                if (tile == 1 && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
+                else if (tile == 2 && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
+                else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
                 AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
             }
         }
@@ -224,7 +200,7 @@ void LevelEditor_Draw() {
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
     AEGfxTextureSet(NULL, 0, 0);
     AEMtx33Scale(&scale, uiWidth, halfH * 2.0f);
-    AEMtx33Trans(&trans, -halfW + (uiWidth / 2.0f), 0.0f); // Center vertically
+    AEMtx33Trans(&trans, -halfW + (uiWidth / 2.0f), 0.0f);
     AEMtx33Concat(&transform, &trans, &scale);
     AEGfxSetTransform(transform.m);
     AEGfxMeshDraw(meshUIBg, AE_GFX_MDM_TRIANGLES);
@@ -236,9 +212,7 @@ void LevelEditor_Draw() {
     f32 slotSize = 100.0f;
     f32 iconSize = 70.0f;
 
-    // A handy lambda function to draw tool boxes cleanly
     auto DrawToolBox = [&](f32 sY, int tileType, AEGfxTexture* tex) {
-        // Draw Orange Border if selected
         if (currentTool == tileType) {
             AEMtx33Scale(&scale, slotSize + 8.0f, slotSize + 8.0f);
             AEMtx33Trans(&trans, slotCenterX, sY);
@@ -249,7 +223,6 @@ void LevelEditor_Draw() {
             AEGfxMeshDraw(meshSlotBorder, AE_GFX_MDM_TRIANGLES);
         }
 
-        // Draw Slot Background
         AEMtx33Scale(&scale, slotSize, slotSize);
         AEMtx33Trans(&trans, slotCenterX, sY);
         AEMtx33Concat(&transform, &trans, &scale);
@@ -258,23 +231,16 @@ void LevelEditor_Draw() {
         AEGfxTextureSet(NULL, 0, 0);
         AEGfxMeshDraw(meshSlotBg, AE_GFX_MDM_TRIANGLES);
 
-        // Draw Icon Inside
         AEMtx33Scale(&scale, iconSize, iconSize);
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
-        if (tex) {
-            AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            AEGfxTextureSet(tex, 0, 0);
-        }
-        else {
-            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-            AEGfxTextureSet(NULL, 0, 0);
-        }
+        if (tex) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(tex, 0, 0); }
+        else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
         };
 
-    DrawToolBox(slot1Y, TILE_SQUARE, texSquare);
-    DrawToolBox(slot2Y, TILE_SPIKE, texSpike);
+    DrawToolBox(slot1Y, 1, texSquare);
+    DrawToolBox(slot2Y, 2, texSpike);
 
     // 4. Draw drag preview attached to mouse cursor
     if (isDragging && mouseX < -halfW + uiWidth) {
@@ -283,18 +249,9 @@ void LevelEditor_Draw() {
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
 
-        if (currentTool == TILE_SQUARE && texSquare) {
-            AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            AEGfxTextureSet(texSquare, 0, 0);
-        }
-        else if (currentTool == TILE_SPIKE && texSpike) {
-            AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            AEGfxTextureSet(texSpike, 0, 0);
-        }
-        else {
-            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-            AEGfxTextureSet(NULL, 0, 0);
-        }
+        if (currentTool == 1 && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
+        else if (currentTool == 2 && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
+        else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
     }
 }
@@ -307,7 +264,6 @@ void LevelEditor_Unload() {
     if (texSquare) AEGfxTextureUnload(texSquare);
     if (texSpike) AEGfxTextureUnload(texSpike);
 
-    // Clean up all styling meshes
     if (meshWhite) AEGfxMeshFree(meshWhite);
     if (meshUIBg) AEGfxMeshFree(meshUIBg);
     if (meshSlotBg) AEGfxMeshFree(meshSlotBg);

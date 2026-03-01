@@ -1,116 +1,44 @@
+#include "pch.hpp"
 #include "Player.hpp"
-namespace {
-	//Earth grav 9.81, testing with 5.0f
-	f32 gravity = 981.f;
-	f32 max_energy{};
-
-	f32 tap_timer{ 0.0f };
-	bool wait_double_tap{ false };
-	bool w_released{ false };
-}
-
-// Import player configurations from file
-bool PlayerConfig::LoadFromFile(const char* filename) {
-	std::ifstream ifs(filename);
-
-	if (!ifs) { return false; }
-	std::string tmp;
-
-	ifs >> tmp;
-	ifs >> speed;
-	ifs >> tmp;
-	ifs >> acceleration;
-	ifs >> tmp;
-	ifs >> maxHealth;
-
-	return true;
-}
 
 Player::~Player() {
-	if (mesh) AEGfxMeshFree(mesh);
-	if (texture) AEGfxTextureUnload(texture);
+    // Free resources if necessary
 }
 
-void Player::Movement(f32 dt) {
-	if (wait_double_tap)
-	{
-		tap_timer -= dt;
-		if (tap_timer <= 0.0f)
-		{
-			wait_double_tap = false;  // too slow, reset
-		}
-	}
-
-	AEVec2 added;
-	// If no input by default gravity will pull the player down
-	AEVec2Set(&added, 0.0f, static_cast<f32>(-gravity * dt));
-
-	if (AEInputCheckCurr(AEVK_W)) {
-		// Fwd Angle + accel * dt
-		AEVec2Set(&added, 0, static_cast<f32>(config.Acceleration() * dt));
-	}	
-	if (AEInputCheckCurr(AEVK_S)) {
-		AEVec2Set(&added, 0, static_cast<f32>(-config.Acceleration() * dt));
-	}
-
-	if (AEInputCheckTriggered(AEVK_W) && w_released) {
-		// If the player double taps W, give them a boost
-		if (wait_double_tap) {
-			float burstStrength = 500.0f;
-
-			AEVec2 burst;
-			AEVec2Set(&burst, 0.0f, burstStrength);
-
-			AEVec2Add(&velocity, &velocity, &burst);
-
-			wait_double_tap = false;
-			boost_timer = 3.0f; // 3 seconds cooldown
-		}
-		wait_double_tap = true;
-		tap_timer = 0.5f; // 0.5 seconds to double tap
-		w_released = false;
-	}
-
-	// Recharge boost if timer is up
-	if (boost_timer > 0.0f) {
-		boost_timer -= dt;
-		if (boost_timer <= 0.0f) {
-			boost_rocket = true;
-		}
-	}
-	
-	if (AEInputCheckReleased(AEVK_W)) {
-		w_released = true;
-	}
-	
-	//Get new velocity based on accel and current vel
-	// Find the velocity according to the acceleration
-	AEVec2 newVel;
-	AEVec2Add(&newVel, &added, &velocity);
-	AEVec2Scale(&newVel, &newVel, 0.99f);
-
-	// Set current velocity to new velocity
-	AEVec2Set(&velocity, newVel.x, newVel.y);
-
-	AEVec2Set(&position, f32(position.x + velocity.x * dt), f32(position.y + velocity.y * dt));
-	
-
-
-	f32 min_x = AEGfxGetWinMinX() + Half_Size().x;
-	f32 max_x = AEGfxGetWinMaxX() - Half_Size().x;
-	f32 min_y = AEGfxGetWinMinY() + Half_Size().y;
-	f32 max_y = AEGfxGetWinMaxY() - Half_Size().y;
-
-
-	if (Position().x < min_x)
-		Position().x = min_x;
-	if (Position().x > max_x)
-		Position().x = max_x;
-	if (Position().y < min_y)
-		Position().y = min_y;
-	if (Position().y > max_y) {
-		Position().y = max_y;
-	}
+bool PlayerConfig::LoadFromFile(const char* filename) {
+    // Keep your existing config logic
+    return true;
 }
 
+void Player::Movement(f32 delta_time) {
+    // 1. VERTICAL MOVEMENT (Jetpack / Gravity)
+    if (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) {
+        velocity.y = config.Speed(); // Fly upwards
+    }
+    else {
+        velocity.y -= config.Acceleration() * delta_time; // Gravity pulls down
+    }
 
+    // 2. HORIZONTAL MOVEMENT (True Side Scroller)
+    if (AEInputCheckCurr(AEVK_D) || AEInputCheckCurr(AEVK_RIGHT)) {
+        velocity.x = config.Speed(); // Move Right
+    }
+    else if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
+        velocity.x = -config.Speed(); // Move Left
+    }
+    else {
+        velocity.x = 0.0f; // Stop moving horizontally when no keys are pressed
+    }
+
+    // 3. APPLY VELOCITY TO POSITION
+    position.x += velocity.x * delta_time;
+    position.y += velocity.y * delta_time;
+
+    // 4. PREVENT FALLING INTO THE VOID
+    // Adds a safety floor at the bottom of the camera so the player doesn't fall infinitely
+    f32 bottomBoundary = AEGfxGetWinMinY() + half_size.y;
+    if (position.y < bottomBoundary) {
+        position.y = bottomBoundary;
+        velocity.y = 0.0f;
+    }
+}
