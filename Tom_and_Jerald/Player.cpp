@@ -2,32 +2,32 @@
 #include "Player.hpp"
 
 Player::~Player() {
-    // Free resources if necessary
+    // Empty Destructor
 }
 
-bool PlayerConfig::LoadFromFile(const char* filename) {
-    // Keep your existing config logic
+// FIX: Commented out the parameter name to bypass the unreferenced parameter error
+bool PlayerConfig::LoadFromFile(const char* /*filename*/) {
     return true;
 }
 
 void Player::Movement(f32 delta_time) {
     // 1. VERTICAL MOVEMENT (Jetpack / Gravity)
     if (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) {
-        velocity.y = config.Speed(); // Fly upwards
+        velocity.y = config.Speed();
     }
     else {
-        velocity.y -= config.Acceleration() * delta_time; // Gravity pulls down
+        velocity.y -= config.Acceleration() * delta_time;
     }
 
     // 2. HORIZONTAL MOVEMENT (True Side Scroller)
     if (AEInputCheckCurr(AEVK_D) || AEInputCheckCurr(AEVK_RIGHT)) {
-        velocity.x = config.Speed(); // Move Right
+        velocity.x = config.Speed();
     }
     else if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
-        velocity.x = -config.Speed(); // Move Left
+        velocity.x = -config.Speed();
     }
     else {
-        velocity.x = 0.0f; // Stop moving horizontally when no keys are pressed
+        velocity.x = 0.0f;
     }
 
     // 3. APPLY VELOCITY TO POSITION
@@ -35,7 +35,6 @@ void Player::Movement(f32 delta_time) {
     position.y += velocity.y * delta_time;
 
     // 4. PREVENT FALLING INTO THE VOID
-    // Adds a safety floor at the bottom of the camera so the player doesn't fall infinitely
     f32 bottomBoundary = AEGfxGetWinMinY() + half_size.y;
     if (position.y < bottomBoundary) {
         position.y = bottomBoundary;

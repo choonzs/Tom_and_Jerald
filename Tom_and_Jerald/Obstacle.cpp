@@ -3,6 +3,8 @@
 #include "utils.hpp"
 #include "Obstacle.hpp"
 
+const int k_obstacle_count = 100;
+
 void Obstacle::Reset()
 {
     f32 max_x = AEGfxGetWinMaxX();

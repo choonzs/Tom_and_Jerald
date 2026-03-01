@@ -1,84 +1,59 @@
-#include "pch.hpp"
-#ifndef PLAYER_HPP 
+#ifndef PLAYER_HPP
 #define PLAYER_HPP
-namespace {
-	// Temp placement of stuff until asiohjfioheiohodeiqj
-	const int k_obstacle_count = 10;
-	const f32 k_stage_duration = 30.0f;
-	const f32 k_damage_cooldown = 1.0f;
 
+#include "AEEngine.h"
 
-	const int k_max_health = 10; //player
-	const f32 k_player_speed = 500.0f;
-	const f32 k_player_base_half_size = 40.0f;
-
-}
 class PlayerConfig {
 public:
-	bool LoadFromFile(const char* filename);
-
-	f32 Speed() const { return speed; }
-	f32 Acceleration() const { return acceleration; }
-	int MaxHealth() const { return maxHealth; }
-
+    PlayerConfig() : speed(300.0f), acceleration(500.0f), max_health(3) {}
+    bool LoadFromFile(const char* filename);
+    f32 Speed() const { return speed; }
+    f32 Acceleration() const { return acceleration; }
+    int MaxHealth() const { return max_health; }
 private:
-	f32 speed = 500.0f;        // default values
-	f32 acceleration = 500.0f;
-	int maxHealth = 10;
+    f32 speed;
+    f32 acceleration;
+    int max_health;
 };
-
-
 
 class Player {
-	public:	
-		//ctor
-		Player() : position{ 0.0f, 0.0f }, prev_position{ position }, 
-			velocity{ 0.0f, 0.0f },
-			half_size{ 40.0f, 40.0f }, health(config.MaxHealth()), 
-			texture(nullptr), mesh(nullptr) {
-			config.LoadFromFile("PlayerConfig.txt");
-		}
-		//dtor
-		~Player();
+public:
+    Player() : health(3), texture(nullptr), mesh(nullptr) {
+        AEVec2Zero(&position);
+        AEVec2Zero(&velocity);
+        AEVec2Set(&half_size, 20.0f, 20.0f);
+    }
+    ~Player();
 
+    void Movement(f32 delta_time);
 
-		// accessors
-		AEVec2 Position() const { return position; }
-		AEVec2 Half_Size() const { return half_size; }
-		int Health() const { return health; }
-		AEGfxTexture* Texture() const { return texture; }
-		AEGfxVertexList* Mesh() const { return mesh; }
+    // Getters and Setters
+    AEVec2& Position() { return position; }
+    const AEVec2& Position() const { return position; }
 
-		PlayerConfig Config() const { return config; }
+    AEVec2& Velocity() { return velocity; }
+    const AEVec2& Velocity() const { return velocity; }
 
+    AEVec2& Half_Size() { return half_size; }
+    const AEVec2& Half_Size() const { return half_size; } // Const version added
 
-		// mutators
-		AEVec2& Position() { return position; }
-		AEVec2& Half_Size() { return half_size; }
-		int& Health() { return health; }
-		AEGfxTexture*& Texture() { return texture; }
-		AEGfxVertexList*& Mesh() { return mesh; }
+    int& Health() { return health; }
+    int Health() const { return health; } // Const version added
 
+    AEGfxTexture*& Texture() { return texture; }
+    AEGfxVertexList*& Mesh() { return mesh; }
 
-		// Movement
-		void Movement(f32 delta_time);
+    PlayerConfig& Config() { return config; }
+    const PlayerConfig& Config() const { return config; } // Const version added
 
-	private: 
-		AEVec2 position;
-		AEVec2 prev_position;	// object previous position -> it's the position calculated in the previous loop
-		AEVec2 velocity;	// object current velocity
-		
-		AEVec2 half_size;
-		int health;
-		AEGfxTexture* texture;
-		AEGfxVertexList* mesh;
-
-		bool boost_rocket{ true };
-		f32 boost_timer{};
-
-		PlayerConfig config;
-
+private:
+    AEVec2 position;
+    AEVec2 velocity;
+    AEVec2 half_size;
+    int health;
+    AEGfxTexture* texture;
+    AEGfxVertexList* mesh;
+    PlayerConfig config;
 };
-
 
 #endif // !PLAYER_HPP
