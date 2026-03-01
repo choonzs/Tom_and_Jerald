@@ -99,12 +99,12 @@ void CustomLevel_Initialize() {
                 int type;
                 inFile >> type;
                 if (type != 0) {
-                    LevelTile tile;
-                    tile.type = type;
-                    tile.half_size.x = TILE_SIZE / 2.0f;
-                    tile.half_size.y = TILE_SIZE / 2.0f;
-                    tile.pos.x = startX + (c * TILE_SIZE) + tile.half_size.x;
-                    tile.pos.y = startY + (r * TILE_SIZE) + tile.half_size.y;
+					LevelTile tile{ 
+                        type, 
+                        {TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}, 
+                        {startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f}
+                    };
+                    
                     map_tiles.push_back(tile);
                     if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
                 }

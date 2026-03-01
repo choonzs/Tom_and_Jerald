@@ -85,7 +85,7 @@ void LevelEditor_Update() {
             scrollTimer = 0.0f;
 
             // DYNAMIC GENERATION: Append a new empty column if we reach the map's boundary
-            if (viewOffsetX + VIEW_COLS >= mapData[0].size()) {
+            if (static_cast<size_t>(viewOffsetX + VIEW_COLS) >= mapData[0].size()) {
                 for (int r = 0; r < VIEW_ROWS; ++r) {
                     mapData[r].push_back(0); // 0 = Empty tile
                 }
@@ -139,7 +139,7 @@ void LevelEditor_Update() {
     if (AEInputCheckTriggered(AEVK_E)) {
         std::ofstream outFile("Level1.txt"); // Saves exactly what Level 1 will read
         if (outFile.is_open()) {
-            int currentMaxCols = mapData[0].size();
+            int currentMaxCols = static_cast<int>(mapData[0].size());
             outFile << currentMaxCols << " " << VIEW_ROWS << "\n";
             for (int r = 0; r < VIEW_ROWS; ++r) {
                 for (int c = 0; c < currentMaxCols; ++c) {

@@ -22,6 +22,10 @@ public:
         AEVec2Zero(&position);
         AEVec2Zero(&velocity);
         AEVec2Set(&half_size, 20.0f, 20.0f);
+
+        if (!Config().LoadFromFile("Assets/PlayerConfig.txt")) {
+			// If loading fails, use default values (already set in constructor)
+        }
     }
     ~Player();
 

@@ -1,16 +1,30 @@
 #include "pch.hpp"
 #include "Player.hpp"
 
+
 Player::~Player() {
     // Empty Destructor
     if (mesh) AEGfxMeshFree(mesh);
     if (texture) AEGfxTextureUnload(texture);
 }
 
-// FIX: Commented out the parameter name to bypass the unreferenced parameter error
-bool PlayerConfig::LoadFromFile(const char* /*filename*/) {
+// Import player configurations from file
+bool PlayerConfig::LoadFromFile(const char* filename) {
+    std::ifstream ifs(filename);
+
+    if (!ifs) { return false; }
+    std::string tmp;
+
+    ifs >> tmp;
+    ifs >> speed;
+    ifs >> tmp;
+    ifs >> acceleration;
+    ifs >> tmp;
+    ifs >> max_health;
+
     return true;
 }
+
 
 void Player::Movement(f32 delta_time) {
     // 1. VERTICAL MOVEMENT (Jetpack / Gravity)
