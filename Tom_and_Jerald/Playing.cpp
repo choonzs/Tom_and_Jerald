@@ -11,6 +11,7 @@
 #include "JetpackFuel.hpp"
 #include "Particles.hpp"
 #include "Player.hpp"
+#include "ImgFontInit.hpp"
 
 // --- FIX: RESTORED MISSING CONSTANTS ---
 const f32 k_stage_duration = 120.0f;
@@ -25,9 +26,9 @@ JetpackFuel* pFuel = nullptr;
 Obstacle obstacles[MAX_ACTIVE_OBSTACLES] = {};
 
 Player base_player;
-AEGfxTexture* background_texture = nullptr;
 AEGfxTexture* asteroid_texture = nullptr;
 AEGfxTexture* fuel_pickup_texture = nullptr;
+
 
 namespace {
     Camera camera;
@@ -52,11 +53,7 @@ namespace {
 int getMaxHealthFromUpgrades();
 
 void Playing_Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
-    base_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
-    background_texture = AEGfxTextureLoad("Assets/Game_Background.png");
-    asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
-    fuel_pickup_texture = AEGfxTextureLoad("Assets/FuelPickup.png");
+    ASSETS::Init_Images();
 }
 
 void Playing_Initialize() {
@@ -184,7 +181,7 @@ void Playing_Update() {
 
 void Playing_Draw() {
     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    ANIMATION::set_sprite_texture(background_texture);
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
 
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
@@ -199,11 +196,11 @@ void Playing_Draw() {
     drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(base_player.Texture());
+        ANIMATION::set_sprite_texture(ASSETS::playerTexture);               //Dn player class here, change if necessary.
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
 
-    ANIMATION::set_sprite_texture(asteroid_texture);
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
         Obstacle* obstacle = &obstacles[i];
         drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -258,11 +255,8 @@ void Playing_Free() {
 }
 
 void Playing_Unload() {
-    AEGfxDestroyFont(font_id);
-    AEGfxTextureUnload(background_texture);
-    AEGfxTextureUnload(asteroid_texture);
-    if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
-    /*Player Unloaded using dtor, no need to do anything*/
+    ASSETS::Unload_Images();
+
 }
 
 int getMaxHealthFromUpgrades() {
