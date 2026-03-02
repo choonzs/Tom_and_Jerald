@@ -9,7 +9,7 @@
 
 f32 randFloat(f32 min, f32 max);
 
-void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x = 0.0f, f32 cam_pos_y = 0.0f);
+void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x = 0.0f, f32 cam_pos_y = 0.0f, f32 red = 1.0f, f32 green = 1.0f, f32 blue = 1.0f, f32 alpha = 1.0f);
 void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_pos_y);
 void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height = 1.0f, f32 sprite_uv_width = 1.0f);
 void createUnitCircles(AEGfxVertexList** out_mesh);

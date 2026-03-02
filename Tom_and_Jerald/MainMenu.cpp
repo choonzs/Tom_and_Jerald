@@ -71,9 +71,6 @@ void MainMenu_Update() {
 	else {
 		mainmenu_flag = TRUE;
 	}
-	std::cout << mainmenu_flag << "\n"; //TEST for screenchange
-	
-
 
 
 	if (mainmenu_flag == TRUE) {
@@ -126,7 +123,8 @@ void MainMenu_Update() {
 
 void MainMenu_Draw() {
 	if (mainmenu_flag == TRUE) {
-		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f);
+
+		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f,0.0f,0.0f,1.0f,0.0f);
 
 		drawCenteredText(font_id, "START (ENTER)", 0.3f, 0.7f);
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
