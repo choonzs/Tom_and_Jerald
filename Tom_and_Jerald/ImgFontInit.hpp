@@ -12,6 +12,7 @@ namespace ASSETS {
 	extern AEGfxTexture* otherAssets;		//Other assets + UI
 	void Init_Images();
 	void Init_Font();
+	s8& Font();
 
 	void Unload_Images();
 	void Unload_Font();

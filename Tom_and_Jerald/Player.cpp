@@ -73,4 +73,10 @@ void Player::Movement(f32 dt) {
         position.y = bottomBoundary;
         velocity.y = 0.0f;
     }
+	// 5. PREVENT GOING ABOVE THE CEILING
+    f32 topBoundary = AEGfxGetWinMaxY() - half_size.y;
+    if (position.y > topBoundary) {
+        position.y = topBoundary;
+        velocity.y = 0.0f;
+	}
 }

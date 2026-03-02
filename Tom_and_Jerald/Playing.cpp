@@ -32,7 +32,6 @@ AEGfxTexture* fuel_pickup_texture = nullptr;
 
 namespace {
     Camera camera;
-    s8 font_id;
     AEGfxVertexList* unit_square = nullptr;
     AEGfxVertexList* unit_circle = nullptr;
 
@@ -52,6 +51,7 @@ int getMaxHealthFromUpgrades();
 
 void Playing_Load() {
     ASSETS::Init_Images();
+    ASSETS::Init_Font();
 }
 
 void Playing_Initialize() {
@@ -232,18 +232,18 @@ void Playing_Draw() {
 
     char cheese_text[64];
     sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
-    AEGfxPrint(font_id, cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
 
     char fps_text[64];
     sprintf_s(fps_text, "%.1f FPS", 1 / (f32)AEFrameRateControllerGetFrameTime());
-    AEGfxPrint(font_id, fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
 
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     char timer_text[64];
     f32 time_left = k_stage_duration - stage_timer;
     if (time_left < 0.0f) time_left = 0.0f;
     sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
-    AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
     graphics::particleDraw(unit_circle);
 }
@@ -256,6 +256,7 @@ void Playing_Free() {
 
 void Playing_Unload() {
     ASSETS::Unload_Images();
+    ASSETS::Unload_Font();
 
 }
 

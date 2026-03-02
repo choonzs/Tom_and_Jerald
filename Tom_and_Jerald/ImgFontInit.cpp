@@ -10,9 +10,9 @@ namespace ASSETS {
 	AEGfxTexture* backgroundAssets = nullptr; //Background + obstacles
 	AEGfxTexture* otherAssets = nullptr;		 //Other assets + UI
 
+	s8 font_id;
 
 	void Init_Images();
-	s8 font_id;
 	void Init_Images() {
 		playerTexture = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 		copyrightLogo = AEGfxTextureLoad("Assets/DigipenLogo.png");
@@ -24,6 +24,7 @@ namespace ASSETS {
 	void Init_Font() {
 		font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	}
+	s8& Font() {return font_id;}
 
 	void Unload_Images() {
 		AEGfxTextureUnload(playerTexture);

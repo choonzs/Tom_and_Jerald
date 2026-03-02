@@ -3,8 +3,15 @@
 #include "Playing.hpp"
 #include "Utils.hpp"
 
+
 f32 randFloat(f32 min, f32 max) {
 	return min + (max - min) * ((f32)rand() / RAND_MAX);
+}
+
+// Bruh why do we have two functions that do the same thing?
+f32 randomRange(f32 min_value, f32 max_value)
+{
+	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
 }
 
 
@@ -15,6 +22,8 @@ void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_po
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
 	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, red, green, blue, alpha);
 }
+
+
 void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
 {
 	f32 width = 0.0f;
@@ -22,6 +31,7 @@ void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_po
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
 	AEGfxPrint(font_id, text, cam_pos_x, cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 }
+
 
 void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height, f32 sprite_uv_width)
 {
@@ -61,6 +71,7 @@ void createUnitCircles(AEGfxVertexList** out_mesh) {
 	*out_mesh = AEGfxMeshEnd();
 }
 
+
 void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha)
 {
 	AEMtx33 scale;
@@ -76,6 +87,7 @@ void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 
 	AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 }
 
+
 bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEVec2* position_b, const AEVec2* half_size_b)
 {
 
@@ -86,11 +98,6 @@ bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEV
 		return false;
 
 	return true;
-}
-
-f32 randomRange(f32 min_value, f32 max_value)
-{
-	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
 }
 
 
@@ -113,7 +120,6 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
 	}
 }
-
 
 void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
 	std::ifstream inFile("ExportedLevel.txt");
@@ -159,5 +165,8 @@ void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<Le
 		}
 		inFile.close();
 	}
+
+	// TEMP VALUE
+	level_end_x += 500.0f; // Adding some buffer to the end of the level
 }
 
