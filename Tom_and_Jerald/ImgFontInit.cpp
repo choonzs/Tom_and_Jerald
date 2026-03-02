@@ -12,7 +12,6 @@ namespace ASSETS {
 
 	s8 font_id;
 
-	void Init_Images();
 	void Init_Images() {
 		playerTexture = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 		copyrightLogo = AEGfxTextureLoad("Assets/DigipenLogo.png");

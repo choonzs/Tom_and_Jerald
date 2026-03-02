@@ -6,7 +6,6 @@
 Player::~Player() {
     // Empty Destructor
     if (mesh) AEGfxMeshFree(mesh);
-    if (texture) AEGfxTextureUnload(texture);
 }
 
 // Import player configurations from file

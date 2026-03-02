@@ -141,8 +141,8 @@ void MainMenu_Draw() {
 
 void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
-	ASSETS::Unload_Images;
 }
 void MainMenu_Unload() {
 	AEGfxDestroyFont(font_id);
+	ASSETS::Unload_Images();
 }
