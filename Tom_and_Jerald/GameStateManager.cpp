@@ -9,6 +9,7 @@
 #include "Shop.hpp"
 #include "LevelEditor.hpp"
 #include "CustomLevel.hpp"
+#include "Settings.hpp"
 
 int current{}, previous{}, next{};
 
@@ -77,6 +78,14 @@ void GSM_Update()
 		fpDraw = CustomLevel_Draw;
 		fpFree = CustomLevel_Free;
 		fpUnload = CustomLevel_Unload;
+		break;
+	case GAME_STATE_SETTINGS:
+		fpLoad = Setting_Load;
+		fpInitialize = Settings_Initialize;
+		fpUpdate = Settings_Update;
+		fpDraw = Settings_Draw;
+		fpFree = Settings_Free;
+		fpUnload = Settings_Unload;
 		break;
 	case GAME_STATE_RESTART:
 		break;

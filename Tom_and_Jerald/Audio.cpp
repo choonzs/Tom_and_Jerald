@@ -11,6 +11,7 @@ AEAudioGroup se_rat;
 
 void AudioInit()
 {
+    // koad background music and sound effects from assets folder
     backgroundAudio = AEAudioLoadMusic("Assets/background_audio.mp3");
     clickAudio = AEAudioLoadSound("Assets/click_audio.mp3");
     ratsqueakAudio = AEAudioLoadSound("Assets/ratClick_audio.mp3");
@@ -22,12 +23,16 @@ void AudioInit()
 
 void AudioFree()
 {
+    // unload all audio groups to prevent memory leaks
     AEAudioUnloadAudioGroup(bgm);
     AEAudioUnloadAudioGroup(se_click);
     AEAudioUnloadAudioGroup(se_rat);
 }
 
+// flag to track if background audio is already playing
+// prevents background music from restarting every frame
 bool bgmPlaying = false;
+
 void PlayBackgroundAudio()
 {
     // only play if it is not already playing
@@ -40,26 +45,26 @@ void PlayBackgroundAudio()
 
 void PlayClick()
 {
-    AEAudioPlay(clickAudio, se_click, 1.f, 1.f, 0); // play once
+    AEAudioPlay(clickAudio, se_click, 1.f, 1.f, 0); // plays click sound once on button press
 }
 
 void PlayRatSqueak()
 {
-    AEAudioPlay(ratsqueakAudio, se_rat, 1.f, 1.f, 0); // play once
+    AEAudioPlay(ratsqueakAudio, se_rat, 1.f, 1.f, 0); // plays rat squeak sound once
 }
 
 void StopBackgroundAudio()
 {
-    AEAudioStopGroup(bgm);
+    AEAudioStopGroup(bgm); // stops background music
     bgmPlaying = false; // reset the flag so it can play again when called
 }
 
 void StopClick()
 {
-    AEAudioStopGroup(se_click);
+    AEAudioStopGroup(se_click); // stops click sound effect if it is still playing
 }
 
 void StopRatSqueak()
 {
-    AEAudioStopGroup(se_rat);
+    AEAudioStopGroup(se_rat);  // stops rat squeak sound effect if it is still playing
 }
