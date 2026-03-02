@@ -11,6 +11,7 @@
 #include "Upgrades.hpp"
 #include "Credits.hpp"
 #include "LevelTile.hpp"
+#include "ImgFontInit.hpp"
 
 Player custom_player;
 namespace {
@@ -18,17 +19,10 @@ namespace {
 
     const int MAX_ACTIVE_OBSTACLES = 10;
     ObstacleSystem obstacle_system(0);
-
     Camera camera;
     JetpackFuel* pFuel = nullptr;
 
-    AEGfxTexture* texSquare = nullptr;
-    AEGfxTexture* texSpike = nullptr;
-    AEGfxTexture* texBackground = nullptr;
-    AEGfxTexture* fuel_pickup_texture = nullptr;
-    AEGfxTexture* asteroid_texture = nullptr;
     AEGfxVertexList* unit_square = nullptr;
-    s8 font_id;
 
     f32 damage_timer = 0.0f;
     f32 level_end_x = 1000.0f;
@@ -44,20 +38,14 @@ namespace {
 }
 
 void CustomLevel_Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
-    texSquare = AEGfxTextureLoad("Assets/Square.png");
-    texSpike = AEGfxTextureLoad("Assets/Spike.png");
-    texBackground = AEGfxTextureLoad("Assets/Game_Background.png");
-    fuel_pickup_texture = AEGfxTextureLoad("Assets/FuelPickup.png");
-    asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
-    custom_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
+    ASSETS::Init_Images();
+	ASSETS::Init_Font();
 }
 
 void CustomLevel_Initialize() {
     createUnitSquare(&unit_square, 0.5f, 0.5f);
     createUnitSquare(&(custom_player.Mesh()), 0.5f, 0.5f);
     ANIMATION::sprite_Initialize();
-
     map_tiles.clear();
     damage_timer = 0.0f;
 
@@ -72,6 +60,7 @@ void CustomLevel_Initialize() {
     custom_player.Health() = max_health;
 
     camera.Magnitude() = 20.0f;
+	camera.Position() = custom_player.Position();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
@@ -92,10 +81,11 @@ void CustomLevel_Update() {
     custom_player.Movement(dt);
     ANIMATION::sprite_update(dt);
 
-    camera.Position().x = custom_player.Position().x;
-    camera.Update();
+	// Camera follows player, but update also update to ensure shake if toggle is set
 	camera.Follow(custom_player.Position());
+    camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
 
     f32 camX = camera.Position().x;
     f32 offscreen_limit = AEGfxGetWinMaxX() + 150.0f;
@@ -185,8 +175,6 @@ void CustomLevel_Update() {
         }
     }
 
-    if (took_damage) camera.Set_Shaking();
-
     if (custom_player.Health() <= 0) {
         next = GAME_STATE_GAME_OVER;
     }
@@ -196,56 +184,56 @@ void CustomLevel_Update() {
 }
 
 void CustomLevel_Draw() {
-    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-    ANIMATION::set_sprite_texture(texBackground);
+	// Clear the screen & Set to Default
+    AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
+    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+    /******************************************************************************/
+
+
+    // Draw Background Block
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
     f32 cam_x = camera.Position().x;
-
     f32 offset = fmodf(cam_x, bg_width);
     if (offset < 0) offset += bg_width;
     f32 draw_start_x = cam_x - offset;
-	//Draws Background
-    drawQuad(unit_square, cam_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    /******************************************************************************/
     
-    // Not needed i think
-    /*for (auto& tile : map_tiles) {
-        if (std::abs(tile.pos.x - camera.Position().x) < AEGfxGetWinMaxX() + 50.0f) {
-            if (tile.type == 1 && texSquare) ANIMATION::set_sprite_texture(texSquare);
-            else if (tile.type == 2 && texSpike) ANIMATION::set_sprite_texture(texSpike);
-            else ANIMATION::set_sprite_texture(nullptr);
-            drawQuad(unit_square, tile.pos.x, tile.pos.y, tile.half_size.x * 2.0f, tile.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-        }
-    }*/
-
 	// Drawing of the obstacles
-    ANIMATION::set_sprite_texture(asteroid_texture);
-    
     auto& obstacles = obstacle_system.Obstacles();
     for (auto iter = obstacles.begin(); iter != obstacles.end(); ++iter) {
         switch (iter->Type()) {
         case ObstacleType::Asteroid:
-            ANIMATION::set_sprite_texture(asteroid_texture);
+            ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
             break;
         case ObstacleType::Spike:
-            ANIMATION::set_sprite_texture(texSpike);
+			ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
             break;
         }
         drawQuad(unit_square, iter->position.x, iter->position.y, iter->half_size.x * 2.0f, iter->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-
     }
+    /******************************************************************************/
 
+	// Draw Player, with flashing effect when taking damage
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(custom_player.Texture());
+        ANIMATION::set_sprite_texture(ASSETS::playerTexture);
         drawQuad(custom_player.Mesh(), custom_player.Position().x, custom_player.Position().y, custom_player.Half_Size().x * 2.0f, custom_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
+    /******************************************************************************/
 
+	// Draw Fuel Pickup
     if (g_fuel_pickup.active) {
-        if (fuel_pickup_texture) {
+        if (ASSETS::otherAssets) {
             AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            ANIMATION::set_sprite_texture(fuel_pickup_texture);
+            ANIMATION::set_sprite_texture(ASSETS::otherAssets);
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 1.0f, 1.0f, 1.0f);
         }
         else {
@@ -254,19 +242,27 @@ void CustomLevel_Draw() {
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 0.9f, 0.0f, 1.0f);
         }
     }
-
+    /******************************************************************************/
+	
+    // Draw Fuel Bar
     if (pFuel) {
         f32 world_x = custom_player.Position().x;
         f32 world_y = custom_player.Position().y + custom_player.Half_Size().y + 20.0f;
         pFuel->Draw(world_x, world_y, 60.0f, 10.0f);
     }
+    /******************************************************************************/
 
+	// Draw Health Bar
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
     drawHealthBar(unit_square, custom_player, (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease())));
-
+    /******************************************************************************/
+ 
+	// Draw HP Text
     char hp_text[64];
     sprintf_s(hp_text, "HP: %d", custom_player.Health());
-    AEGfxPrint(font_id, hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
+    /******************************************************************************/
 }
 
 void CustomLevel_Free() {
@@ -276,10 +272,6 @@ void CustomLevel_Free() {
 }
 
 void CustomLevel_Unload() {
-    AEGfxDestroyFont(font_id);
-    if (texSquare) AEGfxTextureUnload(texSquare);
-    if (texSpike) AEGfxTextureUnload(texSpike);
-    if (texBackground) AEGfxTextureUnload(texBackground);
-    if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
-    if (asteroid_texture) AEGfxTextureUnload(asteroid_texture);
+    ASSETS::Unload_Images();
+	ASSETS::Unload_Font();
 }
