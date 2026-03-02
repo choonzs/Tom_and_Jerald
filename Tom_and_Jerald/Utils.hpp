@@ -1,11 +1,13 @@
 #include "pch.hpp"
 #include "Player.hpp"
 #include "playing.hpp"
+#include "LevelTile.hpp"
+#include "Obstacle.hpp"
 
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-
+f32 randFloat(f32 min, f32 max);
 
 void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x = 0.0f, f32 cam_pos_y = 0.0f);
 void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_pos_y);
@@ -19,5 +21,7 @@ bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEV
 f32 randomRange(f32 min_value, f32 max_value);
 
 void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health);
+
+void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
 
 #endif // !UTILS_H

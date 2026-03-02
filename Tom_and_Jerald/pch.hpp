@@ -20,5 +20,7 @@
 #include <ctime>
 #include "AEEngine.h"
 #include <cstdlib>
+#include <vector>
+
 
 #endif //PCH_H

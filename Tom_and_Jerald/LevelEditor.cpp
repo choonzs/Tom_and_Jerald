@@ -2,6 +2,7 @@
 #include "LevelEditor.hpp"
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
+#include "Obstacle.hpp"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -18,7 +19,7 @@ namespace {
 
     // Tool Selection State
     bool isDragging = false;
-    int currentTool = 1;  // 1 = TILE_SQUARE
+	ObstacleType currentTool = Asteroid;  // 1 = Asteroid, 2 = Spike
     f32 mouseX, mouseY;
 
     // Textures & Meshes
@@ -49,7 +50,7 @@ void LevelEditor_Initialize() {
     mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
     viewOffsetX = 0;
     isDragging = false;
-    currentTool = 1;
+    currentTool = Asteroid;
 
     AEGfxSetCamPosition(0.0f, 0.0f);
     AEGfxSetBackgroundColor(0.15f, 0.15f, 0.15f);
@@ -109,8 +110,12 @@ void LevelEditor_Update() {
             if (AEInputCheckTriggered(AEVK_LBUTTON)) {
                 f32 slot1Y = halfH - 120.0f;
                 f32 slot2Y = halfH - 260.0f;
-                if (mouseY < slot1Y + 50.0f && mouseY > slot1Y - 50.0f) { currentTool = 1; isDragging = true; } // SQUARE
-                if (mouseY < slot2Y + 50.0f && mouseY > slot2Y - 50.0f) { currentTool = 2; isDragging = true; } // SPIKE
+                if (mouseY < slot1Y + 50.0f && mouseY > slot1Y - 50.0f) {
+                    currentTool = Asteroid; isDragging = true; 
+                } // SQUARE
+                if (mouseY < slot2Y + 50.0f && mouseY > slot2Y - 50.0f) {
+                    currentTool = Spike; isDragging = true; 
+                } // SPIKE
             }
         }
         else {
@@ -137,8 +142,11 @@ void LevelEditor_Update() {
 
     // --- EXPORTING ---
     if (AEInputCheckTriggered(AEVK_E)) {
-        std::ofstream outFile("Level1.txt"); // Saves exactly what Level 1 will read
-        if (outFile.is_open()) {
+		//TODO Get Max window position and set it as finish line for the level end
+
+		std::cout << "outfile created\n";
+        std::ofstream outFile("ExportedLevel.txt"); // Saves exactly what Level 1 will read
+        if (outFile.is_open()) { 
             int currentMaxCols = static_cast<int>(mapData[0].size());
             outFile << currentMaxCols << " " << VIEW_ROWS << "\n";
             for (int r = 0; r < VIEW_ROWS; ++r) {
@@ -154,6 +162,12 @@ void LevelEditor_Update() {
 }
 
 void LevelEditor_Draw() {
+    // set render mode to color only, no texture
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+
+    AEGfxSetTransparency(1.f);
+
+
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     f32 halfW = AEGfxGetWinMaxX();
     f32 halfH = AEGfxGetWinMaxY();
@@ -239,8 +253,8 @@ void LevelEditor_Draw() {
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
         };
 
-    DrawToolBox(slot1Y, 1, texSquare);
-    DrawToolBox(slot2Y, 2, texSpike);
+    DrawToolBox(slot1Y, Asteroid, texSquare);
+    DrawToolBox(slot2Y, Spike, texSpike);
 
     // 4. Draw drag preview attached to mouse cursor
     if (isDragging && mouseX < -halfW + uiWidth) {
@@ -249,8 +263,8 @@ void LevelEditor_Draw() {
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
 
-        if (currentTool == 1 && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
-        else if (currentTool == 2 && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
+        if (currentTool == Asteroid && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
+        else if (currentTool == Spike && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
         else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
     }

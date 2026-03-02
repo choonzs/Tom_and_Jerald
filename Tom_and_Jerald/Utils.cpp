@@ -3,6 +3,10 @@
 #include "Playing.hpp"
 #include "Utils.hpp"
 
+f32 randFloat(f32 min, f32 max) {
+	return min + (max - min) * ((f32)rand() / RAND_MAX);
+}
+
 
 void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
 {
@@ -107,6 +111,53 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 		drawQuad(mesh, center_x, center_y, bar_width, bar_height, 0.15f, 0.15f, 0.15f, 1.0f);
 		if (i < player.Health())
 			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
+	}
+}
+
+
+void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
+	std::ifstream inFile("ExportedLevel.txt");
+	if (inFile.is_open()) {
+		int cols, rows;
+		inFile >> cols >> rows;
+
+		f32 halfW = AEGfxGetWinMaxX();
+		f32 halfH = AEGfxGetWinMaxY();
+		f32 TILE_SIZE = (halfH * 2.0f) / rows;
+		f32 startX = -halfW;
+		f32 startY = -halfH;
+
+		for (int r = 0; r < rows; ++r) {
+			for (int c = 0; c < cols; ++c) {
+				int type;
+				inFile >> type;
+				if (type != 0) {
+					LevelTile tile{
+						type,
+						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
+						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
+					};
+
+					map_tiles.push_back(tile);
+					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
+
+
+					// Creating obstacle object based on tile type and randomizing FOR NOW its size and speed within a range
+					Obstacle new_obstacle(static_cast<ObstacleType>(type),
+						tile.pos,
+						{ randFloat(-220.0f, 220.0f),randFloat(-220.0f, 220.0f) },
+						{ randFloat(15.0f, 30.0f), randFloat(15.0f, 30.0f) }
+					);
+					if (new_obstacle.Type() == Spike) {
+						new_obstacle.Velocity() = { 0.0f, 0.0f }; // Spikes don't move
+					}
+
+					// Add it to the obstacle system's vector
+					obstacle_system.AddObstacle(new_obstacle);
+				}
+			}
+		}
+		inFile.close();
 	}
 }
 

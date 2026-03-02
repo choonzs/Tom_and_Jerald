@@ -45,9 +45,7 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
-    f32 randFloat(f32 min, f32 max) {
-        return min + (max - min) * ((f32)rand() / RAND_MAX);
-    }
+  
 }
 
 int getMaxHealthFromUpgrades();
@@ -95,6 +93,8 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
 

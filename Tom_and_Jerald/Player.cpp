@@ -16,6 +16,7 @@ bool PlayerConfig::LoadFromFile(const char* filename) {
     if (!ifs) { return false; }
     std::string tmp;
 
+	// The file is expected to be in the format:
     ifs >> tmp;
     ifs >> speed;
     ifs >> tmp;
@@ -46,10 +47,13 @@ void Player::Movement(f32 dt) {
 		added.x = static_cast<f32>(Config().Acceleration() * dt);
     }
     else if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
-		added.x = -static_cast<f32>(Config().Acceleration() * dt);
+        added.x = -static_cast<f32>(Config().Acceleration() * dt * 0.5f);
+        if (velocity.x < static_cast<f32>(Config().Acceleration() * dt)) {
+            added.x = static_cast<f32>(Config().Speed() * dt); // No horizontal input, no horizontal acceleration
+        }
     }
     else {
-		added.x = 0.0f; // No horizontal input, no horizontal acceleration
+		added.x = static_cast<f32>(Config().Speed() * dt); // No horizontal input, no horizontal acceleration
     }
 
     // Find the velocity according to the acceleration

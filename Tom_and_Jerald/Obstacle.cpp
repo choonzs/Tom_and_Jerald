@@ -25,35 +25,28 @@ void Obstacle::Reset()
         randomRange(-220.0f, 220.0f));
 }
 
-void Obstacle::Update(f32 delta_time, f32 min_x, f32 max_x, f32 min_y, f32 max_y)
+void Obstacle::Update(f32 dt, f32 camX, f32 offscreen_limit, bool endless = true)
 {
-    position.x += velocity.x * delta_time;
-    position.y += velocity.y * delta_time;
+	// checks if the obstacle exists
+    if (!this) { return; }
+	//Update Position based on velocity
+    position.x += velocity.x * dt;
+    position.y += velocity.y * dt;
 
-    // Once it reach off screen on the left, reset the obstacle
-    if (position.x - half_size.x < min_x - (3 * half_size.x))
-    {
-        Reset();
-    }
+	// Bounce off top and bottom of the screen
+    velocity.y = ((position.y > AEGfxGetWinMaxY() - 20.0f) or (position.y < AEGfxGetWinMinY() + 20.0f)) 
+        ? -std::abs(velocity.y) : velocity.y;
 
-    // Bounce off walls right boundary
-    if (position.x + half_size.x > max_x + (3 * half_size.x))
-    {
-        velocity.x *= -1.0f;
-    }
-
-    // Bounce off walls bottom boundary
-    if (position.y - half_size.y < min_y)
-    {
-        position.y = min_y + half_size.y;
-        velocity.y *= -1.0f;
-    }
-
-    // Bounce off walls top boundary
-    if (position.y + half_size.y > max_y)
-    {
-        position.y = max_y - half_size.y;
-        velocity.y *= -1.0f;
+   
+    if (position.x < camX - offscreen_limit or position.x > camX + offscreen_limit) {
+		// Gamemode is endless so reset the obstacle to come back from the right side of the screen
+        if (endless) {
+            Reset();
+        }
+        else {
+			// Gamemode not endless so destroy the obstacle 
+           type = Non_Obstacle;
+        }
     }
 }
 
@@ -77,10 +70,11 @@ void ObstacleSystem::UpdateObstacles(Obstacle* obstacles, f32 delta_time)
     f32 min_y = AEGfxGetWinMinY();
     f32 max_y = AEGfxGetWinMaxY();
 
-    for (int i = 0; i < k_obstacle_count; ++i)
+    // TODO can be replaced
+    /*for (int i = 0; i < k_obstacle_count; ++i)
     {
         obstacles[i].Update(delta_time, min_x, max_x, min_y, max_y);
-    }
+    }*/
 }
 
 void resetObstacle(Obstacle* obstacle)

@@ -10,19 +10,15 @@
 #include "JetpackFuel.hpp"
 #include "Upgrades.hpp"
 #include "Credits.hpp"
-#include <vector>
-#include <fstream>
-#include <cmath>
-#include <cstdlib>
+#include "LevelTile.hpp"
 
+Player custom_player;
 namespace {
-    struct LevelTile { int type; AEVec2 pos; AEVec2 half_size; };
     std::vector<LevelTile> map_tiles;
 
     const int MAX_ACTIVE_OBSTACLES = 10;
-    Obstacle level_obstacles[MAX_ACTIVE_OBSTACLES] = {};
+    ObstacleSystem obstacle_system(0);
 
-    Player custom_player;
     Camera camera;
     JetpackFuel* pFuel = nullptr;
 
@@ -35,7 +31,7 @@ namespace {
     s8 font_id;
 
     f32 damage_timer = 0.0f;
-    f32 level_end_x = 0.0f;
+    f32 level_end_x = 1000.0f;
 
     struct FuelPickup {
         AEVec2 pos;
@@ -45,9 +41,6 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
-    f32 randFloat(f32 min, f32 max) {
-        return min + (max - min) * ((f32)rand() / RAND_MAX);
-    }
 }
 
 void CustomLevel_Load() {
@@ -67,7 +60,6 @@ void CustomLevel_Initialize() {
 
     map_tiles.clear();
     damage_timer = 0.0f;
-    level_end_x = 0.0f;
 
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upg_size = 20.0f - size_reduction;
@@ -79,49 +71,14 @@ void CustomLevel_Initialize() {
     int max_health = (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease()));
     custom_player.Health() = max_health;
 
+    camera.Magnitude() = 20.0f;
+    AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
     f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
     pFuel = new JetpackFuel(upg_fuel, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
 
-    std::ifstream inFile("ExportedLevel.txt");
-    if (inFile.is_open()) {
-        int cols, rows;
-        inFile >> cols >> rows;
-
-        f32 halfW = AEGfxGetWinMaxX();
-        f32 halfH = AEGfxGetWinMaxY();
-        f32 TILE_SIZE = (halfH * 2.0f) / rows;
-        f32 startX = -halfW;
-        f32 startY = -halfH;
-
-        for (int r = 0; r < rows; ++r) {
-            for (int c = 0; c < cols; ++c) {
-                int type;
-                inFile >> type;
-                if (type != 0) {
-					LevelTile tile{ 
-                        type, 
-                        {TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}, 
-                        {startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f}
-                    };
-                    
-                    map_tiles.push_back(tile);
-                    if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
-                }
-            }
-        }
-        inFile.close();
-    }
-
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        level_obstacles[i].position.x = randFloat(0.0f, AEGfxGetWinMaxX() * 2.0f);
-        level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-        f32 random_size = randFloat(25.0f, 65.0f);
-        level_obstacles[i].half_size.x = random_size;
-        level_obstacles[i].half_size.y = random_size;
-        level_obstacles[i].velocity.x = randFloat(-80.0f, 80.0f);
-        level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-    }
+	LoadLevelDataFromFile("ExportedLevel.txt", level_end_x, map_tiles, obstacle_system);
 }
 
 void CustomLevel_Update() {
@@ -143,29 +100,33 @@ void CustomLevel_Update() {
     f32 camX = camera.Position().x;
     f32 offscreen_limit = AEGfxGetWinMaxX() + 150.0f;
 
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        level_obstacles[i].position.x += level_obstacles[i].velocity.x * dt;
-        level_obstacles[i].position.y += level_obstacles[i].velocity.y * dt;
+    bool took_damage = false;
 
-        if (level_obstacles[i].position.y > AEGfxGetWinMaxY() - 20.0f) level_obstacles[i].velocity.y *= -1;
-        if (level_obstacles[i].position.y < AEGfxGetWinMinY() + 20.0f) level_obstacles[i].velocity.y *= -1;
+    auto& obstacles = obstacle_system.Obstacles();
+    for (auto iter = obstacles.begin(); iter != obstacles.end(); ) {
+		iter->Update(dt, camX, offscreen_limit, false);
 
-        if (level_obstacles[i].position.x < camX - offscreen_limit) {
-            level_obstacles[i].position.x = camX + AEGfxGetWinMaxX() + randFloat(50.0f, 250.0f);
-            level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            level_obstacles[i].velocity.x = randFloat(-100.0f, 20.0f);
-            level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            level_obstacles[i].half_size.x = size; level_obstacles[i].half_size.y = size;
+
+        if (checkOverlap(&(custom_player.Position()), &(custom_player.Half_Size()), iter->PositionPtr(), iter->HalfSizePtr())) {
+            if (damage_timer <= 0.0f) {
+                custom_player.Health() -= 1;
+                damage_timer = 1.0f;
+                took_damage = true;
+            }
         }
-        else if (level_obstacles[i].position.x > camX + offscreen_limit) {
-            level_obstacles[i].position.x = camX - AEGfxGetWinMaxX() - randFloat(50.0f, 250.0f);
-            level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            level_obstacles[i].velocity.x = randFloat(-20.0f, 100.0f);
-            level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            level_obstacles[i].half_size.x = size; level_obstacles[i].half_size.y = size;
+
+        // if type is non obstacle we need to pop it
+        if (iter->Type() == Non_Obstacle) {
+            iter = obstacle_system.Obstacles().erase(iter);
         }
+        else {
+            ++iter;
+        }
+    }
+
+    if (took_damage) {
+        camera.Set_Shaking();
+        Credits_OnDamage();
     }
 
     f32 fuel_ratio = pFuel->GetCurrentFuel() / pFuel->GetMaxFuel();
@@ -190,17 +151,7 @@ void CustomLevel_Update() {
         }
     }
 
-    bool took_damage = false;
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        if (checkOverlap(&(custom_player.Position()), &(custom_player.Half_Size()), &level_obstacles[i].position, &level_obstacles[i].half_size)) {
-            if (damage_timer <= 0.0f) {
-                custom_player.Health() -= 1;
-                damage_timer = 1.0f;
-                took_damage = true;
-            }
-        }
-    }
-
+    // what does this do
     f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
     f32 pW = custom_player.Half_Size().x * 2.0f, pH = custom_player.Half_Size().y * 2.0f;
 
@@ -256,23 +207,34 @@ void CustomLevel_Draw() {
     f32 offset = fmodf(cam_x, bg_width);
     if (offset < 0) offset += bg_width;
     f32 draw_start_x = cam_x - offset;
-
-    drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
-    drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
-
-    for (auto& tile : map_tiles) {
+	//Draws Background
+    drawQuad(unit_square, cam_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    
+    // Not needed i think
+    /*for (auto& tile : map_tiles) {
         if (std::abs(tile.pos.x - camera.Position().x) < AEGfxGetWinMaxX() + 50.0f) {
             if (tile.type == 1 && texSquare) ANIMATION::set_sprite_texture(texSquare);
             else if (tile.type == 2 && texSpike) ANIMATION::set_sprite_texture(texSpike);
             else ANIMATION::set_sprite_texture(nullptr);
             drawQuad(unit_square, tile.pos.x, tile.pos.y, tile.half_size.x * 2.0f, tile.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
         }
-    }
+    }*/
 
+	// Drawing of the obstacles
     ANIMATION::set_sprite_texture(asteroid_texture);
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        Obstacle* obstacle = &level_obstacles[i];
-        drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    
+    auto& obstacles = obstacle_system.Obstacles();
+    for (auto iter = obstacles.begin(); iter != obstacles.end(); ++iter) {
+        switch (iter->Type()) {
+        case ObstacleType::Asteroid:
+            ANIMATION::set_sprite_texture(asteroid_texture);
+            break;
+        case ObstacleType::Spike:
+            ANIMATION::set_sprite_texture(texSpike);
+            break;
+        }
+        drawQuad(unit_square, iter->position.x, iter->position.y, iter->half_size.x * 2.0f, iter->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
     }
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
