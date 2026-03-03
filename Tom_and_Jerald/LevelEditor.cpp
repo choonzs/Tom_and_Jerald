@@ -60,7 +60,7 @@ void LevelEditor_Load() {
 void LevelEditor_Initialize() {
     // Start with 100 columns. It will grow infinitely as you scroll right!
     //mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
-	mapTiles.assign(VIEW_ROWS, std::vector<LevelTile>(100, { 0, {0,0}, {0,0}, {0,0} }));
+	mapTiles.assign(VIEW_ROWS, std::vector<LevelTile>(100, {}));
     viewOffsetX = 0;
     isDragging = false;
     currentTool = Asteroid;
@@ -76,7 +76,7 @@ void LevelEditor_Initialize() {
 }
 
 void LevelEditor_Update() {
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU;}
 
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     s32 mx, my;
@@ -146,13 +146,13 @@ void LevelEditor_Update() {
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
             if (gridX >= 0 && gridX < mapTiles[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
                 //mapData[gridY][gridX] = currentTool;
-
-                mapTiles[gridY][gridX] = {
-                    currentTool,
-                    { -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f },
-                    { (TILE_SIZE / 2.0f) * obstacle_scale, (TILE_SIZE / 2.0f) * obstacle_scale },
-                    { velocityX, velocityY }
-				};
+                LevelTile tmp(currentTool,
+                    AEVec2({ -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f }),
+                    AEVec2({ (TILE_SIZE / 2.0f) * obstacle_scale, (TILE_SIZE / 2.0f) * obstacle_scale }),
+                    AEVec2({ velocityX, velocityY }),
+                    obstacle_scale
+                );
+                mapTiles[gridY][gridX] = tmp;
             }
         }
     }
@@ -164,13 +164,8 @@ void LevelEditor_Update() {
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
             if (gridX >= 0 && gridX < mapTiles[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
                 //mapData[gridY][gridX] = 0; // 0 = Empty Tile
-
-                mapTiles[gridY][gridX] = {
-                    0,
-                    { -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f },
-                    { (TILE_SIZE / 2.0f), (TILE_SIZE / 2.0f)},
-					{ 0, 0}
-                };
+                mapTiles[gridY].erase(mapTiles[gridY].begin() + gridX);
+                
             }
         }
     }
@@ -188,7 +183,7 @@ void LevelEditor_Update() {
 
 		// Create "MapLevel" directory if it doesn't exist
         if (fs::create_directory("MapLevel")) {
-            std::cout << "Directory 'MapLevel' created successfully.\n";
+            //std::cout << "Directory 'MapLevel' created successfully.\n";
 		}
 
 		// Dynamically find a filename that doesn't exist yet to avoid overwriting
@@ -361,8 +356,8 @@ void LevelEditor_Draw() {
 }
 
 void LevelEditor_Free() {
-    //mapData.clear();
     mapTiles.clear();
+    std::vector<std::vector<LevelTile>>().swap(mapTiles);
 
     if (meshWhite) AEGfxMeshFree(meshWhite);
     if (meshUIBg) AEGfxMeshFree(meshUIBg);

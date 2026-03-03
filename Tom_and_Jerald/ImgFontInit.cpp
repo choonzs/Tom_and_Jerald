@@ -31,6 +31,11 @@ namespace ASSETS {
 		AEGfxTextureUnload(copyrightText);
 		AEGfxTextureUnload(backgroundAssets);
 		AEGfxTextureUnload(otherAssets);
+		playerTexture = nullptr;
+		copyrightLogo = nullptr;
+		copyrightText = nullptr;
+		backgroundAssets = nullptr;
+		otherAssets = nullptr;
 	}
 
 	void Unload_Font() {

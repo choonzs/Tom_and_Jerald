@@ -13,12 +13,16 @@
 #include "LevelTile.hpp"
 #include "ImgFontInit.hpp"
 
-Player custom_player;
-namespace {
-    std::vector<LevelTile> map_tiles;
 
+
+namespace {
+    Player* custom_player;
+    
+    // issues w this
+    std::vector<LevelTile> map_tiles{};
+	s8 font_id;
     const int MAX_ACTIVE_OBSTACLES = 10;
-    ObstacleSystem obstacle_system(0);
+    ObstacleSystem obstacle_system;
     Camera camera;
     JetpackFuel* pFuel = nullptr;
 
@@ -39,37 +43,46 @@ namespace {
 
 void CustomLevel_Load() {
     ASSETS::Init_Images();
-	ASSETS::Init_Font();
+	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	/*ASSETS::Init_Font();*/
+    
 }
 
 void CustomLevel_Initialize() {
+	custom_player = new Player();
     createUnitSquare(&unit_square, 0.5f, 0.5f);
-    createUnitSquare(&(custom_player.Mesh()), 0.5f, 0.5f);
+    createUnitSquare(&(*custom_player).Mesh(), 0.5f, 0.5f);
     ANIMATION::sprite_Initialize();
-    map_tiles.clear();
     damage_timer = 0.0f;
 
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upg_size = 20.0f - size_reduction;
     if (upg_size < 10.0f) upg_size = 10.0f;
 
-    AEVec2Set(&custom_player.Position(), 0.0f, 0.0f);
-    AEVec2Set(&custom_player.Half_Size(), upg_size, upg_size);
+    AEVec2Set(&(*custom_player).Position(), 0.0f, 0.0f);
+    AEVec2Set(&(*custom_player).Half_Size(), upg_size, upg_size);
 
-    int max_health = (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease()));
-    custom_player.Health() = max_health;
+    int max_health = (int)std::floor((*custom_player).Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease()));
+    (*custom_player).Health() = max_health;
 
     camera.Magnitude() = 20.0f;
-	camera.Position() = custom_player.Position();
+	camera.Position() = (*custom_player).Position();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
     pFuel = new JetpackFuel(upg_fuel, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
 
+
+    std::cout << map_tiles.size() << "before tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
+
 	// Load level data from file, populating map_tiles and obstacle_system
 	// TODO Find a way to load a specific level based on player selection in menu
 	LoadLevelDataFromFile("MapLevel/ExportedLevel1.txt", level_end_x, map_tiles, obstacle_system);
+
+
+    std::cout << map_tiles.size() << "after tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
+
 }
 
 void CustomLevel_Update() {
@@ -80,11 +93,11 @@ void CustomLevel_Update() {
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
     pFuel->Update(dt, isFlying);
 
-    custom_player.Movement(dt);
+    (*custom_player).Movement(dt);
     ANIMATION::sprite_update(dt);
 
 	// Camera follows player, but update also update to ensure shake if toggle is set
-	camera.Follow(custom_player.Position());
+    camera.Follow((*custom_player).Position());
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
@@ -99,9 +112,9 @@ void CustomLevel_Update() {
 		iter->Update(dt, camX, offscreen_limit, false);
 
 
-        if (checkOverlap(&(custom_player.Position()), &(custom_player.Half_Size()), iter->PositionPtr(), iter->HalfSizePtr())) {
+        if (checkOverlap(( &(*custom_player).Position()), &(*custom_player).Half_Size(), iter->PositionPtr(), iter->HalfSizePtr())) {
             if (damage_timer <= 0.0f) {
-                custom_player.Health() -= 1;
+                (*custom_player).Health() -= 1;
                 damage_timer = 1.0f;
                 took_damage = true;
             }
@@ -134,7 +147,7 @@ void CustomLevel_Update() {
 
     if (g_fuel_pickup.active) {
         AEVec2 p_half = { g_fuel_pickup.size / 2.0f, g_fuel_pickup.size / 2.0f };
-        if (checkOverlap(&custom_player.Position(), &custom_player.Half_Size(), &g_fuel_pickup.pos, &p_half)) {
+        if (checkOverlap(&(*custom_player).Position(), &(*custom_player).Half_Size(), &g_fuel_pickup.pos, &p_half)) {
             pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
             g_fuel_pickup.active = false;
         }
@@ -177,10 +190,10 @@ void CustomLevel_Update() {
         }
     }*/
 
-    if (custom_player.Health() <= 0) {
+    if ((*custom_player).Health() <= 0) {
         next = GAME_STATE_GAME_OVER;
     }
-    else if (custom_player.Position().x > level_end_x + 100.0f && level_end_x > 0.0f) {
+    else if ((*custom_player).Position().x > level_end_x + 100.0f && level_end_x > 0.0f) {
         next = GAME_STATE_VICTORY;
     }
 }
@@ -227,7 +240,7 @@ void CustomLevel_Draw() {
 	// Draw Player, with flashing effect when taking damage
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
         ANIMATION::set_sprite_texture(ASSETS::playerTexture);
-        drawQuad(custom_player.Mesh(), custom_player.Position().x, custom_player.Position().y, custom_player.Half_Size().x * 2.0f, custom_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
+        drawQuad((*custom_player).Mesh(), (*custom_player).Position().x, (*custom_player).Position().y, (*custom_player).Half_Size().x * 2.0f, (*custom_player).Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
     /******************************************************************************/
 
@@ -248,8 +261,8 @@ void CustomLevel_Draw() {
 	
     // Draw Fuel Bar
     if (pFuel) {
-        f32 world_x = custom_player.Position().x;
-        f32 world_y = custom_player.Position().y + custom_player.Half_Size().y + 20.0f;
+        f32 world_x = (*custom_player).Position().x;
+        f32 world_y = (*custom_player).Position().y + (*custom_player).Half_Size().y + 20.0f;
         pFuel->Draw(world_x, world_y, 60.0f, 10.0f);
     }
     /******************************************************************************/
@@ -257,23 +270,42 @@ void CustomLevel_Draw() {
 	// Draw Health Bar
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
     AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
-    drawHealthBar(unit_square, custom_player, (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease())));
+    drawHealthBar(unit_square, (*custom_player), (int)std::floor((*custom_player).Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease())));
     /******************************************************************************/
  
 	// Draw HP Text
     char hp_text[64];
-    sprintf_s(hp_text, "HP: %d", custom_player.Health());
+    sprintf_s(hp_text, "HP: %d", (*custom_player).Health());
     AEGfxPrint(ASSETS::Font(), hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
     /******************************************************************************/
 }
 
 void CustomLevel_Free() {
+	std::cout << "Freeing Custom Level Resources\n";
+
     AEGfxMeshFree(unit_square);
+    
+    
+	// Free map tile vector memory by swapping with an empty vector
     map_tiles.clear();
+    obstacle_system.Obstacles().clear();
+    // lets try this for now
+    std::vector<LevelTile>().swap(map_tiles);
+    std::vector<Obstacle>().swap(obstacle_system.Obstacles());
+
+	map_tiles.shrink_to_fit();
+	obstacle_system.Obstacles().shrink_to_fit();
+
     if (pFuel) { delete pFuel; pFuel = nullptr; }
+    std::cout << "cust free" << std::endl;
+    
+    delete custom_player;
+    custom_player = nullptr;
+
 }
 
 void CustomLevel_Unload() {
+	AEGfxDestroyFont(font_id);
     ASSETS::Unload_Images();
-	ASSETS::Unload_Font();
+	/*ASSETS::Unload_Font();*/
 }

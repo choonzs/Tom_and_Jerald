@@ -6,6 +6,9 @@
 #include "GameStateManager.hpp"
 #include "Audio.hpp"
 
+// For memory leak detection
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 // ---------------------------------------------------------------------------
 // main
 
