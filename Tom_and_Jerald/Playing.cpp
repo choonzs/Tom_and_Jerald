@@ -11,8 +11,7 @@
 #include "JetpackFuel.hpp"
 #include "Particles.hpp"
 #include "Player.hpp"
-#include <cstdlib>
-#include <cmath>
+#include "ImgFontInit.hpp"
 
 // --- FIX: RESTORED MISSING CONSTANTS ---
 const f32 k_stage_duration = 120.0f;
@@ -27,13 +26,12 @@ JetpackFuel* pFuel = nullptr;
 Obstacle obstacles[MAX_ACTIVE_OBSTACLES] = {};
 
 Player base_player;
-AEGfxTexture* background_texture = nullptr;
 AEGfxTexture* asteroid_texture = nullptr;
 AEGfxTexture* fuel_pickup_texture = nullptr;
 
+
 namespace {
     Camera camera;
-    s8 font_id;
     AEGfxVertexList* unit_square = nullptr;
     AEGfxVertexList* unit_circle = nullptr;
 
@@ -46,19 +44,14 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
-    f32 randFloat(f32 min, f32 max) {
-        return min + (max - min) * ((f32)rand() / RAND_MAX);
-    }
+  
 }
 
 int getMaxHealthFromUpgrades();
 
 void Playing_Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
-    base_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
-    background_texture = AEGfxTextureLoad("Assets/Game_Background.png");
-    asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
-    fuel_pickup_texture = AEGfxTextureLoad("Assets/FuelPickup.png");
+    ASSETS::Init_Images();
+    ASSETS::Init_Font();
 }
 
 void Playing_Initialize() {
@@ -84,8 +77,8 @@ void Playing_Initialize() {
 
     ANIMATION::sprite_Initialize();
     camera.Magnitude() = 20.0f;
-    camera.Position().x = 0.0f;
-    camera.Position().y = 0.0f;
+    camera.Position().x = base_player.Position().x;
+    camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
@@ -100,6 +93,8 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
 
@@ -109,14 +104,17 @@ void Playing_Update() {
     stage_timer += delta_time;
     if (damage_timer > 0.0f) damage_timer -= delta_time;
 
-    base_player.Movement(delta_time);
+    if (pFuel) {
+        base_player.Movement(delta_time);
+    }
 
-    camera.Position().x = base_player.Position().x;
+	camera.Follow(base_player.Position());
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 camX = camera.Position().x;
-    f32 offscreen_limit = AEGfxGetWinMaxX() + 150.0f;
+    // change this to based on player world pos
+	f32 offscreen_limit_left{ AEGfxGetWinMinX() - 100.0f };
 
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
         obstacles[i].position.x += obstacles[i].velocity.x * delta_time;
@@ -125,21 +123,8 @@ void Playing_Update() {
         if (obstacles[i].position.y > AEGfxGetWinMaxY() - 20.0f) obstacles[i].velocity.y *= -1;
         if (obstacles[i].position.y < AEGfxGetWinMinY() + 20.0f) obstacles[i].velocity.y *= -1;
 
-        if (obstacles[i].position.x < camX - offscreen_limit) {
-            obstacles[i].position.x = camX + AEGfxGetWinMaxX() + randFloat(50.0f, 250.0f);
-            obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            obstacles[i].velocity.x = randFloat(-100.0f, 20.0f);
-            obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            obstacles[i].half_size.x = size; obstacles[i].half_size.y = size;
-        }
-        else if (obstacles[i].position.x > camX + offscreen_limit) {
-            obstacles[i].position.x = camX - AEGfxGetWinMaxX() - randFloat(50.0f, 250.0f);
-            obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            obstacles[i].velocity.x = randFloat(-20.0f, 100.0f);
-            obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            obstacles[i].half_size.x = size; obstacles[i].half_size.y = size;
+        if (obstacles[i].position.x < offscreen_limit_left) {
+            obstacles[i].Reset();
         }
     }
 
@@ -196,7 +181,7 @@ void Playing_Update() {
 
 void Playing_Draw() {
     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    ANIMATION::set_sprite_texture(background_texture);
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
 
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
@@ -211,11 +196,11 @@ void Playing_Draw() {
     drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(base_player.Texture());
+        ANIMATION::set_sprite_texture(ASSETS::playerTexture);               //Dn player class here, change if necessary.
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
 
-    ANIMATION::set_sprite_texture(asteroid_texture);
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
         Obstacle* obstacle = &obstacles[i];
         drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -247,18 +232,18 @@ void Playing_Draw() {
 
     char cheese_text[64];
     sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
-    AEGfxPrint(font_id, cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
 
     char fps_text[64];
     sprintf_s(fps_text, "%.1f FPS", 1 / (f32)AEFrameRateControllerGetFrameTime());
-    AEGfxPrint(font_id, fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
 
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     char timer_text[64];
     f32 time_left = k_stage_duration - stage_timer;
     if (time_left < 0.0f) time_left = 0.0f;
     sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
-    AEGfxPrint(font_id, timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
     graphics::particleDraw(unit_circle);
 }
@@ -270,10 +255,9 @@ void Playing_Free() {
 }
 
 void Playing_Unload() {
-    AEGfxDestroyFont(font_id);
-    AEGfxTextureUnload(background_texture);
-    AEGfxTextureUnload(asteroid_texture);
-    if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
+    ASSETS::Unload_Images();
+    ASSETS::Unload_Font();
+
 }
 
 int getMaxHealthFromUpgrades() {

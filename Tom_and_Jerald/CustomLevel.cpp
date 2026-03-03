@@ -10,32 +10,22 @@
 #include "JetpackFuel.hpp"
 #include "Upgrades.hpp"
 #include "Credits.hpp"
-#include <vector>
-#include <fstream>
-#include <cmath>
-#include <cstdlib>
+#include "LevelTile.hpp"
+#include "ImgFontInit.hpp"
 
+Player custom_player;
 namespace {
-    struct LevelTile { int type; AEVec2 pos; AEVec2 half_size; };
     std::vector<LevelTile> map_tiles;
 
     const int MAX_ACTIVE_OBSTACLES = 10;
-    Obstacle level_obstacles[MAX_ACTIVE_OBSTACLES] = {};
-
-    Player custom_player;
+    ObstacleSystem obstacle_system(0);
     Camera camera;
     JetpackFuel* pFuel = nullptr;
 
-    AEGfxTexture* texSquare = nullptr;
-    AEGfxTexture* texSpike = nullptr;
-    AEGfxTexture* texBackground = nullptr;
-    AEGfxTexture* fuel_pickup_texture = nullptr;
-    AEGfxTexture* asteroid_texture = nullptr;
     AEGfxVertexList* unit_square = nullptr;
-    s8 font_id;
 
     f32 damage_timer = 0.0f;
-    f32 level_end_x = 0.0f;
+    f32 level_end_x = 1000.0f;
 
     struct FuelPickup {
         AEVec2 pos;
@@ -45,29 +35,19 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
-    f32 randFloat(f32 min, f32 max) {
-        return min + (max - min) * ((f32)rand() / RAND_MAX);
-    }
 }
 
 void CustomLevel_Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
-    texSquare = AEGfxTextureLoad("Assets/Square.png");
-    texSpike = AEGfxTextureLoad("Assets/Spike.png");
-    texBackground = AEGfxTextureLoad("Assets/Game_Background.png");
-    fuel_pickup_texture = AEGfxTextureLoad("Assets/FuelPickup.png");
-    asteroid_texture = AEGfxTextureLoad("Assets/PlanetTexture.png");
-    custom_player.Texture() = AEGfxTextureLoad("Assets/Fairy_Rat.png");
+    ASSETS::Init_Images();
+	ASSETS::Init_Font();
 }
 
 void CustomLevel_Initialize() {
     createUnitSquare(&unit_square, 0.5f, 0.5f);
     createUnitSquare(&(custom_player.Mesh()), 0.5f, 0.5f);
     ANIMATION::sprite_Initialize();
-
     map_tiles.clear();
     damage_timer = 0.0f;
-    level_end_x = 0.0f;
 
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upg_size = 20.0f - size_reduction;
@@ -79,49 +59,17 @@ void CustomLevel_Initialize() {
     int max_health = (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease()));
     custom_player.Health() = max_health;
 
+    camera.Magnitude() = 20.0f;
+	camera.Position() = custom_player.Position();
+    AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
     f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
     pFuel = new JetpackFuel(upg_fuel, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
 
-    std::ifstream inFile("ExportedLevel.txt");
-    if (inFile.is_open()) {
-        int cols, rows;
-        inFile >> cols >> rows;
-
-        f32 halfW = AEGfxGetWinMaxX();
-        f32 halfH = AEGfxGetWinMaxY();
-        f32 TILE_SIZE = (halfH * 2.0f) / rows;
-        f32 startX = -halfW;
-        f32 startY = -halfH;
-
-        for (int r = 0; r < rows; ++r) {
-            for (int c = 0; c < cols; ++c) {
-                int type;
-                inFile >> type;
-                if (type != 0) {
-					LevelTile tile{ 
-                        type, 
-                        {TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}, 
-                        {startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f}
-                    };
-                    
-                    map_tiles.push_back(tile);
-                    if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
-                }
-            }
-        }
-        inFile.close();
-    }
-
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        level_obstacles[i].position.x = randFloat(0.0f, AEGfxGetWinMaxX() * 2.0f);
-        level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-        f32 random_size = randFloat(25.0f, 65.0f);
-        level_obstacles[i].half_size.x = random_size;
-        level_obstacles[i].half_size.y = random_size;
-        level_obstacles[i].velocity.x = randFloat(-80.0f, 80.0f);
-        level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-    }
+	// Load level data from file, populating map_tiles and obstacle_system
+	// TODO Find a way to load a specific level based on player selection in menu
+	LoadLevelDataFromFile("MapLevel/ExportedLevel1.txt", level_end_x, map_tiles, obstacle_system);
 }
 
 void CustomLevel_Update() {
@@ -135,36 +83,42 @@ void CustomLevel_Update() {
     custom_player.Movement(dt);
     ANIMATION::sprite_update(dt);
 
-    camera.Position().x = custom_player.Position().x;
+	// Camera follows player, but update also update to ensure shake if toggle is set
+	camera.Follow(custom_player.Position());
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
 
     f32 camX = camera.Position().x;
     f32 offscreen_limit = AEGfxGetWinMaxX() + 150.0f;
 
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        level_obstacles[i].position.x += level_obstacles[i].velocity.x * dt;
-        level_obstacles[i].position.y += level_obstacles[i].velocity.y * dt;
+    bool took_damage = false;
 
-        if (level_obstacles[i].position.y > AEGfxGetWinMaxY() - 20.0f) level_obstacles[i].velocity.y *= -1;
-        if (level_obstacles[i].position.y < AEGfxGetWinMinY() + 20.0f) level_obstacles[i].velocity.y *= -1;
+    auto& obstacles = obstacle_system.Obstacles();
+    for (auto iter = obstacles.begin(); iter != obstacles.end(); ) {
+		iter->Update(dt, camX, offscreen_limit, false);
 
-        if (level_obstacles[i].position.x < camX - offscreen_limit) {
-            level_obstacles[i].position.x = camX + AEGfxGetWinMaxX() + randFloat(50.0f, 250.0f);
-            level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            level_obstacles[i].velocity.x = randFloat(-100.0f, 20.0f);
-            level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            level_obstacles[i].half_size.x = size; level_obstacles[i].half_size.y = size;
+
+        if (checkOverlap(&(custom_player.Position()), &(custom_player.Half_Size()), iter->PositionPtr(), iter->HalfSizePtr())) {
+            if (damage_timer <= 0.0f) {
+                custom_player.Health() -= 1;
+                damage_timer = 1.0f;
+                took_damage = true;
+            }
         }
-        else if (level_obstacles[i].position.x > camX + offscreen_limit) {
-            level_obstacles[i].position.x = camX - AEGfxGetWinMaxX() - randFloat(50.0f, 250.0f);
-            level_obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            level_obstacles[i].velocity.x = randFloat(-20.0f, 100.0f);
-            level_obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
-            f32 size = randFloat(25.0f, 65.0f);
-            level_obstacles[i].half_size.x = size; level_obstacles[i].half_size.y = size;
+
+        // if type is non obstacle we need to pop it
+        if (iter->Type() == Non_Obstacle) {
+            iter = obstacle_system.Obstacles().erase(iter);
         }
+        else {
+            ++iter;
+        }
+    }
+
+    if (took_damage) {
+        camera.Set_Shaking();
+        Credits_OnDamage();
     }
 
     f32 fuel_ratio = pFuel->GetCurrentFuel() / pFuel->GetMaxFuel();
@@ -189,18 +143,8 @@ void CustomLevel_Update() {
         }
     }
 
-    bool took_damage = false;
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        if (checkOverlap(&(custom_player.Position()), &(custom_player.Half_Size()), &level_obstacles[i].position, &level_obstacles[i].half_size)) {
-            if (damage_timer <= 0.0f) {
-                custom_player.Health() -= 1;
-                damage_timer = 1.0f;
-                took_damage = true;
-            }
-        }
-    }
-
-    f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
+    // what does this do
+    /*f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
     f32 pW = custom_player.Half_Size().x * 2.0f, pH = custom_player.Half_Size().y * 2.0f;
 
     for (auto& tile : map_tiles) {
@@ -231,9 +175,7 @@ void CustomLevel_Update() {
                 pX = custom_player.Position().x; pY = custom_player.Position().y;
             }
         }
-    }
-
-    if (took_damage) camera.Set_Shaking();
+    }*/
 
     if (custom_player.Health() <= 0) {
         next = GAME_STATE_GAME_OVER;
@@ -244,45 +186,56 @@ void CustomLevel_Update() {
 }
 
 void CustomLevel_Draw() {
-    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-    ANIMATION::set_sprite_texture(texBackground);
+	// Clear the screen & Set to Default
+    AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
+    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+    /******************************************************************************/
+
+
+    // Draw Background Block
+    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
     f32 cam_x = camera.Position().x;
-
     f32 offset = fmodf(cam_x, bg_width);
     if (offset < 0) offset += bg_width;
     f32 draw_start_x = cam_x - offset;
-
     drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
     drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
-
-    for (auto& tile : map_tiles) {
-        if (std::abs(tile.pos.x - camera.Position().x) < AEGfxGetWinMaxX() + 50.0f) {
-            if (tile.type == 1 && texSquare) ANIMATION::set_sprite_texture(texSquare);
-            else if (tile.type == 2 && texSpike) ANIMATION::set_sprite_texture(texSpike);
-            else ANIMATION::set_sprite_texture(nullptr);
-            drawQuad(unit_square, tile.pos.x, tile.pos.y, tile.half_size.x * 2.0f, tile.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+    /******************************************************************************/
+    
+	// Drawing of the obstacles
+    auto& obstacles = obstacle_system.Obstacles();
+    for (auto iter = obstacles.begin(); iter != obstacles.end(); ++iter) {
+        switch (iter->Type()) {
+        case ObstacleType::Asteroid:
+            ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
+            break;
+        case ObstacleType::Spike:
+			ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
+            break;
         }
+        drawQuad(unit_square, iter->position.x, iter->position.y, iter->half_size.x * 2.0f, iter->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
     }
+    /******************************************************************************/
 
-    ANIMATION::set_sprite_texture(asteroid_texture);
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        Obstacle* obstacle = &level_obstacles[i];
-        drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
+	// Draw Player, with flashing effect when taking damage
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(custom_player.Texture());
+        ANIMATION::set_sprite_texture(ASSETS::playerTexture);
         drawQuad(custom_player.Mesh(), custom_player.Position().x, custom_player.Position().y, custom_player.Half_Size().x * 2.0f, custom_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
+    /******************************************************************************/
 
+	// Draw Fuel Pickup
     if (g_fuel_pickup.active) {
-        if (fuel_pickup_texture) {
+        if (ASSETS::otherAssets) {
             AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            ANIMATION::set_sprite_texture(fuel_pickup_texture);
+            ANIMATION::set_sprite_texture(ASSETS::otherAssets);
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 1.0f, 1.0f, 1.0f);
         }
         else {
@@ -291,19 +244,27 @@ void CustomLevel_Draw() {
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 0.9f, 0.0f, 1.0f);
         }
     }
-
+    /******************************************************************************/
+	
+    // Draw Fuel Bar
     if (pFuel) {
         f32 world_x = custom_player.Position().x;
         f32 world_y = custom_player.Position().y + custom_player.Half_Size().y + 20.0f;
         pFuel->Draw(world_x, world_y, 60.0f, 10.0f);
     }
+    /******************************************************************************/
 
+	// Draw Health Bar
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
     drawHealthBar(unit_square, custom_player, (int)std::floor(custom_player.Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease())));
-
+    /******************************************************************************/
+ 
+	// Draw HP Text
     char hp_text[64];
     sprintf_s(hp_text, "HP: %d", custom_player.Health());
-    AEGfxPrint(font_id, hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
+    /******************************************************************************/
 }
 
 void CustomLevel_Free() {
@@ -313,11 +274,6 @@ void CustomLevel_Free() {
 }
 
 void CustomLevel_Unload() {
-    AEGfxDestroyFont(font_id);
-    if (texSquare) AEGfxTextureUnload(texSquare);
-    if (texSpike) AEGfxTextureUnload(texSpike);
-    if (texBackground) AEGfxTextureUnload(texBackground);
-    if (fuel_pickup_texture) AEGfxTextureUnload(fuel_pickup_texture);
-    if (asteroid_texture) AEGfxTextureUnload(asteroid_texture);
-    AEGfxTextureUnload(custom_player.Texture());
+    ASSETS::Unload_Images();
+	ASSETS::Unload_Font();
 }

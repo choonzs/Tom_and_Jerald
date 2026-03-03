@@ -2,15 +2,29 @@
 #include "Player.hpp"
 #include "Playing.hpp"
 #include "Utils.hpp"
+#include "LevelTile.hpp"
 
 
-void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
+f32 randFloat(f32 min, f32 max) {
+	return min + (max - min) * ((f32)rand() / RAND_MAX);
+}
+
+// Bruh why do we have two functions that do the same thing?
+f32 randomRange(f32 min_value, f32 max_value)
+{
+	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
+}
+
+
+void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y,f32 red, f32 green, f32 blue, f32 alpha)
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
-	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
+	AEGfxPrint(font_id, text, -width * 0.5f + cam_pos_x, y + cam_pos_y, scale, red, green, blue, alpha);
 }
+
+
 void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_pos_y)
 {
 	f32 width = 0.0f;
@@ -18,6 +32,7 @@ void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_po
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
 	AEGfxPrint(font_id, text, cam_pos_x, cam_pos_y, scale, 1.0f, 1.0f, 1.0f, 1.0f);
 }
+
 
 void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height, f32 sprite_uv_width)
 {
@@ -57,6 +72,7 @@ void createUnitCircles(AEGfxVertexList** out_mesh) {
 	*out_mesh = AEGfxMeshEnd();
 }
 
+
 void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha)
 {
 	AEMtx33 scale;
@@ -72,6 +88,7 @@ void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 
 	AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 }
 
+
 bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEVec2* position_b, const AEVec2* half_size_b)
 {
 
@@ -82,11 +99,6 @@ bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEV
 		return false;
 
 	return true;
-}
-
-f32 randomRange(f32 min_value, f32 max_value)
-{
-	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
 }
 
 
@@ -108,5 +120,55 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 		if (i < player.Health())
 			drawQuad(mesh, center_x, center_y, bar_width - 4.0f, bar_height - 4.0f, 0.2f, 0.9f, 0.35f, 1.0f);
 	}
+}
+
+void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
+	std::ifstream inFile(filename);
+	if (inFile.is_open()) {
+		int cols, rows;
+		inFile >> cols >> rows;
+
+		/*f32 halfW = AEGfxGetWinMaxX();
+		f32 halfH = AEGfxGetWinMaxY();
+		f32 TILE_SIZE = (halfH * 2.0f) / rows;
+		f32 startX = -halfW;
+		f32 startY = -halfH;*/
+
+		for (int r = 0; r < rows; ++r) {
+			for (int c = 0; c < cols; ++c) {
+				LevelTile tile;
+				inFile >> tile;
+				if (tile.type != 0) {
+					/*LevelTile tile{
+						type,
+						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
+						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
+					};*/
+
+					map_tiles.push_back(tile);
+					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
+					std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
+
+					// Creating obstacle object based on tile type and randomizing FOR NOW its size and speed within a range
+					Obstacle new_obstacle(
+						static_cast<ObstacleType>(tile.type),
+						tile.pos,
+						tile.velocity,
+						{tile.half_size.x * tile.scale, tile.half_size.y * tile.scale}
+					);
+					if (new_obstacle.Type() == Spike) {
+						new_obstacle.Velocity() = { 0.0f, 0.0f }; // Spikes don't move
+					}
+
+					std::cout << "Loaded obstacle of type " << new_obstacle.Type() << " at position (" << new_obstacle.Position().x << ", " << new_obstacle.Position().y << ") with velocity (" << new_obstacle.Velocity().x << ", " << new_obstacle.Velocity().y << ") and half-size (" << new_obstacle.HalfSize().x << ", " << new_obstacle.HalfSize().y << ")\n";
+					// Add it to the obstacle system's vector
+					obstacle_system.AddObstacle(new_obstacle);
+				}
+			}
+		}
+		inFile.close();
+	}
+	level_end_x = 1000.0f; // Adding some buffer to the end of the level
+	std::cout << "Level data loaded from file: " << filename << " with " << map_tiles.size() << " tiles and " << obstacle_system.Obstacles().size() << " obstacles.\n";
 }
 

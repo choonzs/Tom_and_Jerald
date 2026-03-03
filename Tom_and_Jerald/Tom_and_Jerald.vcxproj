@@ -61,6 +61,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -86,6 +87,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmodL.dll" "$(OutDir)" /s /r /y /q</
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,9 +109,10 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="DifferentGamemode.cpp" />
     <ClCompile Include="GameOver.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
-    <ClCompile Include="img_font_init.cpp" />
+    <ClCompile Include="ImgFontInit.cpp" />
     <ClCompile Include="Jetpack Fuel.cpp" />
     <ClCompile Include="LevelEditor.cpp" />
+    <ClCompile Include="LevelTile.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="Obstacle.cpp" />
@@ -118,11 +121,11 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Playing.cpp" />
     <ClCompile Include="Credits.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shop.cpp" />
     <ClCompile Include="Upgrades.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Victory.cpp" />
-    <ClCompile Include="Victory.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.hpp" />
@@ -134,18 +137,21 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="GameStateList.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
     <ClInclude Include="Credits.hpp" />
-    <ClInclude Include="img_font_init.hpp" />
+    <ClInclude Include="ImgFontInit.hpp" />
     <ClInclude Include="JetpackFuel.hpp" />
     <ClInclude Include="LevelEditor.hpp" />
+    <ClInclude Include="LevelTile.hpp" />
     <ClInclude Include="MainMenu.hpp" />
     <ClInclude Include="Obstacle.hpp" />
     <ClInclude Include="Particles.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Playing.hpp" />
+    <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Shop.hpp" />
     <ClInclude Include="Upgrades.hpp" />
     <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="Victory.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

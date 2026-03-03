@@ -18,7 +18,7 @@ private:
 
 class Player {
 public:
-    Player() : health(3), texture(nullptr), mesh(nullptr) {
+    Player() : health(3), mesh(nullptr) {
         AEVec2Zero(&position);
         AEVec2Zero(&velocity);
         AEVec2Set(&half_size, 20.0f, 20.0f);
@@ -44,7 +44,6 @@ public:
     int& Health() { return health; }
     int Health() const { return health; } // Const version added
 
-    AEGfxTexture*& Texture() { return texture; }
     AEGfxVertexList*& Mesh() { return mesh; }
 
     PlayerConfig& Config() { return config; }
@@ -55,7 +54,6 @@ private:
     AEVec2 velocity;
     AEVec2 half_size;
     int health;
-    AEGfxTexture* texture;
     AEGfxVertexList* mesh;
     PlayerConfig config;
 };

@@ -10,6 +10,7 @@
 #include "LevelEditor.hpp"
 #include "CustomLevel.hpp"
 #include "DifferentGamemode.hpp"
+#include "Settings.hpp"
 
 int current{}, previous{}, next{};
 

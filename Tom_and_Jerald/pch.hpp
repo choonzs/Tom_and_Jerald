@@ -19,5 +19,9 @@
 #include <cmath>
 #include <ctime>
 #include "AEEngine.h"
+#include <cstdlib>
+#include <vector>
+#include <filesystem> // For file system operations like checking if file exists, creating directories, etc.
+
 
 #endif //PCH_H
