@@ -2,6 +2,7 @@
 #include "Player.hpp"
 #include "Playing.hpp"
 #include "Utils.hpp"
+#include "LevelTile.hpp"
 
 
 f32 randFloat(f32 min, f32 max) {
@@ -127,37 +128,39 @@ void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<Le
 		int cols, rows;
 		inFile >> cols >> rows;
 
-		f32 halfW = AEGfxGetWinMaxX();
+		/*f32 halfW = AEGfxGetWinMaxX();
 		f32 halfH = AEGfxGetWinMaxY();
 		f32 TILE_SIZE = (halfH * 2.0f) / rows;
 		f32 startX = -halfW;
-		f32 startY = -halfH;
+		f32 startY = -halfH;*/
 
 		for (int r = 0; r < rows; ++r) {
 			for (int c = 0; c < cols; ++c) {
-				int type;
-				inFile >> type;
-				if (type != 0) {
-					LevelTile tile{
+				LevelTile tile;
+				inFile >> tile;
+				if (tile.type != 0) {
+					/*LevelTile tile{
 						type,
 						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
 						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
-					};
+					};*/
 
 					map_tiles.push_back(tile);
 					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
-
+					std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
 
 					// Creating obstacle object based on tile type and randomizing FOR NOW its size and speed within a range
-					Obstacle new_obstacle(static_cast<ObstacleType>(type),
+					Obstacle new_obstacle(
+						static_cast<ObstacleType>(tile.type),
 						tile.pos,
-						{ randFloat(-220.0f, 220.0f),randFloat(-220.0f, 220.0f) },
-						{ randFloat(15.0f, 30.0f), randFloat(15.0f, 30.0f) }
+						tile.velocity,
+						{tile.half_size.x * tile.scale, tile.half_size.y * tile.scale}
 					);
 					if (new_obstacle.Type() == Spike) {
 						new_obstacle.Velocity() = { 0.0f, 0.0f }; // Spikes don't move
 					}
 
+					std::cout << "Loaded obstacle of type " << new_obstacle.Type() << " at position (" << new_obstacle.Position().x << ", " << new_obstacle.Position().y << ") with velocity (" << new_obstacle.Velocity().x << ", " << new_obstacle.Velocity().y << ") and half-size (" << new_obstacle.HalfSize().x << ", " << new_obstacle.HalfSize().y << ")\n";
 					// Add it to the obstacle system's vector
 					obstacle_system.AddObstacle(new_obstacle);
 				}
@@ -165,8 +168,7 @@ void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<Le
 		}
 		inFile.close();
 	}
-
-	// TEMP VALUE
-	level_end_x += 500.0f; // Adding some buffer to the end of the level
+	level_end_x = 1000.0f; // Adding some buffer to the end of the level
+	std::cout << "Level data loaded from file: " << filename << " with " << map_tiles.size() << " tiles and " << obstacle_system.Obstacles().size() << " obstacles.\n";
 }
 

@@ -3,17 +3,22 @@
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
 #include "Obstacle.hpp"
-#include <vector>
-#include <iostream>
-#include <fstream>
-
+#include "ImgFontInit.hpp"
+#include "LevelTile.hpp"
 namespace {
     int VIEW_COLS = 0;
     const int VIEW_ROWS = 36;
     f32 TILE_SIZE = 0.0f;
     f32 uiWidth = 240.0f;
 
-    std::vector<std::vector<int>> mapData;
+	// Map Data: 2D grid representing the level layout. Each int corresponds to a TileType.
+    //std::vector<std::vector<int>> mapData;
+
+
+    // New Map Data
+	std::vector<std::vector<LevelTile>> mapTiles;
+
+
     int viewOffsetX = 0;
     f32 scrollTimer = 0.0f; // Controls smooth scrolling speed
 
@@ -21,6 +26,12 @@ namespace {
     bool isDragging = false;
 	ObstacleType currentTool = Asteroid;  // 1 = Asteroid, 2 = Spike
     f32 mouseX, mouseY;
+
+	// --- UI Values ---
+    f32 velocityX{};
+    f32 velocityY{};
+
+    f32 obstacle_scale{1.0f}; //by default
 
     // Textures & Meshes
     AEGfxTexture* texSquare = nullptr;
@@ -43,11 +54,13 @@ namespace {
 void LevelEditor_Load() {
     texSquare = AEGfxTextureLoad("Assets/Square.png");
     texSpike = AEGfxTextureLoad("Assets/Spike.png");
+    ASSETS::Init_Font();
 }
 
 void LevelEditor_Initialize() {
     // Start with 100 columns. It will grow infinitely as you scroll right!
-    mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
+    //mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
+	mapTiles.assign(VIEW_ROWS, std::vector<LevelTile>(100, { 0, {0,0}, {0,0}, {0,0} }));
     viewOffsetX = 0;
     isDragging = false;
     currentTool = Asteroid;
@@ -77,6 +90,15 @@ void LevelEditor_Update() {
 
     mouseX = (f32)mx - halfW;
     mouseY = -(f32)my + halfH;
+    // --- OBJECT VELOCITY & SCALE ADJUSTMENTS ---
+	if (AEInputCheckCurr(AEVK_D)) velocityX += 10.0f;
+	if (AEInputCheckCurr(AEVK_A)) velocityX -= 10.0f;
+	if (AEInputCheckCurr(AEVK_W)) velocityY += 10.0f;
+	if (AEInputCheckCurr(AEVK_S)) velocityY -= 10.0f;
+	// Scale adjustments with Z and X keys
+	if (AEInputCheckCurr(AEVK_Z)) obstacle_scale += .1f;
+	if (AEInputCheckCurr(AEVK_X)) obstacle_scale -= .1f;
+
 
     // --- SMOOTH SCROLLING & INFINITE DYNAMIC GENERATION ---
     if (AEInputCheckCurr(AEVK_RIGHT)) {
@@ -86,9 +108,10 @@ void LevelEditor_Update() {
             scrollTimer = 0.0f;
 
             // DYNAMIC GENERATION: Append a new empty column if we reach the map's boundary
-            if (static_cast<size_t>(viewOffsetX + VIEW_COLS) >= mapData[0].size()) {
+            if (static_cast<size_t>(viewOffsetX + VIEW_COLS) >= mapTiles[0].size()) {
                 for (int r = 0; r < VIEW_ROWS; ++r) {
-                    mapData[r].push_back(0); // 0 = Empty tile
+                    LevelTile empty{};
+                    mapTiles[r].push_back(empty); // 0 = Empty tile
                 }
             }
         }
@@ -121,8 +144,15 @@ void LevelEditor_Update() {
         else {
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
-            if (gridX >= 0 && gridX < mapData[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
-                mapData[gridY][gridX] = currentTool;
+            if (gridX >= 0 && gridX < mapTiles[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
+                //mapData[gridY][gridX] = currentTool;
+
+                mapTiles[gridY][gridX] = {
+                    currentTool,
+                    { -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f },
+                    { (TILE_SIZE / 2.0f) * obstacle_scale, (TILE_SIZE / 2.0f) * obstacle_scale },
+                    { velocityX, velocityY }
+				};
             }
         }
     }
@@ -132,8 +162,15 @@ void LevelEditor_Update() {
         if (mouseX >= -halfW + uiWidth) {
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
-            if (gridX >= 0 && gridX < mapData[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
-                mapData[gridY][gridX] = 0; // 0 = Empty Tile
+            if (gridX >= 0 && gridX < mapTiles[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
+                //mapData[gridY][gridX] = 0; // 0 = Empty Tile
+
+                mapTiles[gridY][gridX] = {
+                    0,
+                    { -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f },
+                    { (TILE_SIZE / 2.0f), (TILE_SIZE / 2.0f)},
+					{ 0, 0}
+                };
             }
         }
     }
@@ -143,15 +180,38 @@ void LevelEditor_Update() {
     // --- EXPORTING ---
     if (AEInputCheckTriggered(AEVK_E)) {
 		//TODO Get Max window position and set it as finish line for the level end
+        int fileIndex = 1;
+		std::string filename;
 
-		std::cout << "outfile created\n";
-        std::ofstream outFile("ExportedLevel.txt"); // Saves exactly what Level 1 will read
+        // Shorten for easier readability
+		namespace fs = std::filesystem;
+
+		// Create "MapLevel" directory if it doesn't exist
+        if (fs::create_directory("MapLevel")) {
+            std::cout << "Directory 'MapLevel' created successfully.\n";
+		}
+
+		// Dynamically find a filename that doesn't exist yet to avoid overwriting
+        do {
+            filename = "MapLevel/ExportedLevel" + std::to_string(fileIndex) + ".txt";
+            ++fileIndex;
+		} while (fs::exists(filename));
+
+		// Opens output file stream and writes the current map data to the file
+		std::ofstream outFile(filename); 
         if (outFile.is_open()) { 
-            int currentMaxCols = static_cast<int>(mapData[0].size());
+            //int currentMaxCols = static_cast<int>(mapData[0].size());
+
+            int currentMaxCols = static_cast<int>(mapTiles[0].size());
             outFile << currentMaxCols << " " << VIEW_ROWS << "\n";
             for (int r = 0; r < VIEW_ROWS; ++r) {
                 for (int c = 0; c < currentMaxCols; ++c) {
-                    outFile << mapData[r][c] << " ";
+                    //outFile << mapData[r][c] << " ";
+                    //
+                    outFile << mapTiles[r][c].type << " " << mapTiles[r][c].pos.x << " " << mapTiles[r][c].pos.y << " "
+                            << mapTiles[r][c].half_size.x << " " << mapTiles[r][c].half_size.y << " "
+						<< velocityX << " " << velocityY << " " << obstacle_scale << "\n";
+
                 }
                 outFile << "\n";
             }
@@ -165,7 +225,7 @@ void LevelEditor_Draw() {
     // Clear the screen & Set to Default
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 0.0f);
     AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     AEGfxSetTransparency(1.0f);
@@ -183,9 +243,9 @@ void LevelEditor_Draw() {
     for (int r = 0; r < VIEW_ROWS; ++r) {
         for (int c = 0; c < VIEW_COLS; ++c) {
             int mapCol = c + viewOffsetX;
-            if (mapCol >= mapData[0].size()) continue;
+            if (mapCol >= mapTiles[0].size()) continue;
 
-            int tile = mapData[r][mapCol];
+            int tile = mapTiles[r][mapCol].type;
 
             f32 pX = startX + (c * TILE_SIZE) + (TILE_SIZE / 2.0f);
             f32 pY = startY + (r * TILE_SIZE) + (TILE_SIZE / 2.0f);
@@ -270,10 +330,39 @@ void LevelEditor_Draw() {
         else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
     }
+    
+    // 5. Draw UI Text (representing velocity and scale values)
+    f32 textX = slotCenterX;  // small padding from left panel edge
+    f32 textY = 0.0;    // start center
+    f32 lineHeight = 0.2f;       // vertical spacing between lines
+
+    char buffer[128];
+
+    // Example: showing player velocity
+    sprintf_s(buffer, "Velocity X: %.2f", velocityX);
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    textY -= lineHeight;  // move down for next line
+
+    sprintf_s(buffer, "Velocity Y: %.2f", velocityY);
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    textY -= lineHeight;
+
+    // Example: showing tile scale
+    sprintf_s(buffer, "Scale Size: %.2f", static_cast<f32>(obstacle_scale * 100));
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    textY -= lineHeight;
+
+    // Example: showing current tool
+    sprintf_s(buffer, "Current Tool: %s", currentTool == Asteroid ? "Asteroid" : "Spike");
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    //------------------------------------------------------------------------------
+
+    
 }
 
 void LevelEditor_Free() {
-    mapData.clear();
+    //mapData.clear();
+    mapTiles.clear();
 
     if (meshWhite) AEGfxMeshFree(meshWhite);
     if (meshUIBg) AEGfxMeshFree(meshUIBg);
@@ -285,4 +374,5 @@ void LevelEditor_Free() {
 void LevelEditor_Unload() {
     if (texSquare) AEGfxTextureUnload(texSquare);
     if (texSpike) AEGfxTextureUnload(texSpike);
+    ASSETS::Unload_Font();
 }

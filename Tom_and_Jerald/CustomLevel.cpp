@@ -67,7 +67,9 @@ void CustomLevel_Initialize() {
     pFuel = new JetpackFuel(upg_fuel, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
 
-	LoadLevelDataFromFile("ExportedLevel.txt", level_end_x, map_tiles, obstacle_system);
+	// Load level data from file, populating map_tiles and obstacle_system
+	// TODO Find a way to load a specific level based on player selection in menu
+	LoadLevelDataFromFile("MapLevel/ExportedLevel1.txt", level_end_x, map_tiles, obstacle_system);
 }
 
 void CustomLevel_Update() {
@@ -142,7 +144,7 @@ void CustomLevel_Update() {
     }
 
     // what does this do
-    f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
+    /*f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
     f32 pW = custom_player.Half_Size().x * 2.0f, pH = custom_player.Half_Size().y * 2.0f;
 
     for (auto& tile : map_tiles) {
@@ -173,7 +175,7 @@ void CustomLevel_Update() {
                 pX = custom_player.Position().x; pY = custom_player.Position().y;
             }
         }
-    }
+    }*/
 
     if (custom_player.Health() <= 0) {
         next = GAME_STATE_GAME_OVER;
