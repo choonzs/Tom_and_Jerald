@@ -9,6 +9,7 @@
 #include "Shop.hpp"
 #include "LevelEditor.hpp"
 #include "CustomLevel.hpp"
+#include "DifferentGamemode.hpp"
 
 int current{}, previous{}, next{};
 
@@ -77,6 +78,14 @@ void GSM_Update()
 		fpDraw = CustomLevel_Draw;
 		fpFree = CustomLevel_Free;
 		fpUnload = CustomLevel_Unload;
+		break;
+	case GAME_STATE_MAZE:
+		fpLoad = GameState_MazeLoad;
+		fpInitialize = GameState_MazeInit;
+		fpUpdate = GameState_MazeUpdate;
+		fpDraw = GameState_MazeDraw;
+		fpFree = GameState_MazeFree;
+		fpUnload = GameState_MazeUnload;
 		break;
 	case GAME_STATE_RESTART:
 		break;
