@@ -122,7 +122,7 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 }
 
 void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
-	std::ifstream inFile("ExportedLevel.txt");
+	std::ifstream inFile(filename);
 	if (inFile.is_open()) {
 		int cols, rows;
 		inFile >> cols >> rows;

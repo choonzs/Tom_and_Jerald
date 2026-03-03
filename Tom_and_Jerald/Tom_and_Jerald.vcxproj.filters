@@ -42,9 +42,6 @@
     <ClCompile Include="Victory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Victory.hpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="Credits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,6 +83,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Victory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="GameOver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -147,6 +147,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Settings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelTile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

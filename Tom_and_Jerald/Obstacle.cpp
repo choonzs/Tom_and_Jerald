@@ -57,32 +57,33 @@ void ObstacleSystem::ResetObstacle(Obstacle* obstacle)
         obstacle->Reset();
     }
 }
-
-void ObstacleSystem::UpdateObstacles(Obstacle* obstacles, f32 delta_time)
-{
-    if (!obstacles)
-    {
-        return;
-    }
-
-    f32 min_x = AEGfxGetWinMinX();
-    f32 max_x = AEGfxGetWinMaxX();
-    f32 min_y = AEGfxGetWinMinY();
-    f32 max_y = AEGfxGetWinMaxY();
-
-    // TODO can be replaced
-    /*for (int i = 0; i < k_obstacle_count; ++i)
-    {
-        obstacles[i].Update(delta_time, min_x, max_x, min_y, max_y);
-    }*/
-}
+// Not needed for now
+//void ObstacleSystem::UpdateObstacles(Obstacle* obstacles, f32 delta_time)
+//{
+//    if (!obstacles)
+//    {
+//        return;
+//    }
+//
+//    f32 min_x = AEGfxGetWinMinX();
+//    f32 max_x = AEGfxGetWinMaxX();
+//    f32 min_y = AEGfxGetWinMinY();
+//    f32 max_y = AEGfxGetWinMaxY();
+//
+//    // TODO can be replaced
+//    /*for (int i = 0; i < k_obstacle_count; ++i)
+//    {
+//        obstacles[i].Update(delta_time, min_x, max_x, min_y, max_y);
+//    }*/
+//}
 
 void resetObstacle(Obstacle* obstacle)
 {
     ObstacleSystem::ResetObstacle(obstacle);
 }
 
-void updateObstacles(Obstacle* obstacles, f32 delta_time)
-{
-    ObstacleSystem::UpdateObstacles(obstacles, delta_time);
-}
+//Not needed for now
+//void updateObstacles(Obstacle* obstacles, f32 delta_time)
+//{
+//    ObstacleSystem::UpdateObstacles(obstacles, delta_time);
+//}

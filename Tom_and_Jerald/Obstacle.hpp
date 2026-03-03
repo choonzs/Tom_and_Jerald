@@ -45,7 +45,7 @@ public:
 	ObstacleSystem(int count) : obstacles{ static_cast<const unsigned int>(count) } {}
 
     static void ResetObstacle(Obstacle* obstacle);
-    static void UpdateObstacles(Obstacle* obstacles, f32 delta_time);
+    //static void UpdateObstacles(Obstacle* obstacles, f32 delta_time);
 
 	// Add to vector of obstacles
 	void AddObstacle(Obstacle& obstacle) { obstacles.push_back(obstacle); }
@@ -59,6 +59,6 @@ private:
 };
 
 void resetObstacle(Obstacle* obstacle);
-void updateObstacles(Obstacle* obstacles, f32 delta_time);
+//void updateObstacles(Obstacle* obstacles, f32 delta_time);
 
 #endif // !OBSTACLE_HPP

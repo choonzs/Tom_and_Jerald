@@ -122,7 +122,6 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Upgrades.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Victory.cpp" />
-    <ClCompile Include="Victory.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.hpp" />
@@ -147,6 +146,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Shop.hpp" />
     <ClInclude Include="Upgrades.hpp" />
     <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="Victory.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

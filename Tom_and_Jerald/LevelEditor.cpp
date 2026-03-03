@@ -162,13 +162,15 @@ void LevelEditor_Update() {
 }
 
 void LevelEditor_Draw() {
-    // set render mode to color only, no texture
-    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-
-    AEGfxSetTransparency(1.f);
-
-
+    // Clear the screen & Set to Default
+    AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
+    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+    /******************************************************************************/
+
     f32 halfW = AEGfxGetWinMaxX();
     f32 halfH = AEGfxGetWinMaxY();
 
