@@ -50,6 +50,44 @@ void MainMenu_Initialize() {
 }
 
 void MainMenu_Update() {
+	camera.Update();
+	camera.Set_Shaking();
+	if (AEInputCheckTriggered(AEVK_RETURN))
+	{
+		PlayClick();
+		// Moving to playing state
+		next = GAME_STATE_PLAYING;
+	}
+	else if (AEInputCheckTriggered(AEVK_S))
+	{
+		PlayClick();
+		next = GAME_STATE_SHOP;
+	}
+	else if (AEInputCheckTriggered(AEVK_E))
+	{
+		PlayClick();
+		next = GAME_STATE_LEVEL_EDITOR;
+	} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
+	{
+		PlayClick();
+		// Quitting the game
+		next = GAME_STATE_QUIT;
+	}
+	else if (AEInputCheckTriggered(AEVK_C))
+	{
+		PlayClick();
+		next = GAME_STATE_CUSTOM_PLAY;
+	}
+	else if (AEInputCheckTriggered(AEVK_M))
+	{
+		PlayClick();
+		next = GAME_STATE_MAZE;
+	}
+	else {
+		current = GAME_STATE_MENU;
+		// Refreshing the next state to stay in menu
+		//next = GAME_STATE_RESTART;
+	}
 
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
@@ -137,6 +175,16 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 	}
+	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
+	drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
+	drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
+	drawCenteredText(font_id, "LEVEL EDITOR (E)", -0.1f, 0.7f);
+	drawCenteredText(font_id, "MAZE (M)", -0.30f, 0.7f);
+	drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
+	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
+	drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
+	drawCenteredText(font_id, "EDITOR (L)", -0.15f, 0.7f);
+	drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); // <--- ADD THIS LINE
 }
 
 void MainMenu_Free() {

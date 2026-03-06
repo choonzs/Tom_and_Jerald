@@ -1,6 +1,18 @@
 #include "pch.hpp"
 #include "LevelTile.hpp"
 
+LevelTile& LevelTile::operator=(LevelTile const& rhs) {
+	
+	type = rhs.type;
+	pos = rhs.pos;
+	half_size = rhs.half_size;
+	velocity = rhs.velocity;
+	scale = rhs.scale;
+
+	return *this;
+}
+
+
 std::istream& operator>>(std::istream& is, LevelTile& tile) {
 	is >> tile.type
 		>> tile.pos.x >> tile.pos.y

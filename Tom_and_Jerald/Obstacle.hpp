@@ -14,10 +14,7 @@ public:
 	Obstacle(ObstacleType type, AEVec2 pos, AEVec2 velocity, AEVec2 half_size) 
 		: type{ type }, position{ pos },
 		velocity{ velocity }, half_size{ half_size } {}
-	~Obstacle() {
-		// Empty Destructor
-		std::cout << "Obstacle Destroyed\n";
-	}
+	
     void Reset();
     void Update(f32 delta_time, f32 cam_x, f32 offscreen_limit, bool endless);
 	
@@ -42,7 +39,7 @@ public:
 class ObstacleSystem
 {
 public:
-	ObstacleSystem(int count) : obstacles{ static_cast<const unsigned int>(count) } {}
+	ObstacleSystem() : obstacles(0) {};
 
     static void ResetObstacle(Obstacle* obstacle);
     //static void UpdateObstacles(Obstacle* obstacles, f32 delta_time);
