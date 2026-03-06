@@ -4,14 +4,25 @@
 
 
 namespace ANIMATION {
-    struct Spritesheet {
+    class Spritesheet {
+    public:
         u32 rows, cols, max_sprites;
         f32 uv_width, uv_height;
-    } spritesheet;
+    };
+    //Create instances of the spritesheet class
+    Spritesheet ss_background;
+    Spritesheet ss_other;
 
-    struct Animation {
-        f32 timer{}, duration_per_frame{ 0.1f };
-    } animation;
+    class Animation {
+    public:
+        f32 timer{}, duration_per_frame{ 2.0f };
+        u32 active_row{ 0 };
+        u32 col_start{ 0 };
+        u32 col_count{ 0 };
+
+    };
+    //Create instances of the animation class
+    Animation animation;
     
 
     u32 current_sprite_index = 0; // start from first sprite
@@ -26,11 +37,11 @@ namespace ANIMATION {
 
         std::string tmp;
         ifs >> tmp;
-        ifs >> spritesheet.rows;
+        ifs >> ss_background.rows;
         ifs >> tmp;
-        ifs >> spritesheet.cols;
+        ifs >> ss_background.cols;
         ifs >> tmp;
-        ifs >> spritesheet.max_sprites;
+        ifs >> ss_background.max_sprites;
 
         return true;
     }
@@ -40,8 +51,14 @@ namespace ANIMATION {
             std::cerr << "Unable to open file!" << std::endl;
 
         }
-        spritesheet.uv_width = 1.f / spritesheet.cols;
-        spritesheet.uv_height = 1.f / spritesheet.rows;
+        ss_background.uv_width = 1.f / ss_background.cols;
+        ss_background.uv_height = 1.f / ss_background.rows;
+
+        //backround frames - need to pass these in later
+        animation.active_row = 0;
+        animation.col_start = 0;
+        animation.col_count = 3;  // only play 3 frames
+        current_sprite_index = 0;
     }
 
 	void sprite_update(f32 delta_time) {
@@ -53,13 +70,23 @@ namespace ANIMATION {
             animation.timer = 0;
 
             // Calculate the next sprite UV
-            current_sprite_index = ++current_sprite_index % spritesheet.max_sprites;
+            /* old code
+            current_sprite_index = ++current_sprite_index % ss_background.max_sprites;
 
-            u32 current_sprite_row = current_sprite_index / spritesheet.cols;
-            u32 current_sprite_col = current_sprite_index % spritesheet.cols;
+            u32 current_sprite_row = current_sprite_index / ss_background.cols;
+            u32 current_sprite_col = current_sprite_index % ss_background.cols;
 
-            current_sprite_uv_offset_x = spritesheet.uv_width * current_sprite_col;
-            current_sprite_uv_offset_y = spritesheet.uv_height * current_sprite_row;
+            current_sprite_uv_offset_x = ss_background.uv_width * current_sprite_col;
+            current_sprite_uv_offset_y = ss_background.uv_height * current_sprite_row;*/
+
+
+            u32 total_cols = (animation.col_count > 0) ? animation.col_count : ss_background.cols;
+
+            // current_sprite_index tracks just the column (0 to total_cols-1)
+            current_sprite_index = (current_sprite_index + 1) % total_cols;
+
+            current_sprite_uv_offset_x = ss_background.uv_width * static_cast<f32>(animation.col_start + current_sprite_index);
+            current_sprite_uv_offset_y = ss_background.uv_height * static_cast<f32>(animation.active_row);
 
         }
 	}
