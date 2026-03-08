@@ -64,10 +64,7 @@ void ShopState::Load() {
 
 void ShopState::Initialize() {
 	createUnitSquare(&unit_square);
-	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
-	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxTextureSet(nullptr, 0.0f, 0.0f);
+	
 	AEGfxSetCamPosition(0.0f, 0.0f);
 	AEInputShowCursor(1);
 }
@@ -110,9 +107,15 @@ void ShopState::Update() {
 }
 
 void ShopState::Draw() {
+	// Clear the screen & Set to Default
+	AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxTextureSet(nullptr, 0.0f, 0.0f);
+	AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+	AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetTransparency(1.0f);
+	AEGfxTextureSet(nullptr, 0, 0);
+	/******************************************************************************/
 
 	drawCenteredText(font_id, "SHOP", k_title_y, 1.0f);
 

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "LevelTile.hpp"
 
+// Copy Assignment
 LevelTile& LevelTile::operator=(LevelTile const& rhs) {
 	
 	type = rhs.type;
@@ -12,7 +13,7 @@ LevelTile& LevelTile::operator=(LevelTile const& rhs) {
 	return *this;
 }
 
-
+// >> operator overload for instream
 std::istream& operator>>(std::istream& is, LevelTile& tile) {
 	is >> tile.type
 		>> tile.pos.x >> tile.pos.y

@@ -178,13 +178,7 @@ void LevelEditor_Update() {
 		std::string filename;
 
         // Shorten for easier readability
-		namespace fs = std::filesystem;
-
-        // CALLED IN MAIN MENU
-		// Create "MapLevel" directory if it doesn't exist
-        //if (fs::create_directory("MapLevel")) {
-            //std::cout << "Directory 'MapLevel' created successfully.\n";
-		//}
+	    namespace fs = std::filesystem;
 
 		// Dynamically find a filename that doesn't exist yet to avoid overwriting
         do {
@@ -221,13 +215,13 @@ void LevelEditor_Update() {
 void LevelEditor_Draw() {
     // Clear the screen & Set to Default
     AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 0.0f);
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
     AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     AEGfxSetTransparency(1.0f);
+    AEGfxTextureSet(nullptr, 0, 0);
     /******************************************************************************/
-
     f32 halfW = AEGfxGetWinMaxX();
     f32 halfH = AEGfxGetWinMaxY();
 

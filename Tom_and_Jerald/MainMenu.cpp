@@ -176,6 +176,11 @@ void MainMenu_Update() {
 			PlayClick();
 			next = GAME_STATE_SETTINGS;
 		}
+		else if (AEInputCheckTriggered(AEVK_M))
+		{
+			PlayClick();
+			next = GAME_STATE_MAZE;
+		}
 		else {
 			current = GAME_STATE_MENU;
 			// Refreshing the next state to stay in menu
@@ -198,7 +203,7 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "START (ENTER)", 0.3f, 0.7f);
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
-		drawCenteredText(font_id, "EDITOR (L)", 0.0f, 0.7f);
+		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f);
 		drawCenteredText(font_id, buffer, -0.1f, 0.7f); // <--- ADD THIS LINE
 		drawCenteredText(font_id, "Settings (T)", -0.2f, 0.7f);
 		drawCenteredText(font_id, "EXIT (ESC)", -0.3f, 0.7f);
