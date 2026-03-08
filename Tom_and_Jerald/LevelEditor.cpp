@@ -5,6 +5,8 @@
 #include "Obstacle.hpp"
 #include "ImgFontInit.hpp"
 #include "LevelTile.hpp"
+#include "Audio.hpp"
+
 namespace {
     int VIEW_COLS = 0;
     const int VIEW_ROWS = 36;
@@ -76,7 +78,7 @@ void LevelEditor_Initialize() {
 }
 
 void LevelEditor_Update() {
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU;}
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { PlayClick(); next = GAME_STATE_MENU; }
 
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     s32 mx, my;

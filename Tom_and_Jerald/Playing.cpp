@@ -12,6 +12,7 @@
 #include "Particles.hpp"
 #include "Player.hpp"
 #include "ImgFontInit.hpp"
+#include "Audio.hpp"
 
 // --- FIX: RESTORED MISSING CONSTANTS ---
 const f32 k_stage_duration = 120.0f;
@@ -104,7 +105,7 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { PlayClick(); next = GAME_STATE_MENU; }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
@@ -174,6 +175,7 @@ void Playing_Update() {
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
         if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacles[i].position, &obstacles[i].half_size)) {
             if (damage_timer <= 0.0f) {
+                PlayRatSqueak();
                 base_player.Health() -= 1;
                 damage_timer = k_damage_cooldown;
                 took_damage = true;
