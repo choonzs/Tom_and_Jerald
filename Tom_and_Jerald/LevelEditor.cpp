@@ -163,9 +163,8 @@ void LevelEditor_Update() {
             int gridX = (int)((mouseX - (-halfW + uiWidth)) / TILE_SIZE) + viewOffsetX;
             int gridY = (int)((mouseY + halfH) / TILE_SIZE);
             if (gridX >= 0 && gridX < mapTiles[0].size() && gridY >= 0 && gridY < VIEW_ROWS) {
-                //mapData[gridY][gridX] = 0; // 0 = Empty Tile
-                mapTiles[gridY].erase(mapTiles[gridY].begin() + gridX);
-                
+                mapTiles[gridY][gridX] = LevelTile(); // Use default ctor to reset it back to non obstacle
+                //mapTiles[gridY].erase(mapTiles[gridY].begin() + gridX);
             }
         }
     }
@@ -181,10 +180,11 @@ void LevelEditor_Update() {
         // Shorten for easier readability
 		namespace fs = std::filesystem;
 
+        // CALLED IN MAIN MENU
 		// Create "MapLevel" directory if it doesn't exist
-        if (fs::create_directory("MapLevel")) {
+        //if (fs::create_directory("MapLevel")) {
             //std::cout << "Directory 'MapLevel' created successfully.\n";
-		}
+		//}
 
 		// Dynamically find a filename that doesn't exist yet to avoid overwriting
         do {
@@ -201,6 +201,8 @@ void LevelEditor_Update() {
             outFile << currentMaxCols << " " << VIEW_ROWS << "\n";
             for (int r = 0; r < VIEW_ROWS; ++r) {
                 for (int c = 0; c < currentMaxCols; ++c) {
+                    // Temp fix to optimise process
+                    if (mapTiles[r][c].type == 0) continue; // Dont save non-obstacle data
                     //outFile << mapData[r][c] << " ";
                     //
                     outFile << mapTiles[r][c].type << " " << mapTiles[r][c].pos.x << " " << mapTiles[r][c].pos.y << " "
@@ -208,7 +210,7 @@ void LevelEditor_Update() {
 						<< velocityX << " " << velocityY << " " << obstacle_scale << "\n";
 
                 }
-                outFile << "\n";
+                //outFile << "\n";
             }
             outFile.close();
             std::cout << "Level Exported dynamically with " << currentMaxCols << " columns!\n";

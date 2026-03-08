@@ -158,6 +158,6 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health);
 	A reference to an ObstacleSystem object that will be populated with obstacles based on the loaded level data.
 
 *******************************************************************************/
-void LoadLevelDataFromFile(const char* filename, f32& level_end_x, std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
+void LoadLevelDataFromFile(std::string filename, f32& level_end_x, std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
 
 #endif // !UTILS_H
