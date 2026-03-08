@@ -23,6 +23,9 @@ namespace {
 	f32 window_height;
 
 	BOOL mainmenu_flag;
+
+	// txt files start w 1
+	unsigned int select_level{1};
 }
 
 
@@ -52,42 +55,42 @@ void MainMenu_Initialize() {
 void MainMenu_Update() {
 	camera.Update();
 	camera.Set_Shaking();
-	if (AEInputCheckTriggered(AEVK_RETURN))
-	{
-		PlayClick();
-		// Moving to playing state
-		next = GAME_STATE_PLAYING;
-	}
-	else if (AEInputCheckTriggered(AEVK_S))
-	{
-		PlayClick();
-		next = GAME_STATE_SHOP;
-	}
-	else if (AEInputCheckTriggered(AEVK_E))
-	{
-		PlayClick();
-		next = GAME_STATE_LEVEL_EDITOR;
-	} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
-	{
-		PlayClick();
-		// Quitting the game
-		next = GAME_STATE_QUIT;
-	}
-	else if (AEInputCheckTriggered(AEVK_C))
-	{
-		PlayClick();
-		next = GAME_STATE_CUSTOM_PLAY;
-	}
-	else if (AEInputCheckTriggered(AEVK_M))
-	{
-		PlayClick();
-		next = GAME_STATE_MAZE;
-	}
-	else {
-		current = GAME_STATE_MENU;
-		// Refreshing the next state to stay in menu
-		//next = GAME_STATE_RESTART;
-	}
+	//if (AEInputCheckTriggered(AEVK_RETURN))
+	//{
+	//	PlayClick();
+	//	// Moving to playing state
+	//	next = GAME_STATE_PLAYING;
+	//}
+	//else if (AEInputCheckTriggered(AEVK_S))
+	//{
+	//	PlayClick();
+	//	next = GAME_STATE_SHOP;
+	//}
+	//else if (AEInputCheckTriggered(AEVK_E))
+	//{
+	//	PlayClick();
+	//	next = GAME_STATE_LEVEL_EDITOR;
+	//} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
+	//{
+	//	PlayClick();
+	//	// Quitting the game
+	//	next = GAME_STATE_QUIT;
+	//}
+	//else if (AEInputCheckTriggered(AEVK_C))
+	//{
+	//	PlayClick();
+	//	next = GAME_STATE_CUSTOM_PLAY;
+	//}
+	//else if (AEInputCheckTriggered(AEVK_M))
+	//{
+	//	PlayClick();
+	//	next = GAME_STATE_MAZE;
+	//}
+	//else {
+	//	current = GAME_STATE_MENU;
+	//	// Refreshing the next state to stay in menu
+	//	//next = GAME_STATE_RESTART;
+	//}
 
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
@@ -112,6 +115,15 @@ void MainMenu_Update() {
 
 
 	if (mainmenu_flag == TRUE) {
+		// temp for switching levels
+		if (AEInputCheckTriggered(AEVK_A)) {
+			if ((select_level) > 1) { --select_level; }
+		}
+		else if (AEInputCheckTriggered(AEVK_D)) {
+			++select_level;
+		}
+
+		// Menu Controls
 		if (AEInputCheckTriggered(AEVK_RETURN))
 		{
 			PlayClick();
@@ -136,6 +148,26 @@ void MainMenu_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_C))
 		{
+			// Write down text file number that we need to open 
+			// shld move to util cpp to avoid clutter
+			std::string filename;
+
+			// Shorten for easier readability
+			namespace fs = std::filesystem;
+			// Create "MapLevel" directory if it doesn't exist
+			if (fs::create_directory("MapLevel")) {
+				//std::cout << "Directory 'MapLevel' created successfully.\n";
+			}
+			filename = "MapLevel/LoadLevel.txt";
+			// Opens output file stream and writes the level number to load, trunc to remove anything inside
+			std::ofstream outFile(filename, std::ios::trunc);
+			if (outFile.is_open()) {
+				outFile << select_level;
+				outFile.close();
+			}
+			// --------------------------------------------------
+
+
 			PlayClick();
 			next = GAME_STATE_CUSTOM_PLAY;
 		}
@@ -149,17 +181,16 @@ void MainMenu_Update() {
 			// Refreshing the next state to stay in menu
 			//next = GAME_STATE_RESTART;
 		}
-
-		/*for camera movement
-		if (AEInputCheckTriggered(AEVK_A)) {
-			// Shift left
-			camera.Position().x += 10.0f * delta_time;
-		}*/
 	}
 	
 }
 
 void MainMenu_Draw() {
+	char buffer[128];
+
+	// Example: show current select level
+	sprintf_s(buffer, "PLAY CUSTOM LEVEL %d (C)", select_level);
+	
 	if (mainmenu_flag == TRUE) {
 
 		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f,0.0f,0.0f,1.0f,0.0f);
@@ -168,23 +199,24 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
 		drawCenteredText(font_id, "EDITOR (L)", 0.0f, 0.7f);
-		drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.1f, 0.7f); // <--- ADD THIS LINE
+		drawCenteredText(font_id, buffer, -0.1f, 0.7f); // <--- ADD THIS LINE
 		drawCenteredText(font_id, "Settings (T)", -0.2f, 0.7f);
 		drawCenteredText(font_id, "EXIT (ESC)", -0.3f, 0.7f);
 
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 	}
-	drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
-	drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
-	drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
-	drawCenteredText(font_id, "LEVEL EDITOR (E)", -0.1f, 0.7f);
-	drawCenteredText(font_id, "MAZE (M)", -0.30f, 0.7f);
-	drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
-	drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
-	drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
-	drawCenteredText(font_id, "EDITOR (L)", -0.15f, 0.7f);
-	drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); // <--- ADD THIS LINE
+	// To be removed?
+	//drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
+	//drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
+	//drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
+	//drawCenteredText(font_id, "LEVEL EDITOR (E)", -0.1f, 0.7f);
+	//drawCenteredText(font_id, "MAZE (M)", -0.30f, 0.7f);
+	//drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
+	//drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
+	//drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
+	//drawCenteredText(font_id, "EDITOR (L)", -0.15f, 0.7f);
+	//drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); // <--- ADD THIS LINE
 }
 
 void MainMenu_Free() {

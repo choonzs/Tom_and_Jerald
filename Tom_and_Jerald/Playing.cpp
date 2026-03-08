@@ -93,7 +93,7 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();

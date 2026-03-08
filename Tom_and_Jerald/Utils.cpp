@@ -122,7 +122,7 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health)
 	}
 }
 
-void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
+void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<LevelTile>& map_tiles, ObstacleSystem& obstacle_system) {
 	std::ifstream inFile(filename);
 	if (inFile.is_open()) {
 		int cols, rows;
@@ -137,20 +137,25 @@ void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<Le
 		for (int r = 0; r < rows; ++r) {
 			for (int c = 0; c < cols; ++c) {
 				LevelTile tile;
-				inFile >> tile;
+				if (!(inFile >> tile)) {   // check if read failed / EOF 
+					std::cout << "End of File.\n";
+					break;
+				}
+
 				if (tile.type != 0) {
 					/*LevelTile tile{
 						type,
 						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
 						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
 					};*/
-
+					std::cout << "Read tile from file: type=" << tile.type << ", pos=(" << tile.pos.x << ", " << tile.pos.y << "), half_size=(" << tile.half_size.x << ", " << tile.half_size.y << "), velocity=(" << tile.velocity.x << ", " << tile.velocity.y << "), scale=" << tile.scale << "\n";
 					map_tiles.push_back(tile);
 					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
-					std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
+					//std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
 
 					// Creating obstacle object based on tile type and randomizing FOR NOW its size and speed within a range
-					Obstacle new_obstacle(
+					Obstacle 
+						new_obstacle(
 						static_cast<ObstacleType>(tile.type),
 						tile.pos,
 						tile.velocity,
@@ -166,9 +171,10 @@ void LoadLevelDataFromFile(const char* filename, f32& level_end_x,std::vector<Le
 				}
 			}
 		}
+		_CrtDumpMemoryLeaks(); // prints currently allocated memory
 		inFile.close();
 	}
 	level_end_x = 1000.0f; // Adding some buffer to the end of the level
-	std::cout << "Level data loaded from file: " << filename << " with " << map_tiles.size() << " tiles and " << obstacle_system.Obstacles().size() << " obstacles.\n";
+	//std::cout << "Level data loaded from file: " << filename << " with " << map_tiles.size() << " tiles and " << obstacle_system.Obstacles().size() << " obstacles.\n";
 }
 

@@ -12,12 +12,13 @@
 #include "Credits.hpp"
 #include "LevelTile.hpp"
 #include "ImgFontInit.hpp"
-
-
+#include "LevelEditor.hpp"
 
 namespace {
     Player* custom_player;
     
+    int select_level{}; // needed for finding which level to load
+
     // issues w this
     std::vector<LevelTile> map_tiles{};
 	s8 font_id;
@@ -76,9 +77,16 @@ void CustomLevel_Initialize() {
 
     std::cout << map_tiles.size() << "before tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
 
-	// Load level data from file, populating map_tiles and obstacle_system
-	// TODO Find a way to load a specific level based on player selection in menu
-	LoadLevelDataFromFile("MapLevel/ExportedLevel1.txt", level_end_x, map_tiles, obstacle_system);
+    // Get level to load from this file
+    std::ifstream inFile("MapLevel/LoadLevel.txt");
+    inFile >> select_level;
+    inFile.close();
+
+    std::string filename;
+    filename = "MapLevel/ExportedLevel" + std::to_string(select_level) + ".txt";
+	
+    // Load level data from file, populating map_tiles and obstacle_system
+	LoadLevelDataFromFile(filename, level_end_x, map_tiles, obstacle_system);
 
 
     std::cout << map_tiles.size() << "after tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
@@ -156,7 +164,7 @@ void CustomLevel_Update() {
         }
     }
 
-    // what does this do
+    // removed for now
     /*f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
     f32 pW = custom_player.Half_Size().x * 2.0f, pH = custom_player.Half_Size().y * 2.0f;
 
