@@ -25,11 +25,12 @@ public:
 	f32& Magnitude();
 
 private:
-	AEVec2 position;
-	f32	speed,
-		magnitude,
-		timer,
-		duration;
+	// Data Encapsulated here
+	AEVec2 position; // Camera Pos
+	f32	speed, // Movement Speed
+		magnitude, // Magnitude (Used for shaking)
+		timer, // time counter for the shaking
+		duration; // how long to shake	
 
 	bool camera_shaking = false;
 };

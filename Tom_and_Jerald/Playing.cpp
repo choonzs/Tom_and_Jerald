@@ -31,10 +31,12 @@ AEGfxTexture* fuel_pickup_texture = nullptr;
 
 
 namespace {
+    // Camera
     Camera camera;
+    // Meshes
     AEGfxVertexList* unit_square = nullptr;
     AEGfxVertexList* unit_circle = nullptr;
-
+    // Fuel
     struct FuelPickup {
         AEVec2 pos;
         bool active;
