@@ -25,7 +25,7 @@ namespace {
 	BOOL mainmenu_flag;
 
 	// txt files start w 1
-	unsigned int select_level{1};
+	unsigned int select_level{ 1 };
 }
 
 
@@ -106,8 +106,8 @@ void MainMenu_Update() {
 		AEGfxTextureSet(ASSETS::copyrightLogo, 1.0f, 1.0f);
 		drawQuad(unit_square, 0, 0, window_width - 100.0f, window_height - 100.0f, 1.f, 1.f, 1.f, alpha);
 
-		local_time += delta_time; 
-		
+		local_time += delta_time;
+
 	}
 	else {
 		mainmenu_flag = TRUE;
@@ -182,7 +182,7 @@ void MainMenu_Update() {
 			//next = GAME_STATE_RESTART;
 		}
 	}
-	
+
 }
 
 void MainMenu_Draw() {
@@ -190,22 +190,32 @@ void MainMenu_Draw() {
 
 	// Example: show current select level
 	sprintf_s(buffer, "PLAY CUSTOM LEVEL %d (C)", select_level);
-	
+
 	if (mainmenu_flag == TRUE) {
 
-		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f,0.0f,0.0f,1.0f,0.0f);
+		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 		drawCenteredText(font_id, "START (ENTER)", 0.3f, 0.7f);
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
-		drawCenteredText(font_id, "EDITOR (L)", 0.0f, 0.7f);
-		drawCenteredText(font_id, buffer, -0.1f, 0.7f); // <--- ADD THIS LINE
-		drawCenteredText(font_id, "Settings (T)", -0.2f, 0.7f);
-		drawCenteredText(font_id, "EXIT (ESC)", -0.3f, 0.7f);
+		drawCenteredText(font_id, buffer, -0.0f, 0.7f); // <--- ADD THIS LINE
+		drawCenteredText(font_id, "Settings (T)", -0.1f, 0.7f);
+		drawCenteredText(font_id, "EXIT (ESC)", -0.2f, 0.7f);
 
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 	}
+	// To be removed?
+	//drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
+	//drawCenteredText(font_id, "START (ENTER)", 0.1f, 0.7f);
+	//drawCenteredText(font_id, "SHOP (S)", 0.0f, 0.7f);
+	//drawCenteredText(font_id, "LEVEL EDITOR (E)", -0.1f, 0.7f);
+	//drawCenteredText(font_id, "MAZE (M)", -0.30f, 0.7f);
+	//drawCenteredText(font_id, "EXIT (ESC)", -0.05f, 0.7f);
+	//drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
+	//drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
+	//drawCenteredText(font_id, "EDITOR (L)", -0.15f, 0.7f);
+	//drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); // <--- ADD THIS LINE
 }
 
 void MainMenu_Free() {

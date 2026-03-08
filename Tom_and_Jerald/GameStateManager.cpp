@@ -1,4 +1,5 @@
 #include "pch.hpp"
+
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
 #include "MainMenu.hpp"
@@ -88,8 +89,11 @@ void GSM_Update()
 		fpUnload = GameState_MazeUnload;
 		break;
 	case GAME_STATE_RESTART:
+		// RESTART is handled in Main.cpp by resetting current/next
+		// to previous. No function pointers needed.
 		break;
 	case GAME_STATE_QUIT:
+		// QUIT exits the main loop. No function pointers needed
 		break;
 	default:
 		break;

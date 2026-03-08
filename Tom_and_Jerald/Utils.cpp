@@ -9,7 +9,6 @@ f32 randFloat(f32 min, f32 max) {
 	return min + (max - min) * ((f32)rand() / RAND_MAX);
 }
 
-// Bruh why do we have two functions that do the same thing?
 f32 randomRange(f32 min_value, f32 max_value)
 {
 	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);

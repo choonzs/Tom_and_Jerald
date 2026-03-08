@@ -1,5 +1,3 @@
-// ---------------------------------------------------------------------------
-// includes test test 123 32323
 // main
 #include "pch.hpp"
 #include "GameStateList.hpp"
@@ -32,41 +30,45 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// initialize all audio assets before the GSM loop starts
 	AudioInit();
 	// GSM LOOP
-		while (current != GAME_STATE_QUIT)
-		{
+	while (current != GAME_STATE_QUIT)
+	{
 
-			// when the window is closed
-			if (0 == AESysDoesWindowExist()) {
-				current = GAME_STATE_QUIT;
+		// when the window is closed
+		if (0 == AESysDoesWindowExist()) {
+			current = GAME_STATE_QUIT;
+		}
+		else {
+			if (current != GAME_STATE_RESTART) {
+				GSM_Update();
+				AEFrameRateControllerReset();
+				fpLoad();
 			}
 			else {
-				if (current != GAME_STATE_RESTART) {
-					GSM_Update();
-					AEFrameRateControllerReset();
-					fpLoad();
-				}
-				else {
-					next = previous;
-					current = previous;
-				}
-				fpInitialize();	
-				// GAME LOOP
-				while (current == next) {
-					// Informing the system about the loop's start
-					AESysFrameStart();
-					PlayBackgroundAudio();
-					fpUpdate();
-					fpDraw();
-					AESysFrameEnd();
-				}
-				fpFree();
-				if (next != GAME_STATE_RESTART) {
-					fpUnload();
-				}
-				previous = current;
-				current = next;
+				next = previous;
+				current = previous;
 			}
+			fpInitialize();  // Initialize state variables (positions, timers, meshes)
+
+			// INNER GAME LOOP - runs every frame while state hasn't changed
+			while (current == next) {
+				AESysFrameStart();      // Signal frame start (updates input, frame timer)
+				PlayBackgroundAudio();  // Ensure BGM is playing (idempotent - won't restart)
+				fpUpdate();             // Run game logic (physics, collisions, input)
+				fpDraw();               // Render the current frame
+				AESysFrameEnd();        // Signal frame end (enforces frame rate, swaps buffers)
+			}
+			fpFree(); // Free per-instance resources (meshes, dynamic allocations)
+
+			// Only unload persistent resources if we're not doing a restart
+			if (next != GAME_STATE_RESTART) {
+				fpUnload();  // Unload textures, fonts, and other loaded assets
+			}
+
+			// Track state history for restart functionality
+			previous = current;
+			current = next;
 		}
+	}
 
 	// free all audio assets after the GSM loop ends
 	AudioFree();
@@ -74,4 +76,3 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// free the system
 	AESysExit();
 }
-
