@@ -1,5 +1,9 @@
 #include "pch.hpp"
 #include "Playing.hpp"
+#include <vector>
+#include <map>
+#include <iostream>
+
 
 
 
@@ -15,6 +19,23 @@ namespace graphics {
 		float size;
 		float lifetime;
 	};
+
+	/*class pixelFont {
+	public:
+		pixelFont(); //Default ctor
+		~pixelFont(); //Default dtor
+
+	private:
+
+	};
+
+	pixelFont::pixelFont()
+	{
+	}
+
+	pixelFont::~pixelFont()
+	{
+	}*/
 
 	#define MAX_PARTICLES 200
 	extern particleSys effects[MAX_PARTICLES];  // declaration only

@@ -16,7 +16,8 @@ f32 randomRange(f32 min_value, f32 max_value)
 }
 
 
-void drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y,f32 red, f32 green, f32 blue, f32 alpha)
+void 
+drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y,f32 red, f32 green, f32 blue, f32 alpha)
 {
 	f32 width = 0.0f;
 	f32 height = 0.0f;

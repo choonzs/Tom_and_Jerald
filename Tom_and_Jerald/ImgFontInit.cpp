@@ -3,7 +3,7 @@
 
 
 namespace ASSETS {
-	AEGfxTexture* playerTexture = nullptr;
+	AEGfxTexture* playerAssets = nullptr;
 	AEGfxTexture* backgroundTexture = nullptr;
 	AEGfxTexture* copyrightText = nullptr;
 	AEGfxTexture* copyrightLogo = nullptr;
@@ -13,11 +13,11 @@ namespace ASSETS {
 	s8 font_id;
 
 	void Init_Images() {
-		playerTexture = AEGfxTextureLoad("Assets/Fairy_Rat.png");
 		copyrightLogo = AEGfxTextureLoad("Assets/DigipenLogo.png");
 		copyrightText = AEGfxTextureLoad("Assets/Copyright.png");
 		backgroundAssets = AEGfxTextureLoad("Assets/SS_BackgroundAssets.png"); //Background + obstacles
 		otherAssets = AEGfxTextureLoad("Assets/SS_OtherAssets.png");		   //Other assets + UI
+		playerAssets = AEGfxTextureLoad("Assets/SS_PlayerAssets.png");		   //Player + customization
 
 	}
 	void Init_Font() {
@@ -26,12 +26,12 @@ namespace ASSETS {
 	s8& Font() {return font_id;}
 
 	void Unload_Images() {
-		AEGfxTextureUnload(playerTexture);
+		AEGfxTextureUnload(playerAssets);
 		AEGfxTextureUnload(copyrightLogo);
 		AEGfxTextureUnload(copyrightText);
 		AEGfxTextureUnload(backgroundAssets);
 		AEGfxTextureUnload(otherAssets);
-		playerTexture = nullptr;
+		playerAssets = nullptr;
 		copyrightLogo = nullptr;
 		copyrightText = nullptr;
 		backgroundAssets = nullptr;

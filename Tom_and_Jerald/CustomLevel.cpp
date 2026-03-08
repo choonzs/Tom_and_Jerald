@@ -50,9 +50,16 @@ void CustomLevel_Load() {
 
 void CustomLevel_Initialize() {
 	custom_player = new Player();
-    createUnitSquare(&unit_square, 0.5f, 0.5f);
-    createUnitSquare(&(*custom_player).Mesh(), 0.5f, 0.5f);
-    ANIMATION::sprite_Initialize();
+    createUnitSquare(&unit_square, 0.25f, 0.25f);
+    createUnitSquare(&(*custom_player).Mesh(), 0.25f, 0.25f);
+    //Animation______________________________
+    ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");
+    ANIMATION::background.Clip_Select(0, 0, 3, 5.0f);
+    ANIMATION::player.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
+    ANIMATION::player.Clip_Select(0, 0, 3, 10.0f);
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
+    ANIMATION::asteroid.Clip_Select(2, 0, 3, 10.0f);
+    //---------------------------------------
     damage_timer = 0.0f;
 
     f32 size_reduction = Upgrades_GetSizeReduction();
@@ -94,7 +101,10 @@ void CustomLevel_Update() {
     pFuel->Update(dt, isFlying);
 
     (*custom_player).Movement(dt);
-    ANIMATION::sprite_update(dt);
+    //Animation______________________________
+    ANIMATION::background.Anim_Update(dt);
+    ANIMATION::player.Anim_Update(dt);
+    //---------------------------------------
 
 	// Camera follows player, but update also update to ensure shake if toggle is set
     camera.Follow((*custom_player).Position());
@@ -211,7 +221,9 @@ void CustomLevel_Draw() {
 
 
     // Draw Background Block
-    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
+    //Animation______________________________
+    ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets);
+    //---------------------------------------
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
     f32 cam_x = camera.Position().x;
@@ -227,10 +239,14 @@ void CustomLevel_Draw() {
     for (auto iter = obstacles.begin(); iter != obstacles.end(); ++iter) {
         switch (iter->Type()) {
         case ObstacleType::Asteroid:
-            ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
+            //Animation______________________________
+            ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);
+            //---------------------------------------
             break;
         case ObstacleType::Spike:
-			ANIMATION::set_sprite_texture(ASSETS::backgroundAssets); // inside backgrd
+            //Animation______________________________
+            ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);
+            //---------------------------------------
             break;
         }
         drawQuad(unit_square, iter->position.x, iter->position.y, iter->half_size.x * 2.0f, iter->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -239,7 +255,9 @@ void CustomLevel_Draw() {
 
 	// Draw Player, with flashing effect when taking damage
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(ASSETS::playerTexture);
+        //Animation______________________________
+        ANIMATION::player.Anim_Draw(ASSETS::playerAssets);
+        //---------------------------------------
         drawQuad((*custom_player).Mesh(), (*custom_player).Position().x, (*custom_player).Position().y, (*custom_player).Half_Size().x * 2.0f, (*custom_player).Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
     /******************************************************************************/
@@ -248,7 +266,7 @@ void CustomLevel_Draw() {
     if (g_fuel_pickup.active) {
         if (ASSETS::otherAssets) {
             AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            ANIMATION::set_sprite_texture(ASSETS::otherAssets);
+            //ANIMATION::set_sprite_texture(ASSETS::otherAssets);
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 1.0f, 1.0f, 1.0f);
         }
         else {

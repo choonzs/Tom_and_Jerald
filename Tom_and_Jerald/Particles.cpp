@@ -61,4 +61,9 @@ namespace graphics {
 		}
 	} // Update & draw particles
 
+	/*
+	void pixelTextInit() {
+
+	}*/
+
 }

@@ -4,109 +4,79 @@
 
 
 namespace ANIMATION {
-    class Spritesheet {
-    public:
-        u32 rows, cols, max_sprites;
-        f32 uv_width, uv_height;
-    };
-    //Create instances of the spritesheet class
-    Spritesheet ss_background;
-    Spritesheet ss_other;
+    //Instances_________________________________________
+    //ADD INSTANCES [HERE] FOR DIFFERENT SPRITES
+    AnimatedSprite background;
+    AnimatedSprite player;
+    AnimatedSprite asteroid;
+        
+    //Member functions__________________________
+    //Initialize spritesheet
+    void AnimatedSprite::Anim_Init(u32 total_rows, u32 total_cols) { //Pass in total rows + cols of spritesheet 
+        rows = total_rows;                      //Store the params for other function use
+        cols = total_cols;
+        max_sprites = rows * cols;
+        uv_width = 1.0f / static_cast<f32>(cols);//Explicit cast to f32
+        uv_height = 1.0f / static_cast<f32>(rows);
+        //std::cout << "Anim_Init called: rows=" << rows << " cols=" << cols << "\n";//DEBUG
+        RecalcUV();                             //Calculate UV for frame 0, prepares for Anim_Update()
+    }
 
-    class Animation {
-    public:
-        f32 timer{}, duration_per_frame{ 2.0f };
-        u32 active_row{ 0 };
-        u32 col_start{ 0 };
-        u32 col_count{ 0 };
-
-    };
-    //Create instances of the animation class
-    Animation animation;
-    
-
-    u32 current_sprite_index = 0; // start from first sprite
-    f32 current_sprite_uv_offset_x = 0.f;
-    f32 current_sprite_uv_offset_y = 0.f;
-    
-    // Reading Data for this script only
-    bool ImportDataFromFile(const char* filename) {
+    //Read information from external file and pass to Anim_Init to iniaialize.
+    bool AnimatedSprite::ImportFromFile(const char* filename) { //Pass in .txt file path
         std::ifstream ifs(filename);
 
-        if (!ifs) { return false; }
+        if (!ifs) {                             //Safeguard
+            std::cerr << "Cannot open " << filename << "\n";
+            return false; 
+        }
 
-        std::string tmp;
-        ifs >> tmp;
-        ifs >> ss_background.rows;
-        ifs >> tmp;
-        ifs >> ss_background.cols;
-        ifs >> tmp;
-        ifs >> ss_background.max_sprites;
-
+        std::string tmp;                        //Absorbs text so that numbers can be passed
+        u32 total_rows{}, total_cols{}, total_sprites{};//Holds the passed number
+        ifs >> tmp >> total_rows;
+        ifs >> tmp >> total_cols;
+        ifs >> tmp >> total_sprites;
+        //std::cout << "Import called: rows=" << total_rows << " cols=" << total_cols << "\n";//DEBUG
+        Anim_Init(total_rows, total_cols);
         return true;
     }
 
-    void sprite_Initialize() {
-        if (!ImportDataFromFile("Assets/AnimationData.txt")) {
-            std::cerr << "Unable to open file!" << std::endl;
-
-        }
-        ss_background.uv_width = 1.f / ss_background.cols;
-        ss_background.uv_height = 1.f / ss_background.rows;
-
-        //backround frames - need to pass these in later
-        animation.active_row = 0;
-        animation.col_start = 0;
-        animation.col_count = 3;  // only play 3 frames
-        current_sprite_index = 0;
+    //Set up specific animation clip
+    void AnimatedSprite::Clip_Select(u32 row, u32 start_col, u32 frame_count, f32 fps) { //Pass in row, col and frames for clip
+        active_row = row;                       //Store data passed to class members
+        col_start = start_col;
+        col_count = frame_count;
+        duration_per_frame = 1.0f / fps;        //Converts fps into seconds per frame(60fps: 1 sec/60 frames = 0.0166..)
+        current_index = 0;                      //Reset class members so that animation plays from the start
+        timer = 0.0f;
+        RecalcUV();                             //Snap UV to first frame
     }
 
-	void sprite_update(f32 delta_time) {
-		animation.timer += delta_time;
-
-        if (animation.timer >= animation.duration_per_frame) {
-            // When the time is up go to the next sprite.
-            // Reset the timer.
-            animation.timer = 0;
-
-            // Calculate the next sprite UV
-            /* old code
-            current_sprite_index = ++current_sprite_index % ss_background.max_sprites;
-
-            u32 current_sprite_row = current_sprite_index / ss_background.cols;
-            u32 current_sprite_col = current_sprite_index % ss_background.cols;
-
-            current_sprite_uv_offset_x = ss_background.uv_width * current_sprite_col;
-            current_sprite_uv_offset_y = ss_background.uv_height * current_sprite_row;*/
-
-
-            u32 total_cols = (animation.col_count > 0) ? animation.col_count : ss_background.cols;
-
-            // current_sprite_index tracks just the column (0 to total_cols-1)
-            current_sprite_index = (current_sprite_index + 1) % total_cols;
-
-            current_sprite_uv_offset_x = ss_background.uv_width * static_cast<f32>(animation.col_start + current_sprite_index);
-            current_sprite_uv_offset_y = ss_background.uv_height * static_cast<f32>(animation.active_row);
-
+    //Updates animation clip to run
+    void AnimatedSprite::Anim_Update(f32 delta_time) {          //Pass in time in seconds since last game tick
+        timer += delta_time;                    //Accumilates tick until time to advance a frame
+        if (timer >= duration_per_frame) {
+            timer -= duration_per_frame;        //Carry over leftover time, so that animation plays at correct speed
+            current_index = (current_index + 1) % col_count;//For clip to loop
+            RecalcUV();                         //Snap to frame on frame change
         }
-	}
-
-    void set_sprite_texture(AEGfxTexture* Texture) {
-        
-        // Tell the engine to get ready to draw something with texture.
-        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-
-        // Set the the color to multiply to white, so that the sprite can 
-        // display the full range of colors (default is black).
-        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
-        AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);
-
-        // Set blend mode to AE_GFX_BM_BLEND
-        // This will allow transparency.
-        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    }
+    //Renders the clip
+    void AnimatedSprite::Anim_Draw(AEGfxTexture* Texture) const {//Pass in texture pointer, const to make sure members are not modified
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);  //Tell engine to get ready to draw texture
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f); //Set color to multiply to white, so sprite can display full range of colors (default is black).
+        AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);//No additive colour, unless glow effect
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);     //Enable transparency blend mode for PNGs
         AEGfxSetTransparency(1.0f);
-
-        // Set the texture to pTex
-        AEGfxTextureSet(Texture, current_sprite_uv_offset_x, current_sprite_uv_offset_y);
+        AEGfxTextureSet(Texture, uv_offset_x, uv_offset_y);//Set the texture to pTex, passes UV offest from RecalcUV()
+   
     }
-}
+
+//Private functions_________________________
+    //Snaps UV to frame, private so that only AnimatedSprite class can call
+    void AnimatedSprite::RecalcUV() {
+        uv_offset_x = uv_width * static_cast<f32>(col_start + current_index);//Selects col + steps to the end of the clip
+        uv_offset_y = uv_height * static_cast<f32>(active_row);//Selects row where clip resides
+    }
+
+}//Namespace ANIMATION

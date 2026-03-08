@@ -55,9 +55,9 @@ void Playing_Load() {
 }
 
 void Playing_Initialize() {
-    createUnitSquare(&unit_square, .5f, .5f);
+    createUnitSquare(&unit_square, 0.25f, 0.25f);
     createUnitCircles(&unit_circle);
-    createUnitSquare(&(base_player.Mesh()), .5f, .5f);
+    createUnitSquare(&(base_player.Mesh()), 0.25f, 0.25f);
 
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upgraded_half_size = 20.0f - size_reduction;
@@ -75,7 +75,16 @@ void Playing_Initialize() {
     pFuel = new JetpackFuel(upgraded_capacity, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
 
-    ANIMATION::sprite_Initialize();
+    //Animation______________________________
+    //Background
+    ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
+    ANIMATION::background.Clip_Select(0, 0, 2, 5.0f);   //Row, start col, frames, fps (BACKGROUND)
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
+    ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);    //Row, start col, frames, fps (ASTERIOD)
+    ANIMATION::player.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
+    ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);      //Row, start col, frames, fps (PLAYER)
+    //---------------------------------------
+
     camera.Magnitude() = 20.0f;
     camera.Position().x = base_player.Position().x;
     camera.Position().y = base_player.Position().y;
@@ -100,7 +109,12 @@ void Playing_Update() {
 
     if (pFuel) pFuel->Update(delta_time, isFlying);
 
-    ANIMATION::sprite_update(delta_time);
+    //Animation______________________________
+    ANIMATION::background.Anim_Update(delta_time);
+    ANIMATION::asteroid.Anim_Update(delta_time);
+    ANIMATION::player.Anim_Update(delta_time);
+    //---------------------------------------
+
     stage_timer += delta_time;
     if (damage_timer > 0.0f) damage_timer -= delta_time;
 
@@ -181,7 +195,6 @@ void Playing_Update() {
 
 void Playing_Draw() {
     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
 
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
@@ -192,16 +205,29 @@ void Playing_Draw() {
 
     f32 draw_start_x = cam_x - offset;
 
+
+    //Animation______________________________
+    ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
+    //---------------------------------------
     drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    AEGfxTextureSet(ASSETS::backgroundAssets, ANIMATION::background.uv_offset_x + 0.25f, ANIMATION::background.uv_offset_y); //Offset by 1 frame
     drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
-        ANIMATION::set_sprite_texture(ASSETS::playerTexture);               //Dn player class here, change if necessary.
+
+        //Animation______________________________
+        ANIMATION::player.Anim_Draw(ASSETS::playerAssets);     //Draws PLAYER
+        //_______________________________________
+
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
 
-    ANIMATION::set_sprite_texture(ASSETS::backgroundAssets);
     for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
+
+        //Animation______________________________
+        ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
+        //---------------------------------------
+
         Obstacle* obstacle = &obstacles[i];
         drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
     }
@@ -209,7 +235,7 @@ void Playing_Draw() {
     if (g_fuel_pickup.active) {
         if (fuel_pickup_texture) {
             AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-            ANIMATION::set_sprite_texture(fuel_pickup_texture);
+            //ANIMATION::set_sprite_texture(fuel_pickup_texture);
             drawQuad(unit_square, g_fuel_pickup.pos.x, g_fuel_pickup.pos.y, g_fuel_pickup.size, g_fuel_pickup.size, 1.0f, 1.0f, 1.0f, 1.0f);
         }
         else {

@@ -1,5 +1,4 @@
 #include "pch.hpp"
-
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
 #include "MainMenu.hpp"
