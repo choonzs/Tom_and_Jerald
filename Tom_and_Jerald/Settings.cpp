@@ -4,17 +4,36 @@
 #include "Settings.hpp"
 #include "Audio.hpp"
 
-// slider values
-f32 bgmVolume = 0.5f;   // default bgm volume
-f32 seVolume = 0.5f;   // default se volume
-f32 sliderX_bgm = 0.5f;  // default bgm slider position (middle)
-f32 sliderX_se = 0.5f;  // default se slider position (middle)
-
-AEGfxVertexList* sliderTrackMesh = nullptr; // the bar background
-AEGfxVertexList* sliderHandleMesh = nullptr; // the draggable handle
-
 namespace {
-    s8 font_id;
+    s8 font_id; // font used to draw labels and percentages
+    std::vector<Slider> sliders; // all sliders on the settings screen
+}
+
+namespace SliderConfig {
+    constexpr f32 track_width = 300.f; // width of the slider
+    constexpr f32 clickZone = 25.f; // how far above/below the bar the mouse still registers
+    constexpr f32 start_y = 100.f;  // screen height of the first slider
+    constexpr f32 spacing_y = 100.f;  // gap between each slider
+    constexpr f32 default_value = 1.0f; // starting volume for all sliders (1.0 = 100%)
+}
+
+// Helper functon -  build a slider and bind its audio groups 
+static Slider MakeSlider(int index, const char* label, std::initializer_list<AEAudioGroup> groups)
+{
+    // place each slider below the previous one
+    f32 posY = SliderConfig::start_y - index * SliderConfig::spacing_y;
+
+    // convert screen position to normalized value for text drawing
+    f32 labelY = posY / AEGfxGetWinMaxY();
+
+    Slider s(SliderConfig::default_value, posY, SliderConfig::track_width, SliderConfig::clickZone, label, labelY);
+
+    // connect each audio group to this slider
+    for (AEAudioGroup g : groups) {
+        s.AddAudioGroup(g);
+    }
+
+    return s;
 }
 
 void Setting_Load() {
@@ -23,149 +42,54 @@ void Setting_Load() {
 }
 
 void Settings_Initialize() {
-    // reset sliders to default values when entering settings
-    sliderX_bgm = 0.5f;
-    sliderX_se = 0.5f;
+    sliders.clear();
 
-    // create slider track mesh
-    // a flat rectangle used as the slider bar background
-    AEGfxMeshStart();
-    AEGfxTriAdd(
-        -1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        -1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f
-    );
-    AEGfxTriAdd(
-        1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f,
-        -1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f
-    );
-    sliderTrackMesh = AEGfxMeshEnd();
+    // To add a new slider: just add one more MakeSlider line here. Nothing else changes.
+    sliders.push_back(MakeSlider(0, "BGM Volume:", { bgm }));
+    sliders.push_back(MakeSlider(1, "SFX Volume:", { se_click, se_rat }));
 
-    // create slider handle mesh using full -1 to 1 range
-    // a flat rectangle used as the slider bar background
-    AEGfxMeshStart();
-    AEGfxTriAdd(
-        -1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        -1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f
-    );
-    AEGfxTriAdd(
-        1.f, -1.f, 0xFFFFFFFF, 0.f, 0.f,
-        1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f,
-        -1.f, 1.f, 0xFFFFFFFF, 0.f, 0.f
-    );
-    sliderHandleMesh = AEGfxMeshEnd();
+    for (Slider& s : sliders) {
+        s.CreateMeshes();
+        s.ApplyDefaultVolume(); // sync audio engine to the default value
+    }
 }
 
 void Settings_Update() {
-
+    // get mouse position and convert to world space
     s32 mx, my;
     AEInputGetCursorPosition(&mx, &my);
+    f32 mouseX = (f32)mx - AEGfxGetWinMaxX();
+    f32 mouseY = -(f32)my + AEGfxGetWinMaxY();
 
-    // convert mouse position to world space
-    f32 halfW = AEGfxGetWinMaxX();
-    f32 halfH = AEGfxGetWinMaxY();
-    f32 mouseX = (f32)mx - halfW;
-    f32 mouseY = -(f32)my + halfH;
-
-    // track if mouse was just clicked this frame
+    // only true on the first frame the mouse button is pressed
     bool justClicked = AEInputCheckTriggered(AEVK_LBUTTON);
 
-    if (AEInputCheckCurr(AEVK_LBUTTON))
-    {
-        // BGM slider
-        // check if mouse is within the bgm slider track area
-        if (mouseY >= 25.f && mouseY <= 75.f)
-        {
-            // play click only on initial press, not while dragging
-            if (justClicked) PlayClick();
-            // clamp mouse to slider range and normalize to 0.0 - 1.0
-            sliderX_bgm = (AEClamp(mouseX, -300.f, 300.f) + 300.f) / 600.f;
-            bgmVolume = sliderX_bgm;
-            AEAudioSetGroupVolume(bgm, bgmVolume);
-        }
-
-        // SE slider
-        // check if mouse is within the se slider track area
-        if (mouseY >= -75.f && mouseY <= -25.f)
-        {
-            // play click only on initial press, not while dragging
-            if (justClicked) PlayClick();
-            // clamp mouse to slider range and normalize to 0.0 - 1.0
-            sliderX_se = (AEClamp(mouseX, -300.f, 300.f) + 300.f) / 600.f;
-            seVolume = sliderX_se;
-            AEAudioSetGroupVolume(se_click, seVolume); // apply volume to click group
-            AEAudioSetGroupVolume(se_rat, seVolume); // apply volume to rat group
-        }
+    // update sliders while mouse is held
+    if (AEInputCheckCurr(AEVK_LBUTTON)) {
+        for (Slider& s : sliders)
+            s.UpdateFromMouse(mouseX, mouseY, justClicked);
     }
 
-    // back to menu
-    if (AEInputCheckTriggered(AEVK_ESCAPE))
-    {
+    // go back to main menu on ESC
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) {
         PlayClick();
         next = GAME_STATE_MENU;
     }
 }
 
+// draws all sliders
 void Settings_Draw() {
-
-    AEMtx33 transform, scale, trans;
-
-    // set render mode to color only, no texture
-    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-    AEGfxSetTransparency(1.f);
-
-    // draw BGM slider track
-    // flat white bar centered
-    AEMtx33Scale(&scale, 300.f, 2.f);
-    AEMtx33Trans(&trans, 0.f, 50.f);
-    AEMtx33Concat(&transform, &trans, &scale);
-    AEGfxSetTransform(transform.m);
-    AEGfxMeshDraw(sliderTrackMesh, AE_GFX_MDM_TRIANGLES);
-
-    // draw BGM slider handle
-    // maps sliderX_bgm (0.0 to 1.0) to screen space (-300 to 300)
-    f32 handlePosX_bgm = (sliderX_bgm * 2.f - 1.f) * 300.f;
-    AEMtx33Scale(&scale, 8.f, 15.f);
-    AEMtx33Trans(&trans, handlePosX_bgm, 50.f);
-    AEMtx33Concat(&transform, &trans, &scale);
-    AEGfxSetTransform(transform.m);
-    AEGfxMeshDraw(sliderHandleMesh, AE_GFX_MDM_TRIANGLES);
-
-    // draw SE slider track
-    // flat white bar centered
-    AEMtx33Scale(&scale, 300.f, 2.f);
-    AEMtx33Trans(&trans, 0.f, -50.f);
-    AEMtx33Concat(&transform, &trans, &scale);
-    AEGfxSetTransform(transform.m);
-    AEGfxMeshDraw(sliderTrackMesh, AE_GFX_MDM_TRIANGLES);
-
-    // draw SE slider handle
-    // maps sliderX_se (0.0 to 1.0) to screen space (-300 to 300)
-    f32 handlePosX_se = (sliderX_se * 2.f - 1.f) * 300.f;
-    AEMtx33Scale(&scale, 8.f, 15.f);
-    AEMtx33Trans(&trans, handlePosX_se, -50.f);
-    AEMtx33Concat(&transform, &trans, &scale);
-    AEGfxSetTransform(transform.m);
-    AEGfxMeshDraw(sliderHandleMesh, AE_GFX_MDM_TRIANGLES);
-
-    // draw labels
-    // display volume as percentage (0% to 100%)
-    char bgmBuffer[32], seBuffer[32];
-    sprintf_s(bgmBuffer, 32, "%.0f%%", bgmVolume * 100.f);  // shows 100% instead of 1.0
-    sprintf_s(seBuffer, 32, "%.0f%%", seVolume * 100.f);
-
-    AEGfxPrint(font_id, "BGM Volume:", -0.8f, 0.2f, 0.5f, 1, 1, 1, 1);
-    AEGfxPrint(font_id, bgmBuffer, 0.7f, 0.2f, 0.5f, 1, 1, 1, 1);
-    AEGfxPrint(font_id, "SFX Volume:", -0.8f, -0.1f, 0.5f, 1, 1, 1, 1);
-    AEGfxPrint(font_id, seBuffer, 0.7f, -0.1f, 0.5f, 1, 1, 1, 1);
+    for (Slider& s : sliders) {
+        s.Draw(font_id);
+    }
 }
 
+// frees slider memory
 void Settings_Free() {
-    // free meshes to prevent memory leaks
-    AEGfxMeshFree(sliderTrackMesh);
-    AEGfxMeshFree(sliderHandleMesh);
+    for (Slider& s : sliders) {
+        s.Free();
+    }
+    sliders.clear();
 }
 
 void Settings_Unload() {

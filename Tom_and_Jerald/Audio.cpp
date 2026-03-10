@@ -16,8 +16,8 @@ void AudioInit()
     clickAudio = AEAudioLoadSound("Assets/click_audio.mp3");
     ratsqueakAudio = AEAudioLoadSound("Assets/ratClick_audio.mp3");
 
-    bgm = AEAudioCreateGroup();
-    se_click = AEAudioCreateGroup();
+    bgm = AEAudioCreateGroup(); 
+    se_click = AEAudioCreateGroup();   
     se_rat = AEAudioCreateGroup();
 }
 
