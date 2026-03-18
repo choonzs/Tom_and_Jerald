@@ -1,70 +1,99 @@
 #include "Audio.hpp"
 #include "AEEngine.h"
+#include "pch.hpp"
 
-AEAudio backgroundAudio;
-AEAudio clickAudio;
-AEAudio ratsqueakAudio;
-
-AEAudioGroup bgm;
-AEAudioGroup se_click;
-AEAudioGroup se_rat;
-
-void AudioInit()
+// returns true if any recognized menu key was pressed
+bool IsMenuKeyTriggered()
 {
-    // koad background music and sound effects from assets folder
-    backgroundAudio = AEAudioLoadMusic("Assets/background_audio.mp3");
-    clickAudio = AEAudioLoadSound("Assets/click_audio.mp3");
-    ratsqueakAudio = AEAudioLoadSound("Assets/ratClick_audio.mp3");
-
-    bgm = AEAudioCreateGroup(); 
-    se_click = AEAudioCreateGroup();   
-    se_rat = AEAudioCreateGroup();
+    return AEInputCheckTriggered(AEVK_RETURN) ||
+        AEInputCheckTriggered(AEVK_S) ||
+        AEInputCheckTriggered(AEVK_E) ||
+        AEInputCheckTriggered(AEVK_ESCAPE) ||
+        AEInputCheckTriggered(AEVK_C) ||
+        AEInputCheckTriggered(AEVK_T) ||
+        AEInputCheckTriggered(AEVK_N) ||
+        AEInputCheckTriggered(AEVK_M) ||
+        AEInputCheckTriggered(AEVK_1) ||
+        AEInputCheckTriggered(AEVK_2) ||
+        AEInputCheckTriggered(AEVK_3) ||
+        AEInputCheckTriggered(AEVK_LBUTTON);
 }
+
+bool AudioLoadConfig(const char* filename) {
+    std::ifstream ifs(filename);
+
+    if (!ifs) {                    
+        std::cerr << "Cannot open " << filename << "\n"; // check if file opens
+        return false;
+    }
+
+    std::string label;  
+    std::string path;
+
+    // reads each line — label first, then path
+    ifs >> label >> path;  // reads "Background_Audio Assets/background_audio.mp3"
+    backgroundAudio.LoadMusic(path.c_str());
+
+    ifs >> label >> path;  // reads "Click_Audio Assets/click_audio.mp3"
+    clickAudio.LoadSound(path.c_str());
+
+    ifs >> label >> path;  // reads "Rat_Audio Assets/ratClick_audio.mp3"
+    ratsqueakAudio.LoadSound(path.c_str());
+
+    ifs.close();
+    return true;
+}
+
+// loads a music file and marks it as looping
+void AudioClip::LoadMusic(const char* filename)
+{
+    mAudio = AEAudioLoadMusic(filename);
+    mGroup = AEAudioCreateGroup();
+    mIsMusic = true;
+}
+
+// loads a sound effect file and marks it as non-looping
+void AudioClip::LoadSound(const char* filename)
+{
+    mAudio = AEAudioLoadSound(filename);
+    mGroup = AEAudioCreateGroup();
+    mIsMusic = false;
+}
+
+// plays the audio clip
+// music will loop forever and is guarded against restarting every frame
+// sound effects play once and can be retriggered
+void AudioClip::Play(float volume, float pitch)
+{
+    // prevent music from restarting if it is already playing
+    if (mIsMusic && mIsPlaying) return;
+
+    int loop = mIsMusic ? -1 : 0; // -1 = loop forever, 0 = play once
+    AEAudioPlay(mAudio, mGroup, volume, pitch, loop);
+    mIsPlaying = true;
+}
+
+// stops the audio clip and resets the flag so it can be played again
+void AudioClip::Stop()
+{
+    AEAudioStopGroup(mGroup);
+    mIsPlaying = false; 
+}
+
+AudioClip backgroundAudio;
+AudioClip clickAudio;
+AudioClip ratsqueakAudio;
+
+//void AudioInit()
+//{
+//    // load background music and sound effects from text file
+//    AudioLoadConfig("Assets/AudioConfig.txt");
+//}
 
 void AudioFree()
 {
-    // unload all audio groups to prevent memory leaks
-    AEAudioUnloadAudioGroup(bgm);
-    AEAudioUnloadAudioGroup(se_click);
-    AEAudioUnloadAudioGroup(se_rat);
-}
-
-// flag to track if background audio is already playing
-// prevents background music from restarting every frame
-bool bgmPlaying = false;
-
-void PlayBackgroundAudio()
-{
-    // only play if it is not already playing
-    if (!bgmPlaying)
-    {
-        AEAudioPlay(backgroundAudio, bgm, 1.f, 1.f, -1); // loops forever
-        bgmPlaying = true; // mark as playing so it won't play again
-    }
-}
-
-void PlayClick()
-{
-    AEAudioPlay(clickAudio, se_click, 1.f, 1.f, 0); // plays click sound once on button press
-}
-
-void PlayRatSqueak()
-{
-    AEAudioPlay(ratsqueakAudio, se_rat, 1.f, 1.f, 0); // plays rat squeak sound once
-}
-
-void StopBackgroundAudio()
-{
-    AEAudioStopGroup(bgm); // stops background music
-    bgmPlaying = false; // reset the flag so it can play again when called
-}
-
-void StopClick()
-{
-    AEAudioStopGroup(se_click); // stops click sound effect if it is still playing
-}
-
-void StopRatSqueak()
-{
-    AEAudioStopGroup(se_rat);  // stops rat squeak sound effect if it is still playing
+    // unload all audio to prevent memory leaks
+    backgroundAudio.Stop();
+    clickAudio.Stop();
+    ratsqueakAudio.Stop();
 }

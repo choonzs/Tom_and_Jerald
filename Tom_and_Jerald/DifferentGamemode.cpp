@@ -228,9 +228,12 @@ void GameState_MazeUpdate()
 {
     const float dt = (float)AEFrameRateControllerGetFrameTime();
 
+    if (IsMenuKeyTriggered()) {
+        clickAudio.Play();
+    }
+
     if (AEInputCheckTriggered(AEVK_ESCAPE))
     {
-        PlayClick();
         next = GAME_STATE_MENU;
         return;
     }
@@ -261,7 +264,6 @@ void GameState_MazeUpdate()
     if (PlayerReachedGoal())
     {
         gMazeRewardsEarned += 1;
-        PlayClick();
         next = GAME_STATE_MENU; 
     }
 }

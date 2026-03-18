@@ -78,7 +78,11 @@ void LevelEditor_Initialize() {
 }
 
 void LevelEditor_Update() {
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { PlayClick(); next = GAME_STATE_MENU; }
+    if (IsMenuKeyTriggered()) {
+        clickAudio.Play();
+    }
+
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
 
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     s32 mx, my;

@@ -52,7 +52,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// INNER GAME LOOP - runs every frame while state hasn't changed
 			while (current == next) {
 				AESysFrameStart();      // Signal frame start (updates input, frame timer)
-				PlayBackgroundAudio();  // Ensure BGM is playing (idempotent - won't restart)
 				fpUpdate();             // Run game logic (physics, collisions, input)
 				fpDraw();               // Render the current frame
 				AESysFrameEnd();        // Signal frame end (enforces frame rate, swaps buffers)

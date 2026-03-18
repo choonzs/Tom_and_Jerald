@@ -1,29 +1,36 @@
+#pragma once
 #include "AEEngine.h"
 
-// audio assets - background music and sound effects
-extern AEAudio backgroundAudio;
-extern AEAudio clickAudio; 
-extern AEAudio ratsqueakAudio;
+class AudioClip {
+    public:
+        //AudioClip() = default;
 
-// audio groups - used to control volume and pitch of each group
-extern AEAudioGroup bgm;
-extern AEAudioGroup se_click;
-extern AEAudioGroup se_rat;
+        // import audio as music (loops) or sound effect (plays once) from external file
+        void LoadMusic(const char* filename);
+        void LoadSound(const char* filename);
 
-// flag to track if background audio is already playing
-// prevents background music from restarting every frame
-extern bool bgmPlaying; 
+        // play the audio clip with optional volume and pitch
+        void Play(float volume = 1.f, float pitch = 1.f);
+        void Stop();
 
-// Init and Free
-void AudioInit();
+    private:
+        AEAudio      mAudio; // the audio asset
+        AEAudioGroup mGroup; // the audio group for volume/pitch control
+        bool         mIsMusic = false; // true = music (loops), false = sound effect (plays once)
+        bool         mIsPlaying = false; // tracks if audio is currently playing
+};
+
+// global audio objects accessible across all game states
+extern AudioClip backgroundAudio; // background music
+extern AudioClip clickAudio; // UI button click sound effect
+extern AudioClip ratsqueakAudio; // rat squeak sound effect during game
+
+// returns true if any menu navigation key was triggered this frame
+// used to play click sound without copy pasting in every game state
+bool IsMenuKeyTriggered();
+
+bool AudioLoadConfig(const char* filename);
+
+// init and Free
+//void AudioInit();
 void AudioFree();
-
-// Individual play functions
-void PlayBackgroundAudio();
-void PlayClick();
-void PlayRatSqueak();
-
-// Individual stop functions
-void StopBackgroundAudio();
-void StopClick();
-void StopRatSqueak();

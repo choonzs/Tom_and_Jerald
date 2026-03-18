@@ -50,40 +50,40 @@ void MainMenu_Initialize() {
 	window_height = (AEGfxGetWinMaxY() - AEGfxGetWinMinY());
 
 	mainmenu_flag = FALSE; //False on default, triggers main menu after splashscreen
+
+	backgroundAudio.Play();
 }
 
 void MainMenu_Update() {
 	camera.Update();
 	camera.Set_Shaking();
+
+	if (IsMenuKeyTriggered()) {
+		clickAudio.Play();
+	}
 	//if (AEInputCheckTriggered(AEVK_RETURN))
 	//{
-	//	PlayClick();
 	//	// Moving to playing state
 	//	next = GAME_STATE_PLAYING;
 	//}
 	//else if (AEInputCheckTriggered(AEVK_S))
 	//{
-	//	PlayClick();
 	//	next = GAME_STATE_SHOP;
 	//}
 	//else if (AEInputCheckTriggered(AEVK_E))
 	//{
-	//	PlayClick();
 	//	next = GAME_STATE_LEVEL_EDITOR;
 	//} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 	//{
-	//	PlayClick();
 	//	// Quitting the game
 	//	next = GAME_STATE_QUIT;
 	//}
 	//else if (AEInputCheckTriggered(AEVK_C))
 	//{
-	//	PlayClick();
 	//	next = GAME_STATE_CUSTOM_PLAY;
 	//}
 	//else if (AEInputCheckTriggered(AEVK_M))
 	//{
-	//	PlayClick();
 	//	next = GAME_STATE_MAZE;
 	//}
 	//else {
@@ -91,6 +91,10 @@ void MainMenu_Update() {
 	//	// Refreshing the next state to stay in menu
 	//	//next = GAME_STATE_RESTART;
 	//}
+
+	if (AEInputCheckTriggered(AEVK_LBUTTON)) { // player clicks a button
+		clickAudio.Play();
+	}
 
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
@@ -126,23 +130,19 @@ void MainMenu_Update() {
 		// Menu Controls
 		if (AEInputCheckTriggered(AEVK_RETURN))
 		{
-			PlayClick();
 			// Moving to playing state
 			next = GAME_STATE_PLAYING;
 		}
 		else if (AEInputCheckTriggered(AEVK_S))
 		{
-			PlayClick();
 			next = GAME_STATE_SHOP;
 		}
 		else if (AEInputCheckTriggered(AEVK_E))
 		{
-			PlayClick();
 			next = GAME_STATE_LEVEL_EDITOR;
 		}
 		else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 		{
-			PlayClick();
 			// Quitting the game
 			next = GAME_STATE_QUIT;
 		}
@@ -168,17 +168,14 @@ void MainMenu_Update() {
 			// --------------------------------------------------
 
 
-			PlayClick();
 			next = GAME_STATE_CUSTOM_PLAY;
 		}
 		else if (AEInputCheckTriggered(AEVK_T))
 		{
-			PlayClick();
 			next = GAME_STATE_SETTINGS;
 		}
 		else if (AEInputCheckTriggered(AEVK_M))
 		{
-			PlayClick();
 			next = GAME_STATE_MAZE;
 		}
 		else {

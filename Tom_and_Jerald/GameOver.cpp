@@ -21,24 +21,24 @@ void GameOver_Initialize() {
 }
 
 void GameOver_Update() {
+	if (IsMenuKeyTriggered()) {
+		clickAudio.Play();
+	}
+
 	if (AEInputCheckTriggered(AEVK_1))
 	{
-		PlayClick();
 		next = GAME_STATE_PLAYING;
 	}
 	else if (AEInputCheckTriggered(AEVK_2))
 	{
-		PlayClick();
 		next = GAME_STATE_MENU;
 	}
 	else if (AEInputCheckTriggered(AEVK_S))
 	{
-		PlayClick();
 		next = GAME_STATE_SHOP;
 	}
 	else if (AEInputCheckTriggered(AEVK_3))
 	{
-		PlayClick();
 		next = GAME_STATE_QUIT;
 	}
 	else {
