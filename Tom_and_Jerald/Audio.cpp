@@ -84,11 +84,11 @@ AudioClip backgroundAudio;
 AudioClip clickAudio;
 AudioClip ratsqueakAudio;
 
-//void AudioInit()
-//{
-//    // load background music and sound effects from text file
-//    AudioLoadConfig("Assets/AudioConfig.txt");
-//}
+void AudioInit()
+{
+    // load background music and sound effects from text file
+    AudioLoadConfig("Assets/AudioConfig.txt");
+}
 
 void AudioFree()
 {

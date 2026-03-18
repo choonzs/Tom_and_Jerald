@@ -32,5 +32,5 @@ bool IsMenuKeyTriggered();
 bool AudioLoadConfig(const char* filename);
 
 // init and Free
-//void AudioInit();
+void AudioInit();
 void AudioFree();
