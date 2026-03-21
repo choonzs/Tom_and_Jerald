@@ -111,6 +111,8 @@ void Playing_Update() {
 
     if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
 
+    if (AEInputCheckTriggered(AEVK_P)) { next = GAME_STATE_PAUSE_MENU; }
+
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
 

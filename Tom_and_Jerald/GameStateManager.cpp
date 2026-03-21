@@ -11,6 +11,7 @@
 #include "CustomLevel.hpp"
 #include "DifferentGamemode.hpp"
 #include "Settings.hpp"
+#include "PauseMenu.hpp"
 
 int current{}, previous{}, next{};
 
@@ -95,6 +96,14 @@ void GSM_Update()
 		fpDraw = GameState_MazeDraw;
 		fpFree = GameState_MazeFree;
 		fpUnload = GameState_MazeUnload;
+		break;
+	case GAME_STATE_PAUSE_MENU:
+		fpLoad = PauseMenu_Load;
+		fpInitialize = PauseMenu_Initialize;
+		fpUpdate = PauseMenu_Update;
+		fpDraw = PauseMenu_Draw;
+		fpFree = PauseMenu_Free;
+		fpUnload = PauseMenu_Unload;
 		break;
 	case GAME_STATE_RESTART:
 		// RESTART is handled in Main.cpp by resetting current/next

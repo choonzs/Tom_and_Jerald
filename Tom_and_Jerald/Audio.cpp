@@ -1,5 +1,4 @@
 #include "Audio.hpp"
-#include "AEEngine.h"
 #include "pch.hpp"
 
 // returns true if any recognized menu key was pressed
@@ -8,6 +7,7 @@ bool IsMenuKeyTriggered()
     return AEInputCheckTriggered(AEVK_RETURN) ||
         AEInputCheckTriggered(AEVK_S) ||
         AEInputCheckTriggered(AEVK_E) ||
+        AEInputCheckTriggered(AEVK_P) ||
         AEInputCheckTriggered(AEVK_ESCAPE) ||
         AEInputCheckTriggered(AEVK_C) ||
         AEInputCheckTriggered(AEVK_T) ||

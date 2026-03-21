@@ -1,9 +1,10 @@
 #pragma once
-#include "AEEngine.h"
+#include "pch.hpp"
 
 class AudioClip {
     public:
         //AudioClip() = default;
+        AEAudioGroup GetGroup() const;
 
         // import audio as music (loops) or sound effect (plays once) from external file
         void LoadMusic(const char* filename);
@@ -12,6 +13,7 @@ class AudioClip {
         // play the audio clip with optional volume and pitch
         void Play(float volume = 1.f, float pitch = 1.f);
         void Stop();
+
 
     private:
         AEAudio      mAudio; // the audio asset
