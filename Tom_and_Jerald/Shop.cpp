@@ -64,6 +64,7 @@ void ShopState::Load() {
 
 void ShopState::Initialize() {
 	createUnitSquare(&unit_square);
+	Credits_LoadFile("Assets/data/Cheese.txt");
 	
 	AEGfxSetCamPosition(0.0f, 0.0f);
 	AEInputShowCursor(1);
@@ -76,6 +77,7 @@ void ShopState::Update() {
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE)) {
 		next = previous;
+		Credits_SaveFile("Assets/data/Cheese.txt");
 		return;
 	}
 

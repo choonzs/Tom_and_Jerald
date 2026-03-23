@@ -9,7 +9,6 @@
 //	f32 scale; // Only for obstacles
 //};
 
-//TODO finish conversion into class type
 class LevelTile {
 public: 
 	// Ctors & Dtors

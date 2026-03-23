@@ -20,9 +20,11 @@
 #include "Credits.hpp"
 
 namespace {
-    int credits = 1000;          // Starting cheese balance
+    int credits{};// Starting cheese balance
+    int credits_init{credits};
     f32 no_damage_timer = 0.0f;  // Time since last damage (seconds)
 }
+ int credits_this_round = 0;
 
 // ---------------------------------------------------------------------------
 // Credits_ResetRound
@@ -96,4 +98,37 @@ void Credits_Add(int amount)
 {
     if (amount > 0)
         credits += amount;
+}
+
+// ---------------------------------------------------------------------------
+// Credits Loading from File and Saving to File
+// ---------------------------------------------------------------------------
+void Credits_LoadFile(const std::string& filename) {
+    std::ifstream ifs(filename);
+    if (ifs.is_open())
+    {
+        ifs >> credits;
+        // if file empty/corrupt
+        if (!ifs) credits = 0; // set back to 0 prevent loading of anything weird
+        ifs.close();
+
+        credits_init = credits; // set init credit amt to credits
+    }
+    else
+    {
+        // file doesn't exist credits remain at 0
+    }
+}
+void Credits_SaveFile(const std::string& filename) {
+    std::ofstream ofs(filename);
+    if (ofs.is_open()) {
+        ofs << credits; // append to file the new credits
+    }
+    ofs.close();
+    credits_init = credits; // set init credit to amt credits
+}
+// Before any saving or loading to txtfile
+// Normally should be different to credit value while inside a round of gameloop
+int Credits_GetInitBalance() {
+    return credits_init;
 }

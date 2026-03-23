@@ -10,6 +10,7 @@
 #include "LevelEditor.hpp"
 #include "CustomLevel.hpp"
 #include "DifferentGamemode.hpp"
+#include "HighScores.hpp"
 #include "Settings.hpp"
 #include "PauseMenu.hpp"
 
@@ -105,6 +106,13 @@ void GSM_Update()
 		fpFree = PauseMenu_Free;
 		fpUnload = PauseMenu_Unload;
 		break;
+	case GAME_STATE_HIGHSCORE:
+		fpLoad = HighScore_Load;
+		fpInitialize = HighScore_Initialize;
+		fpUpdate = HighScore_Update;
+		fpDraw = HighScore_Draw;
+		fpFree = HighScore_Free;
+		fpUnload = HighScore_Unload;
 	case GAME_STATE_RESTART:
 		// RESTART is handled in Main.cpp by resetting current/next
 		// to previous. No function pointers needed.

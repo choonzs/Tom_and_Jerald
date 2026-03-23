@@ -1,0 +1,10 @@
+choon 9
+jera 8 
+dan 7 
+kai 6 
+jin 5 
+choon 4
+jera 3 
+dan 2 
+kai 1 
+jin 0 

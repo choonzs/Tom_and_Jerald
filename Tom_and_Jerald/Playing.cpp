@@ -71,6 +71,7 @@ void Playing_Initialize() {
 
     stage_timer = 0.0f;
     damage_timer = 0.0f;
+    Credits_LoadFile("Assets/data/Cheese.txt");
     Credits_ResetRound();
 
     f32 base_capacity = 100.0f;
@@ -199,8 +200,19 @@ void Playing_Update() {
     Credits_Update(delta_time, game_active);
 
     if (base_player.Health() <= 0) next = GAME_STATE_GAME_OVER;
-    else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
+    // Remove this since we want to make it truly endless
+    //else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
     else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
+
+    //Changing game states
+    if (current != next) {
+        // Current credits minus credits at the start of the round
+        credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
+        // TODO: Do something with the score value
+        std::cout << "Finish Playing Credits " << credits_this_round << '\n';
+        // Save current cheese score
+        Credits_SaveFile("Assets/data/Cheese.txt");
+    }
 }
 
 void Playing_Draw() {

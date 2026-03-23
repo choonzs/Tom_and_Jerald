@@ -33,7 +33,7 @@ namespace {
     f32 velocityX{};
     f32 velocityY{};
 
-    f32 obstacle_scale{1.0f}; //by default
+    f32 obstacle_scale{5.0f}; //by default
 
     // Textures & Meshes
     AEGfxTexture* texSquare = nullptr;
@@ -154,7 +154,7 @@ void LevelEditor_Update() {
                 //mapData[gridY][gridX] = currentTool;
                 LevelTile tmp(currentTool,
                     AEVec2({ -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f }),
-                    AEVec2({ (TILE_SIZE / 2.0f) * obstacle_scale, (TILE_SIZE / 2.0f) * obstacle_scale }),
+                    AEVec2({ (TILE_SIZE / 2.0f), (TILE_SIZE / 2.0f)}),
                     AEVec2({ velocityX, velocityY }),
                     obstacle_scale
                 );
@@ -329,7 +329,7 @@ void LevelEditor_Draw() {
     }
     
     // 5. Draw UI Text (representing velocity and scale values)
-    f32 textX = slotCenterX;  // small padding from left panel edge
+    //f32 textX = slotCenterX;  // small padding from left panel edge
     f32 textY = 0.0;    // start center
     f32 lineHeight = 0.2f;       // vertical spacing between lines
 
@@ -345,7 +345,7 @@ void LevelEditor_Draw() {
     textY -= lineHeight;
 
     // Example: showing tile scale
-    sprintf_s(buffer, "Scale Size: %.2f", static_cast<f32>(obstacle_scale * 100));
+    sprintf_s(buffer, "Scale Size: %.2f", static_cast<f32>(obstacle_scale));
     AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
     textY -= lineHeight;
 

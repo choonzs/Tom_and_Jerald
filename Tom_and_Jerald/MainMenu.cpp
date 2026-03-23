@@ -178,6 +178,11 @@ void MainMenu_Update() {
 		{
 			next = GAME_STATE_MAZE;
 		}
+		else if (AEInputCheckTriggered(AEVK_H))
+		{
+			//PlayClick();
+			next = GAME_STATE_HIGHSCORE;
+		}
 		else {
 			current = GAME_STATE_MENU;
 			// Refreshing the next state to stay in menu
@@ -202,9 +207,9 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
 		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f);
 		drawCenteredText(font_id, buffer, -0.1f, 0.7f); // <--- ADD THIS LINE
-		drawCenteredText(font_id, "Settings (T)", -0.2f, 0.7f);
-		drawCenteredText(font_id, "EXIT (ESC)", -0.3f, 0.7f);
-
+		drawCenteredText(font_id, "HIGH SCORES (H)", -0.2f, 0.7f);
+		drawCenteredText(font_id, "SETTINGS (T)", -0.3f, 0.7f);
+		drawCenteredText(font_id, "EXIT (ESC)", -0.4f, 0.7f);
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 	}
