@@ -228,10 +228,6 @@ void GameState_MazeUpdate()
 {
     const float dt = (float)AEFrameRateControllerGetFrameTime();
 
-    if (IsMenuKeyTriggered()) {
-        clickAudio.Play();
-    }
-
     if (AEInputCheckTriggered(AEVK_ESCAPE))
     {
         next = GAME_STATE_MENU;

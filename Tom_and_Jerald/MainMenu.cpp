@@ -58,9 +58,6 @@ void MainMenu_Update() {
 	camera.Update();
 	camera.Set_Shaking();
 
-	if (IsMenuKeyTriggered()) {
-		clickAudio.Play();
-	}
 	//if (AEInputCheckTriggered(AEVK_RETURN))
 	//{
 	//	// Moving to playing state
@@ -91,10 +88,6 @@ void MainMenu_Update() {
 	//	// Refreshing the next state to stay in menu
 	//	//next = GAME_STATE_RESTART;
 	//}
-
-	if (AEInputCheckTriggered(AEVK_LBUTTON)) { // player clicks a button
-		clickAudio.Play();
-	}
 
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
@@ -180,7 +173,6 @@ void MainMenu_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_H))
 		{
-			//PlayClick();
 			next = GAME_STATE_HIGHSCORE;
 		}
 		else {

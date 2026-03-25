@@ -18,6 +18,8 @@ class Slider {
         // frees the track and handle meshes
         void FreeMeshes();
 
+        void SetValue(float v) { mValue = v; }
+
         float GetValue() const;        // returns value between 0.0f and 1.0f
         const char* GetLabel() const;  // returns the label
 

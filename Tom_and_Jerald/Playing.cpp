@@ -30,6 +30,8 @@ Player base_player;
 AEGfxTexture* asteroid_texture = nullptr;
 AEGfxTexture* fuel_pickup_texture = nullptr;
 
+// check if the game is paused
+bool isPaused;
 
 namespace {
     // Camera
@@ -37,6 +39,7 @@ namespace {
     // Meshes
     AEGfxVertexList* unit_square = nullptr;
     AEGfxVertexList* unit_circle = nullptr;
+    AEGfxVertexList* bgMesh = nullptr;
     // Fuel
     struct FuelPickup {
         AEVec2 pos;
@@ -47,7 +50,8 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
-  
+    s8 font_id;
+
 }
 
 int getMaxHealthFromUpgrades();
@@ -55,12 +59,15 @@ int getMaxHealthFromUpgrades();
 void Playing_Load() {
     ASSETS::Init_Images();
     ASSETS::Init_Font();
+    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 }
 
 void Playing_Initialize() {
     createUnitSquare(&unit_square, 0.25f, 0.25f);
     createUnitCircles(&unit_circle);
     createUnitSquare(&(base_player.Mesh()), 0.25f, 0.25f);
+
+    createUnitSquare(&bgMesh, 0.25f, 0.25f, 1.0);
 
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upgraded_half_size = 20.0f - size_reduction;
@@ -106,13 +113,32 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
-    if (IsMenuKeyTriggered()) {
-        clickAudio.Play();
+    if (AEInputCheckTriggered(AEVK_P)) { isPaused = !isPaused; } // toggle pause
+    
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+
+    if (isPaused) {
+        if (AEInputCheckTriggered(AEVK_R)) {
+            // return back to the game
+            isPaused = false;
+        }
+        else if (AEInputCheckTriggered(AEVK_1))
+        {
+            next = GAME_STATE_RESTART; isPaused = false;
+        }
+        else if (AEInputCheckTriggered(AEVK_2))
+        {
+            next = GAME_STATE_MENU;
+        }
+        else if (AEInputCheckTriggered(AEVK_3))
+        {
+            next = GAME_STATE_QUIT;
+        }
+        else {
+            //next = GAME_STATE_RESTART;
+        }
+        return;
     }
-
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
-
-    if (AEInputCheckTriggered(AEVK_P)) { next = GAME_STATE_PAUSE_MENU; }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
     bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
@@ -213,6 +239,8 @@ void Playing_Update() {
         // Save current cheese score
         Credits_SaveFile("Assets/data/Cheese.txt");
     }
+    else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
+    else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
 }
 
 void Playing_Draw() {
@@ -294,18 +322,34 @@ void Playing_Draw() {
     AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
 
     graphics::particleDraw(unit_circle);
+
+    if (!isPaused) return;
+
+    float camX = camera.Position().x;
+    float camY = camera.Position().y;
+
+    // draw overlay
+    drawQuad(bgMesh, camX, camY, 320.f, 220.f, 0.06f, 0.07f, 0.09f, 1.f);
+    // draw text
+    drawCenteredText(font_id, "PAUSED", 0.35f, 1.0f);
+    drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
+    drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);
+    drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.2f, 0.7f);
+    drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
 }
 
 void Playing_Free() {
     AEGfxMeshFree(unit_square);
     AEGfxMeshFree(unit_circle);
+ 
+    AEGfxMeshFree(bgMesh);
     if (pFuel) { delete pFuel; pFuel = nullptr; }
 }
 
 void Playing_Unload() {
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
-
+    isPaused = false;
 }
 
 int getMaxHealthFromUpgrades() {

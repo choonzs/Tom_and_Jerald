@@ -81,7 +81,7 @@ void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_po
 \param[in] sprite_uv_width
 	The width of the UV coordinates for the sprite texture.
 *******************************************************************************/
-void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height = 1.0f, f32 sprite_uv_width = 1.0f);
+void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height = 1.0f, f32 sprite_uv_width = 1.0f, f32 size = 0.5);
 
 /*!*****************************************************************************
 \brief

@@ -5,8 +5,10 @@
 #include "Audio.hpp"
 
 namespace {
-    // all sliders stored in one vector
+    // all sliders stored in one array
     std::vector<Slider> sliders;
+    // persists slider values across state transitions
+    std::vector<float> savedValues;
     s8 font_id;
 }
 
@@ -18,7 +20,6 @@ const char* Slider::GetLabel() const { return mLabel.c_str(); }
 AEAudioGroup AudioClip::GetGroup() const { return mGroup; }
 
 // reads SliderConfig.txt and initializes all sliders
-// same >> pattern as AudioLoadConfig
 bool SliderLoadConfig(const char* filename)
 {
     std::ifstream ifs(filename);
@@ -28,18 +29,37 @@ bool SliderLoadConfig(const char* filename)
         return false;
     }
 
+    // add sliders into the array
+    std::vector<std::string> labels;
+    // pass each line from the text file into label
     std::string label;
-    float x, y, width, height;
 
-    // each line creates a new slider and adds it to the vector
-    while (ifs >> label >> x >> y >> width >> height)
+    // each line in the txt file creates a new slider and adds it to the vector
+    while (ifs >> label)
     {
-        Slider s;
-        s.Init(label.c_str(), x, y, width, height);
-        sliders.push_back(s); // automatically grows the vector
+        // add the slider into array
+        labels.push_back(label);
     }
 
     ifs.close();
+
+    // get the array size
+    int n = (int)labels.size();
+    // gap value between the sliders
+    float gap = 50.f;
+
+    for (int i = 0; i < n; ++i)
+    {
+        // changes per slider based on i, so each slider gets a different y position
+        float y = ((n - 1) - 2 * i) * gap;
+
+        Slider s;
+        // pass in the label name, x-axis, y-axis, width, height to create a slider
+        s.Init(labels[i].c_str(), 0.f, y, 300.f, 20.f);
+        // add the created slider into sliders array
+        sliders.push_back(s);
+    }
+
     return true;
 }
 
@@ -62,8 +82,8 @@ void Slider::Update()
     AEInputGetCursorPosition(&mouseX, &mouseY);
 
     // convert mouse screen position to world position
-    float worldMouseX = (float)mouseX - (AEGfxGetWinMaxX());
-    float worldMouseY = -((float)mouseY - (AEGfxGetWinMaxY()));
+    float worldMouseX = (float)mouseX + AEGfxGetWinMinX();
+    float worldMouseY = -((float)mouseY) - AEGfxGetWinMinY();
 
     // calculate left and right edge of the track
     f32 handleX = (mValue * 2.f - 1.f) * mWidth;
@@ -172,19 +192,26 @@ void Setting_Load() {
 
 void Settings_Initialize() {
     sliders.clear();
-    SliderLoadConfig("Assets/SliderConfig.txt");
+    // load the slider config text file
+    SliderLoadConfig("../../Assets/SliderConfig.txt");
+
+    // reset camera to origin so world-space mouse conversion is accurate
+    AEGfxSetCamPosition(0.0f, 0.0f);
+    // ensure cursor is visible in settings screen
+    AEInputShowCursor(1);
 
     // create meshes after sliders are initialized
     for (Slider& s : sliders) {
         s.CreateMeshes();
     }
+
+    // restore saved values of the sliders from previous session
+    for (size_t i = 0; i < sliders.size() && i < savedValues.size(); ++i) {
+        sliders[i].SetValue(savedValues[i]);
+    }
 }
 
 void Settings_Update() {
-    if (IsMenuKeyTriggered()) {
-        clickAudio.Play();
-    }
-
     for (Slider& s : sliders) {
         s.Update();
     }
@@ -207,6 +234,15 @@ void Settings_Update() {
 
 // draws all sliders
 void Settings_Draw() {
+    // Clear the screen & Set to Default Draw Settings
+    AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+    AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    AEGfxSetTransparency(1.0f);
+    AEGfxTextureSet(nullptr, 0, 0);
+
     for (Slider& s : sliders) {
         s.Draw(font_id);
     }
@@ -214,8 +250,9 @@ void Settings_Draw() {
 
 // frees slider memory
 void Settings_Free() {
+    savedValues.clear();
     for (Slider& s : sliders) {
-        s.Reset();
+        savedValues.push_back(s.GetValue()); // save first
         s.FreeMeshes();
     }
     sliders.clear();

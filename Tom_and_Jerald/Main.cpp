@@ -32,7 +32,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// GSM LOOP
 	while (current != GAME_STATE_QUIT)
 	{
-
+		clickAudio.Play();
 		// when the window is closed
 		if (0 == AESysDoesWindowExist()) {
 			current = GAME_STATE_QUIT;

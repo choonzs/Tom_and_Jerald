@@ -39,10 +39,6 @@ void GameOver_Initialize() {
 }
 
 void GameOver_Update() {
-	if (IsMenuKeyTriggered()) {
-		clickAudio.Play();
-	}
-
 	if (AEInputCheckTriggered(AEVK_1))
 	{
 		next = GAME_STATE_PLAYING;

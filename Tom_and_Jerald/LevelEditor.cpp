@@ -78,9 +78,6 @@ void LevelEditor_Initialize() {
 }
 
 void LevelEditor_Update() {
-    if (IsMenuKeyTriggered()) {
-        clickAudio.Play();
-    }
 
     if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
 

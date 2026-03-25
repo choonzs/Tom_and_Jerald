@@ -34,18 +34,18 @@ void drawText(s8 font_id, const char* text, f32 scale, f32 cam_pos_x, f32 cam_po
 }
 
 
-void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height, f32 sprite_uv_width)
+void createUnitSquare(AEGfxVertexList** out_mesh, f32 sprite_uv_height, f32 sprite_uv_width, f32 size)
 {
 	AEGfxMeshStart();
 	AEGfxTriAdd(
-		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, sprite_uv_height, // bottom left
-		0.5f, -0.5f, 0xFFFFFFFF, sprite_uv_width, sprite_uv_height, // bottom right 
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
+		-size, -size, 0xFFFFFFFF, 0.0f, sprite_uv_height, // bottom left
+		size, -size, 0xFFFFFFFF, sprite_uv_width, sprite_uv_height, // bottom right 
+		-size, size, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
 
 	AEGfxTriAdd(
-		0.5f, -0.5f, 0xFFFFFFFF, sprite_uv_width, sprite_uv_height, // bottom right 
-		0.5f, 0.5f, 0xFFFFFFFF, sprite_uv_width, 0.0f,   // top right
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
+		size, -size, 0xFFFFFFFF, sprite_uv_width, sprite_uv_height, // bottom right 
+		size, size, 0xFFFFFFFF, sprite_uv_width, 0.0f,   // top right
+		-size, size, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
 
 	*out_mesh = AEGfxMeshEnd();
 }

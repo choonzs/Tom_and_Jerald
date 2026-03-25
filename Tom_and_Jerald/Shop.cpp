@@ -71,9 +71,6 @@ void ShopState::Initialize() {
 }
 
 void ShopState::Update() {
-	if (IsMenuKeyTriggered()) {
-		clickAudio.Play();
-	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE)) {
 		next = previous;

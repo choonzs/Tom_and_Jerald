@@ -26,9 +26,6 @@ void VictoryState::Initialize() {
 }
 
 void VictoryState::Update() {
-    if (IsMenuKeyTriggered()) {
-        clickAudio.Play();
-    }
 
     if (AEInputCheckTriggered(AEVK_N)) {
         next = GAME_STATE_PLAYING;
