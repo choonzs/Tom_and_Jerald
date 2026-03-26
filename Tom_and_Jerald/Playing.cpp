@@ -97,6 +97,7 @@ void Playing_Initialize() {
     //---------------------------------------
 
     camera.Magnitude() = 20.0f;
+
     camera.Position().x = base_player.Position().x;
     camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
@@ -141,7 +142,8 @@ void Playing_Update() {
     }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
-    bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
+    bool isFlying = (AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_SPACE) 
+        || AEInputCheckCurr(AEVK_UP) ) && pFuel->HasFuel();
 
     if (pFuel) pFuel->Update(delta_time, isFlying);
 

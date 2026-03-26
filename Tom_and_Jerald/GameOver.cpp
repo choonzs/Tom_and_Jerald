@@ -17,7 +17,7 @@ namespace {
 	std::string scoreText("SCORE : ");
 	bool new_score{ false };
 
-	std::string newName;
+	std::string newName{};
 	//
 }
 
@@ -29,7 +29,9 @@ void GameOver_Initialize() {
 	createUnitSquare(&unit_square);
 	AEGfxSetCamPosition(0.0f, 0.0f);
 
-	scoreText += std::to_string(credits_this_round);
+	newName = "";
+	scoreText = "SCORE : " + std::to_string(credits_this_round);
+
 	currentboard = new Leaderboard("Assets/data/HighScores.txt");
 	std::cout << "Start GameOver Credits " << credits_this_round << '\n';
 	if (credits_this_round > currentboard->LowestScore()) {
@@ -39,28 +41,14 @@ void GameOver_Initialize() {
 }
 
 void GameOver_Update() {
-	if (AEInputCheckTriggered(AEVK_1))
-	{
-		next = GAME_STATE_PLAYING;
+	if (IsMenuKeyTriggered()) {
+		clickAudio.Play();
 	}
-	else if (AEInputCheckTriggered(AEVK_2))
-	{
-		next = GAME_STATE_MENU;
-	}
-	else if (AEInputCheckTriggered(AEVK_S))
-	{
-		next = GAME_STATE_SHOP;
-	}
-	else if (AEInputCheckTriggered(AEVK_3))
-	{
-		next = GAME_STATE_QUIT;
-	}
-	else {//next = GAME_STATE_RESTART; 
-	}
+
 	if (new_score) {
 		// type in name here
 		// using ascii table 
-		for (char c{ 65 }; c < 122; c++) {
+		for (char c{'A'}; c < 'Z'; c++) {
 			if (AEInputCheckTriggered(c)) {
 				if (newName.size() < 10) newName += c;
 			}
