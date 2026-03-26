@@ -70,39 +70,6 @@ void MainMenu_Update() {
 	camera.Update();
 	camera.Set_Shaking();
 
-<<<<<<< Updated upstream
-	//if (AEInputCheckTriggered(AEVK_RETURN))
-	//{
-	//	// Moving to playing state
-	//	next = GAME_STATE_PLAYING;
-	//}
-	//else if (AEInputCheckTriggered(AEVK_S))
-	//{
-	//	next = GAME_STATE_SHOP;
-	//}
-	//else if (AEInputCheckTriggered(AEVK_E))
-	//{
-	//	next = GAME_STATE_LEVEL_EDITOR;
-	//} else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
-	//{
-	//	// Quitting the game
-	//	next = GAME_STATE_QUIT;
-	//}
-	//else if (AEInputCheckTriggered(AEVK_C))
-	//{
-	//	next = GAME_STATE_CUSTOM_PLAY;
-	//}
-	//else if (AEInputCheckTriggered(AEVK_M))
-	//{
-	//	next = GAME_STATE_MAZE;
-	//}
-	//else {
-	//	current = GAME_STATE_MENU;
-	//	// Refreshing the next state to stay in menu
-	//	//next = GAME_STATE_RESTART;
-	//}
-
-=======
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
 	//Animation______________________________
 	ANIMATION::gameLogo.Anim_Update(delta_time);
@@ -117,7 +84,6 @@ void MainMenu_Update() {
 		clickAudio.Play();
 	}
 
->>>>>>> Stashed changes
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
 
