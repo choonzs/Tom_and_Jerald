@@ -7,10 +7,13 @@
 #include "Camera.hpp"
 #include "Audio.hpp"
 #include "ImgFontInit.hpp"
+#include "Animation.hpp"
 
 namespace {
 	s8 font_id;
-	AEGfxVertexList* unit_square = nullptr;
+	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
+	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
+	AEGfxVertexList* buttons = nullptr;				//For buttons
 
 	int counter{};
 	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
@@ -19,8 +22,8 @@ namespace {
 	f32 delta_time;
 	f32 local_time;
 
-	f32 window_width;
-	f32 window_height;
+	f32 window_width;								//Window Width
+	f32 window_height;								//Window Height
 
 	BOOL mainmenu_flag;
 
@@ -29,13 +32,16 @@ namespace {
 }
 
 
+//LOAD
 void MainMenu_Load() {
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	ASSETS::Init_Images();
 }
 
+//INITIALIZE
 void MainMenu_Initialize() {
 	createUnitSquare(&unit_square);
+	createUnitSquare(&gameLogo, 0.25f, 0.25f);
 
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -51,6 +57,12 @@ void MainMenu_Initialize() {
 
 	mainmenu_flag = FALSE; //False on default, triggers main menu after splashscreen
 
+	//Animation______________________________
+	//Background
+	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
+	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);                 //Row, start col, frames, fps (GAMELOGO)
+	//---------------------------------------
+
 	backgroundAudio.Play();
 }
 
@@ -58,6 +70,7 @@ void MainMenu_Update() {
 	camera.Update();
 	camera.Set_Shaking();
 
+<<<<<<< Updated upstream
 	//if (AEInputCheckTriggered(AEVK_RETURN))
 	//{
 	//	// Moving to playing state
@@ -89,19 +102,42 @@ void MainMenu_Update() {
 	//	//next = GAME_STATE_RESTART;
 	//}
 
+=======
+	delta_time = (f32)AEFrameRateControllerGetFrameTime();
+	//Animation______________________________
+	ANIMATION::gameLogo.Anim_Update(delta_time);
+	//---------------------------------------
+
+
+	if (IsMenuKeyTriggered()) {
+		clickAudio.Play();
+	}
+
+	if (AEInputCheckTriggered(AEVK_LBUTTON)) { //Player clicks a button
+		clickAudio.Play();
+	}
+
+>>>>>>> Stashed changes
 	if (local_time < 3.0f) {
 		mainmenu_flag = FALSE;
 
 		// Fade out: full opacity at 0s, invisible at 3s
-		f32 alpha = 1.0f - (local_time / 3.0f);
+		f32 splashScreenAlpha = 1.0f - (local_time / 3.0f);
+		f32 teamNameAlpha = 1.0f - (local_time / 3.0f);
 
+		//Default settings
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 		AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
 		AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);
 		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-		AEGfxSetTransparency(alpha);
+		//Runs the splashscreen
+		AEGfxSetTransparency(splashScreenAlpha);
 		AEGfxTextureSet(ASSETS::copyrightLogo, 1.0f, 1.0f);
-		drawQuad(unit_square, 0, 0, window_width - 100.0f, window_height - 100.0f, 1.f, 1.f, 1.f, alpha);
+		drawQuad(unit_square, 0, 0, window_width - 100.0f, window_height - 100.0f, 1.f, 1.f, 1.f, splashScreenAlpha);
+		//Runs the team name after the splashscreen
+		AEGfxSetTransparency(teamNameAlpha);
+		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f, 0.0f, 0.0f, 1.0f, teamNameAlpha);
+
 
 		local_time += delta_time;
 
@@ -112,7 +148,7 @@ void MainMenu_Update() {
 
 
 	if (mainmenu_flag == TRUE) {
-		// temp for switching levels
+		//Temp for switching levels
 		if (AEInputCheckTriggered(AEVK_A)) {
 			if ((select_level) > 1) { --select_level; }
 		}
@@ -182,6 +218,7 @@ void MainMenu_Update() {
 		}
 	}
 
+
 }
 
 void MainMenu_Draw() {
@@ -192,18 +229,26 @@ void MainMenu_Draw() {
 
 	if (mainmenu_flag == TRUE) {
 
-		drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f, 0.0f, 0.0f, 1.0f, 0.0f);
-
-		drawCenteredText(font_id, "START (ENTER)", 0.3f, 0.7f);
+		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f);
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
-		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f);
-		drawCenteredText(font_id, buffer, -0.1f, 0.7f); // <--- ADD THIS LINE
+		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f); //Link this to main game delete after
+		drawCenteredText(font_id, buffer, -0.1f, 0.7f); 
 		drawCenteredText(font_id, "HIGH SCORES (H)", -0.2f, 0.7f);
 		drawCenteredText(font_id, "SETTINGS (T)", -0.3f, 0.7f);
 		drawCenteredText(font_id, "EXIT (ESC)", -0.4f, 0.7f);
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
+
+
+		//Animation______________________________
+		ANIMATION::gameLogo.Anim_Draw(ASSETS::brandAssets); //Draws GAMELOGO
+		//---------------------------------------
+		drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
+		
+
+
+
 	}
 	// To be removed?
 	//drawCenteredText(font_id, "TOM AND JERALD", 0.4f, 1.1f);
@@ -215,7 +260,7 @@ void MainMenu_Draw() {
 	//drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.25f, 0.45f);
 	//drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.35f, 0.45f);
 	//drawCenteredText(font_id, "EDITOR (L)", -0.15f, 0.7f);
-	//drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); // <--- ADD THIS LINE
+	//drawCenteredText(font_id, "PLAY CUSTOM (C)", -0.25f, 0.7f); 
 }
 
 void MainMenu_Free() {

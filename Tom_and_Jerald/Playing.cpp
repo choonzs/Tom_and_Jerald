@@ -89,11 +89,11 @@ void Playing_Initialize() {
     //Animation______________________________
     //Background
     ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-    ANIMATION::background.Clip_Select(0, 0, 2, 5.0f);   //Row, start col, frames, fps (BACKGROUND)
-    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
-    ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);    //Row, start col, frames, fps (ASTERIOD)
-    ANIMATION::player.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
-    ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);      //Row, start col, frames, fps (PLAYER)
+    ANIMATION::background.Clip_Select(0, 0, 3, 2.0f);                 //Row, start col, frames, fps (BACKGROUND)
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");   //Total rows + columns
+    ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);                  //Row, start col, frames, fps (ASTERIOD)
+    ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
+    ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);                    //Row, start col, frames, fps (PLAYER)
     //---------------------------------------
 
     camera.Magnitude() = 20.0f;

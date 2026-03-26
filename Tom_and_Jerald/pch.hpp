@@ -25,5 +25,8 @@
 #include <iomanip>
 #include <filesystem> // For file system operations like checking if file exists, creating directories, etc.
 
+#include <list> //To use initializer list in particles.cpp
+#include <map>	//Particles.cpp
+#include <array> //Array.cpp
 
 #endif //PCH_H

@@ -73,6 +73,7 @@ void createUnitCircles(AEGfxVertexList** out_mesh) {
 }
 
 
+
 void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha)
 {
 	AEMtx33 scale;

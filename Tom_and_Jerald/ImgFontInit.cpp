@@ -7,8 +7,9 @@ namespace ASSETS {
 	AEGfxTexture* backgroundTexture = nullptr;
 	AEGfxTexture* copyrightText = nullptr;
 	AEGfxTexture* copyrightLogo = nullptr;
-	AEGfxTexture* backgroundAssets = nullptr; //Background + obstacles
+	AEGfxTexture* backgroundAssets = nullptr;	 //Background + obstacles
 	AEGfxTexture* otherAssets = nullptr;		 //Other assets + UI
+	AEGfxTexture* brandAssets = nullptr;
 
 	s8 font_id;
 
@@ -18,8 +19,10 @@ namespace ASSETS {
 		backgroundAssets = AEGfxTextureLoad("Assets/SS_BackgroundAssets.png"); //Background + obstacles
 		otherAssets = AEGfxTextureLoad("Assets/SS_OtherAssets.png");		   //Other assets + UI
 		playerAssets = AEGfxTextureLoad("Assets/SS_PlayerAssets.png");		   //Player + customization
+		brandAssets = AEGfxTextureLoad("Assets//SS_BrandAssets.png");		   //Game name
 
 	}
+
 	void Init_Font() {
 		font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	}
@@ -31,11 +34,14 @@ namespace ASSETS {
 		AEGfxTextureUnload(copyrightText);
 		AEGfxTextureUnload(backgroundAssets);
 		AEGfxTextureUnload(otherAssets);
+		AEGfxTextureUnload(brandAssets);
+
 		playerAssets = nullptr;
 		copyrightLogo = nullptr;
 		copyrightText = nullptr;
 		backgroundAssets = nullptr;
 		otherAssets = nullptr;
+		brandAssets = nullptr;
 	}
 
 	void Unload_Font() {

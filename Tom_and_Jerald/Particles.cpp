@@ -61,9 +61,58 @@ namespace graphics {
 		}
 	} // Update & draw particles
 
-	/*
-	void pixelTextInit() {
 
-	}*/
+
+
+
+	/*
+
+	//Initialize particles
+	void ParticleSystem::Particle_Init(f32 Size, f32 R, f32 G, f32 B, f32 Alpha) {
+		size = Size;
+		red = R;
+		green = G;
+		blue = B;
+		alpha = Alpha;
+	}
+
+	//Read information from external file and pass to Anim_Init to initialize.
+	bool ParticleSystem::ImportFromFile(const char* filename, std::string index) {
+		std::ifstream ifs(filename);
+
+		if (!ifs) {
+			std::cerr < "Cannot open " << filename << "\n";
+			return false;
+		}
+
+		std::string tmp;
+		tmp.find(index); //Pss stirng index for .find to find and start reading 
+		ifs >> tmp  >> size;
+		ifs >> tmp  >> red;
+		ifs >> tmp  >> green;
+		ifs >> tmp  >> blue;
+		ifs >> tmp >> alpha;
+
+
+	}
+
+	//Set up specific particle instance/type
+	void ParticleSystem::Particle_Select() {
+
+	}
+
+	//Updates particles to run
+	void ParticleSystem::Particle_Update(f32 delta_time) {
+		timer += delta_time;
+		
+
+	}
+
+	//Renders the particles
+	void ParticleSystem::Particle_Draw(AEGfxTexture* Texture) const {
+
+	}
+
+	*/
 
 }

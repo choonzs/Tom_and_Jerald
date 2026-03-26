@@ -1,0 +1,16 @@
+Fire
+size 
+red
+green
+blue
+alpha
+
+
+Smoke
+size
+red
+green
+blue
+alpha
+
+

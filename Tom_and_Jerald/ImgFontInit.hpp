@@ -7,9 +7,11 @@ namespace ASSETS {
 	extern AEGfxTexture* backgroundTexture;
 	extern AEGfxTexture* copyrightText;
 	extern AEGfxTexture* copyrightLogo;
-	extern AEGfxTexture* backgroundAssets; //Background + obstacles
+	extern AEGfxTexture* backgroundAssets;  //Background + obstacles
 	extern AEGfxTexture* otherAssets;		//Other assets + UI
 	extern AEGfxTexture* playerAssets;		//Player + customization
+	extern AEGfxTexture* brandAssets;		//Game name
+
 	void Init_Images();
 	void Init_Font();
 	s8& Font();

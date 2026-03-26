@@ -23,7 +23,7 @@ namespace ANIMATION {
         //Initialize spritesheet
         void Anim_Init(u32 total_rows, u32 total_cols);
 
-        //Read information from external file and pass to Anim_Init to iniaialize.
+        //Read information from external file and pass to Anim_Init to initialize.
         bool ImportFromFile(const char* filename);
 
         //Set up specific animation clip
@@ -46,5 +46,8 @@ namespace ANIMATION {
     extern AnimatedSprite background;
     extern AnimatedSprite player;
     extern AnimatedSprite asteroid;
+    extern AnimatedSprite cheese;
+    extern AnimatedSprite gameLogo;
+
 
 }//Namespace ANIMATION
