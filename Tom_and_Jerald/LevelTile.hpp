@@ -34,4 +34,5 @@ public:
 private:
 };
 std::istream& operator>>(std::istream& is, LevelTile& tile);
+std::ostream& operator<<(std::ostream& os, LevelTile& tile);
 #endif // !LEVEL_TILE_HPP

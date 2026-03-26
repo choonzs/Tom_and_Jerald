@@ -6,6 +6,7 @@
 #include "ImgFontInit.hpp"
 #include "LevelTile.hpp"
 #include "Audio.hpp"
+#include "Animation.hpp"
 
 namespace {
     int VIEW_COLS = 0;
@@ -30,10 +31,12 @@ namespace {
     f32 mouseX, mouseY;
 
 	// --- UI Values ---
-    f32 velocityX{};
-    f32 velocityY{};
+    std::pair<ObstacleSpeed, ObstacleSpeed> obstacle_speed( ObstacleSpeed::Normal,ObstacleSpeed::Normal );
+    std::pair<f32, f32> velocity{};
 
-    f32 obstacle_scale{5.0f}; //by default
+    // --- Obstacle Scale ---
+    ObstacleScale obstacle_size{ ObstacleScale::Normal };
+    f32 obstacle_scale{}; //by default
 
     // Textures & Meshes
     AEGfxTexture* texSquare = nullptr;
@@ -57,6 +60,7 @@ void LevelEditor_Load() {
     texSquare = AEGfxTextureLoad("Assets/Square.png");
     texSpike = AEGfxTextureLoad("Assets/Spike.png");
     ASSETS::Init_Font();
+    ASSETS::Init_Images();
 }
 
 void LevelEditor_Initialize() {
@@ -75,6 +79,11 @@ void LevelEditor_Initialize() {
     meshSlotBg = CreateSquareMesh(0xFF3E434C);
     meshSlotBorder = CreateSquareMesh(0xFFF9A03F);
     meshGrid = CreateSquareMesh(0x1AFFFFFF);
+
+    // Animations
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");   //Total rows + columns
+    ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);
+    // =================
 }
 
 void LevelEditor_Update() {
@@ -94,13 +103,32 @@ void LevelEditor_Update() {
     mouseX = (f32)mx - halfW;
     mouseY = -(f32)my + halfH;
     // --- OBJECT VELOCITY & SCALE ADJUSTMENTS ---
-	if (AEInputCheckCurr(AEVK_D)) velocityX += 10.0f;
-	if (AEInputCheckCurr(AEVK_A)) velocityX -= 10.0f;
-	if (AEInputCheckCurr(AEVK_W)) velocityY += 10.0f;
-	if (AEInputCheckCurr(AEVK_S)) velocityY -= 10.0f;
-	// Scale adjustments with Z and X keys
-	if (AEInputCheckCurr(AEVK_Z)) obstacle_scale += .1f;
-	if (AEInputCheckCurr(AEVK_X)) obstacle_scale -= .1f;
+	if (AEInputCheckTriggered(AEVK_D)) ++obstacle_speed.first;
+	if (AEInputCheckTriggered(AEVK_A)) --obstacle_speed.first;
+	if (AEInputCheckTriggered(AEVK_W)) ++obstacle_speed.second;
+	if (AEInputCheckTriggered(AEVK_S)) --obstacle_speed.second;
+    velocity.first = GetObstacleSpeed(obstacle_speed.first);
+    velocity.second = GetObstacleSpeed(obstacle_speed.second);
+
+	// Scale adjustments using mouse scroll
+    s32 scroll = 0;
+    AEInputMouseWheelDelta(&scroll);
+
+    if (scroll > 0)
+    {
+        ++obstacle_size;
+    }
+    else if (scroll < 0)
+    {
+        // Scrolled down 
+        --obstacle_size;
+    }
+    /*if (AEInputCheckTriggered(AEVK_Z)) ++obstacle_size;
+    if (AEInputCheckTriggered(AEVK_X)) --obstacle_size;*/
+    // Update scale based on obstacle size enum
+    obstacle_scale = GetObstacleSize(obstacle_size);
+	/*if (AEInputCheckCurr(AEVK_Z)) obstacle_scale += .1f;
+	if (AEInputCheckCurr(AEVK_X)) obstacle_scale -= .1f;*/
 
 
     // --- SMOOTH SCROLLING & INFINITE DYNAMIC GENERATION ---
@@ -152,7 +180,7 @@ void LevelEditor_Update() {
                 LevelTile tmp(currentTool,
                     AEVec2({ -halfW + uiWidth + (gridX - viewOffsetX) * TILE_SIZE + TILE_SIZE / 2.0f, -halfH + gridY * TILE_SIZE + TILE_SIZE / 2.0f }),
                     AEVec2({ (TILE_SIZE / 2.0f), (TILE_SIZE / 2.0f)}),
-                    AEVec2({ velocityX, velocityY }),
+                    AEVec2({ velocity.first, velocity.second }),
                     obstacle_scale
                 );
                 mapTiles[gridY][gridX] = tmp;
@@ -202,9 +230,10 @@ void LevelEditor_Update() {
                     if (mapTiles[r][c].type == 0) continue; // Dont save non-obstacle data
                     //outFile << mapData[r][c] << " ";
                     //
-                    outFile << mapTiles[r][c].type << " " << mapTiles[r][c].pos.x << " " << mapTiles[r][c].pos.y << " "
+                    outFile << mapTiles[r][c];
+                    /*outFile << mapTiles[r][c].type << " " << mapTiles[r][c].pos.x << " " << mapTiles[r][c].pos.y << " "
                             << mapTiles[r][c].half_size.x << " " << mapTiles[r][c].half_size.y << " "
-						<< velocityX << " " << velocityY << " " << obstacle_scale << "\n";
+						<< velocityX << " " << velocityY << " " << obstacle_scale << "\n";*/
 
                 }
                 //outFile << "\n";
@@ -213,6 +242,10 @@ void LevelEditor_Update() {
             std::cout << "Level Exported dynamically with " << currentMaxCols << " columns!\n";
         }
     }
+
+    //Animation______________________________
+    ANIMATION::asteroid.Anim_Update(dt);
+    //---------------------------------------
 }
 
 void LevelEditor_Draw() {
@@ -306,9 +339,14 @@ void LevelEditor_Draw() {
         AEGfxSetTransform(transform.m);
         if (tex) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(tex, 0, 0); }
         else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
+        
+        // ehh??
+        //Animation______________________________
+        ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
+        //---------------------------------------
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
         };
-
+    
     DrawToolBox(slot1Y, Asteroid, texSquare);
     DrawToolBox(slot2Y, Spike, texSpike);
 
@@ -331,24 +369,67 @@ void LevelEditor_Draw() {
     f32 lineHeight = 0.2f;       // vertical spacing between lines
 
     char buffer[128];
-
-    // Example: showing player velocity
-    sprintf_s(buffer, "Velocity X: %.2f", velocityX);
-    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    // ===================================================================
+    // Example: showing player velocity use switch to change text
+    char const* obstacle_velocity_text{ "Normal" };
+    switch (obstacle_speed.first) {
+    case ObstacleSpeed::Slow:
+        obstacle_velocity_text = "Slow";
+        break;
+    case ObstacleSpeed::Normal:
+        obstacle_velocity_text = "Normal";
+        break;
+    case ObstacleSpeed::Fast:
+        obstacle_velocity_text = "Fast";
+        break;
+    }
+    sprintf_s(buffer, "Horizontal: %s", obstacle_velocity_text);
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.5f, 0.9f, 0.9f, 0.2f, 1.0f);
     textY -= lineHeight;  // move down for next line
+    // =====
 
-    sprintf_s(buffer, "Velocity Y: %.2f", velocityY);
-    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    switch (obstacle_speed.second) {
+    case ObstacleSpeed::Slow:
+        obstacle_velocity_text = "Slow";
+        break;
+    case ObstacleSpeed::Normal:
+        obstacle_velocity_text = "Normal";
+        break;
+    case ObstacleSpeed::Fast:
+        obstacle_velocity_text = "Fast";
+        break;
+    }
+    sprintf_s(buffer, "Vertical: %s", obstacle_velocity_text);
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.5f, 0.9f, 0.9f, 0.2f, 1.0f);
     textY -= lineHeight;
-
-    // Example: showing tile scale
-    sprintf_s(buffer, "Scale Size: %.2f", static_cast<f32>(obstacle_scale));
-    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    // ===================================================================
+    // Example: showing tile scale text
+    char const* obstacle_size_text{ "Normal" };
+    switch (obstacle_size) {
+        case ObstacleScale::Tiny:
+            obstacle_size_text = "Tiny";
+            break;
+        case ObstacleScale::Small:
+            obstacle_size_text = "Small";
+            break;
+        case ObstacleScale::Normal:
+            obstacle_size_text = "Normal";
+            break;
+        case ObstacleScale::Large:
+            obstacle_size_text = "Large";
+            break;
+        case ObstacleScale::Giant:
+            obstacle_size_text = "Giant";
+            break;
+        }
+    // ========================================================================
+    sprintf_s(buffer, "Scale Size: %s", obstacle_size_text);
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.5f, 0.9f, 0.9f, 0.2f, 1.0f);
     textY -= lineHeight;
 
     // Example: showing current tool
-    sprintf_s(buffer, "Current Tool: %s", currentTool == Asteroid ? "Asteroid" : "Spike");
-    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    sprintf_s(buffer, "Tool: %s", currentTool == Asteroid ? "Asteroid" : "Spike");
+    AEGfxPrint(ASSETS::Font(), buffer, -0.95f, textY, 0.5f, 0.9f, 0.9f, 0.2f, 1.0f);
     //------------------------------------------------------------------------------
 
     
@@ -369,4 +450,5 @@ void LevelEditor_Unload() {
     if (texSquare) AEGfxTextureUnload(texSquare);
     if (texSpike) AEGfxTextureUnload(texSpike);
     ASSETS::Unload_Font();
+    ASSETS::Unload_Images();
 }

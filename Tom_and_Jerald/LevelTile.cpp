@@ -22,3 +22,13 @@ std::istream& operator>>(std::istream& is, LevelTile& tile) {
 		>> tile.scale;
 	return is;
 }
+
+// << operator overload for instream
+std::ostream& operator<<(std::ostream& is, LevelTile& tile) {
+	is << tile.type << " "
+		<< tile.pos.x << " " << tile.pos.y << " "
+		<< tile.half_size.x << " " << tile.half_size.y << " "
+		<< tile.velocity.x << " " << tile.velocity.y << " "
+		<< tile.scale << "\n";
+	return is;
+}
