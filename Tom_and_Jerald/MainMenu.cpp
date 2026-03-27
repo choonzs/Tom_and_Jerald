@@ -234,6 +234,7 @@ void MainMenu_Draw() {
 
 void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
+	AEGfxMeshFree(gameLogo);
 }
 void MainMenu_Unload() {
 	AEGfxDestroyFont(font_id);
