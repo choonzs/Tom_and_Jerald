@@ -64,6 +64,9 @@ void MainMenu_Initialize() {
 	//---------------------------------------
 
 	backgroundAudio.Play();
+
+	// Show cursor please
+	AEInputShowCursor(true);
 }
 
 void MainMenu_Update() {

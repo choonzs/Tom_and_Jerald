@@ -64,6 +64,7 @@ void LevelEditor_Load() {
 }
 
 void LevelEditor_Initialize() {
+    AEInputShowCursor(true);
     // Start with 100 columns. It will grow infinitely as you scroll right!
     //mapData.assign(VIEW_ROWS, std::vector<int>(100, 0));
 	mapTiles.assign(VIEW_ROWS, std::vector<LevelTile>(100, {}));
