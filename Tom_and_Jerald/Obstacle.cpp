@@ -34,6 +34,8 @@ void Obstacle::Reset()
     f32 max_y = AEGfxGetWinMaxY();
     f32 size_value = randomRange(25.0f, 70.0f);
 
+    type = randomRange(ObstacleType::Asteroid, ObstacleType::Spike);
+
     AEVec2Set(&half_size, size_value, size_value);
     AEVec2Set(
         &position,

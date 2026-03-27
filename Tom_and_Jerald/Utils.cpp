@@ -14,7 +14,6 @@ f32 randomRange(f32 min_value, f32 max_value)
 	return min_value + (max_value - min_value) * (rand() / (f32)RAND_MAX);
 }
 
-
 void 
 drawCenteredText(s8 font_id, const char* text, f32 y, f32 scale, f32 cam_pos_x, f32 cam_pos_y,f32 red, f32 green, f32 blue, f32 alpha)
 {

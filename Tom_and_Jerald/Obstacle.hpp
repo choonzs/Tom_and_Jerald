@@ -61,13 +61,15 @@ public:
 	AEVec2 position{};
 	AEVec2 velocity{};
 	AEVec2 half_size{};
-	Obstacle() = default;
+	//Obstacle() = default;
 
 	// Parameterized constructor for creating obstacles from level data
 	Obstacle(ObstacleType type, AEVec2 pos, AEVec2 velocity, AEVec2 half_size)
 		: type{ type }, position{ pos },
 		velocity{ velocity }, half_size{ half_size } {
 	}
+	// Randomise
+	Obstacle() { Reset(); };
 
 	// Reset
 	// -----------------------------------------------------------------------
