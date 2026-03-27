@@ -16,9 +16,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ int       nCmdShow)
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
+	// Use this for sanity check
+	//_CrtSetBreakAlloc(388); // break on first leak
+	// ====================================
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+	// ====================================
 
 	srand((unsigned int)time(NULL));
 

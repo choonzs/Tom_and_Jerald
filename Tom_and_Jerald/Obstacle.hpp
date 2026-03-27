@@ -18,7 +18,29 @@
 #ifndef OBSTACLE_HPP
 #define OBSTACLE_HPP
 #include "pch.hpp"
+// ---------------------------------------------------------------------------
+// Represents Obstacle Type
+// ---------------------------------------------------------------------------
 enum ObstacleType : int { Non_Obstacle = 0, Asteroid = 1, Spike = 2 };
+// ---------------------------------------------------------------------------
+// Represents Obstacle Type
+// ---------------------------------------------------------------------------
+enum class ObstacleScale : int {Tiny = 0, Small, Normal, Large, Giant};
+// Negation of Obstacle Scale
+ObstacleScale& operator--(ObstacleScale& scale);
+// Addition of Obstacle Scale
+ObstacleScale& operator++(ObstacleScale& scale);
+f32 GetObstacleSize(ObstacleScale const& scale);
+// ---------------------------------------------------------------------------
+// Represents Obstacle Speed
+// ---------------------------------------------------------------------------
+enum class ObstacleSpeed : int {Slow, Normal, Fast};
+// Negation of Obstacle Scale
+ObstacleSpeed& operator--(ObstacleSpeed& speed);
+// Addition of Obstacle Scale
+ObstacleSpeed& operator++(ObstacleSpeed& speed);
+f32 GetObstacleSpeed(ObstacleSpeed const& speed);
+// ===========================================================================
 
 // Obstacle
 // ---------------------------------------------------------------------------
@@ -39,13 +61,15 @@ public:
 	AEVec2 position{};
 	AEVec2 velocity{};
 	AEVec2 half_size{};
-	Obstacle() = default;
+	//Obstacle() = default;
 
 	// Parameterized constructor for creating obstacles from level data
 	Obstacle(ObstacleType type, AEVec2 pos, AEVec2 velocity, AEVec2 half_size)
 		: type{ type }, position{ pos },
 		velocity{ velocity }, half_size{ half_size } {
 	}
+	// Randomise
+	Obstacle() { Reset(); };
 
 	// Reset
 	// -----------------------------------------------------------------------

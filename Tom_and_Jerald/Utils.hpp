@@ -22,6 +22,15 @@
 *******************************************************************************/
 f32 randFloat(f32 min, f32 max);
 f32 randomRange(f32 min_value, f32 max_value);
+// Overloaded template function to use randomise for other data types
+template <typename T>
+T randomRange(T min_value, T max_value) {
+	int min = static_cast<int>(min_value);
+	int max = static_cast<int>(max_value);
+
+	int value = min + rand() % (max - min + 1);
+	return static_cast<T>(value);
+}
 
 /*!*****************************************************************************
 \brief

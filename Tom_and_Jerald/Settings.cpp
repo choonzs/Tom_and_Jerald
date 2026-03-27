@@ -110,7 +110,7 @@ void Slider::Update()
         if (clampedX < -mWidth) clampedX = -mWidth;
         if (clampedX > mWidth) clampedX = mWidth;
 
-        // convert position to 0.0-1.0 — matches draw formula
+        // convert position to 0.0-1.0 ï¿½ matches draw formula
         mValue = (clampedX + mWidth) / (mWidth * 2.f);
     }
 }
@@ -242,7 +242,6 @@ void Settings_Draw() {
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     AEGfxSetTransparency(1.0f);
     AEGfxTextureSet(nullptr, 0, 0);
-
     for (Slider& s : sliders) {
         s.Draw(font_id);
     }

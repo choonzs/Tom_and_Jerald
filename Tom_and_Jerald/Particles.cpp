@@ -19,7 +19,7 @@ namespace graphics {
 				effects[i].velocityX = randomRange(-1.0f, 1.0f);
 				effects[i].velocityY = randomRange(-1.0f, 1.0f);
 
-				effects[i].lifetime = randomRange(40, 80);
+				effects[i].lifetime = randomRange(40.0f, 80.0f);
 				effects[i].size = randomRange(10.0f, 20.0f);
 
 				// Optional: random color per particle

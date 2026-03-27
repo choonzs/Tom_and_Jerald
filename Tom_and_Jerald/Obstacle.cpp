@@ -34,6 +34,8 @@ void Obstacle::Reset()
     f32 max_y = AEGfxGetWinMaxY();
     f32 size_value = randomRange(25.0f, 70.0f);
 
+    type = randomRange(ObstacleType::Asteroid, ObstacleType::Spike);
+
     AEVec2Set(&half_size, size_value, size_value);
     AEVec2Set(
         &position,
@@ -143,3 +145,64 @@ void resetObstacle(Obstacle* obstacle)
 //{
 //    ObstacleSystem::UpdateObstacles(obstacles, delta_time);
 //}
+// ==================================================================================
+// 
+// Negation of Obstacle Scale
+ObstacleScale& operator--(ObstacleScale& scale) {
+    scale = (scale == ObstacleScale::Tiny) ? ObstacleScale::Giant : ObstacleScale(static_cast<int> (scale) - 1);
+    return scale;
+}
+// Addition of Obstacle Scale
+ObstacleScale& operator++(ObstacleScale& scale) {
+    scale = (scale == ObstacleScale::Giant) ? ObstacleScale::Tiny : ObstacleScale(static_cast<int> (scale) + 1);
+    return scale;
+}
+// Obstacle Size values
+f32 GetObstacleSize(ObstacleScale const& scale) {
+    f32 result{};
+    switch (scale) {
+    case ObstacleScale::Tiny:
+        result = 2.0f;
+        break;
+    case ObstacleScale::Small:
+        result = 3.0f;
+        break;
+    case ObstacleScale::Normal:
+        result = 4.0f;
+        break;
+    case ObstacleScale::Large:
+        result = 5.0f;
+        break;
+    case ObstacleScale::Giant:
+        result = 6.0f;
+        break;
+    }
+    return result;
+}
+// =====================================================
+// Negation of Obstacle Scale
+ObstacleSpeed& operator--(ObstacleSpeed& speed) {
+    speed = (speed == ObstacleSpeed::Slow) ? ObstacleSpeed::Fast : ObstacleSpeed(static_cast<int> (speed) - 1);
+    return speed;
+}
+// Addition of Obstacle Scale
+ObstacleSpeed& operator++(ObstacleSpeed& speed) {
+    speed = (speed == ObstacleSpeed::Fast) ? ObstacleSpeed::Slow : ObstacleSpeed(static_cast<int> (speed) + 1);
+    return speed;
+}
+f32 GetObstacleSpeed(ObstacleSpeed const& speed) {
+    f32 result{};
+    switch (speed) {
+    case ObstacleSpeed::Slow:
+        result = -20.0f;
+        break;
+    case ObstacleSpeed::Normal:
+        result = -50.0f;
+        break;
+    case ObstacleSpeed::Fast:
+        result = -100.0f;
+        break;
+    }
+        return result;
+}
+// ===================================================================

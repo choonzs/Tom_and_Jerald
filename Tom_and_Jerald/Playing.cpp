@@ -14,26 +14,16 @@
 #include "ImgFontInit.hpp"
 #include "Audio.hpp"
 
-// --- FIX: RESTORED MISSING CONSTANTS ---
-const f32 k_stage_duration = 120.0f;
-const f32 k_damage_cooldown = 1.0f;
-const int k_obstacle_count = 10;
-const int MAX_ACTIVE_OBSTACLES = 10;
-
-f32 stage_timer = 0.0f;
-f32 damage_timer = 0.0f;
-JetpackFuel* pFuel = nullptr;
-
-Obstacle obstacles[MAX_ACTIVE_OBSTACLES] = {};
-
-Player base_player;
-AEGfxTexture* asteroid_texture = nullptr;
-AEGfxTexture* fuel_pickup_texture = nullptr;
-
-// check if the game is paused
-bool isPaused;
 
 namespace {
+    // --- FIX: RESTORED MISSING CONSTANTS ---
+    const f32 k_stage_duration = 120.0f;
+    const f32 k_damage_cooldown = 1.0f;
+    const int k_obstacle_count = 10;
+    const int MAX_ACTIVE_OBSTACLES = 10;
+    const f32 k_obstacle_spawn_cooldown = 3.0f;
+
+
     // Camera
     Camera camera;
     // Meshes
@@ -51,6 +41,22 @@ namespace {
     } g_fuel_pickup;
 
     s8 font_id;
+
+    f32 stage_timer = 0.0f;
+    f32 damage_timer = 0.0f;
+    JetpackFuel* pFuel = nullptr;
+
+    std::vector<Obstacle> obstacles;
+    f32 obstacle_last_spawn_time = 0.0f;
+    //Obstacle obstacles[MAX_ACTIVE_OBSTACLES] = {};
+
+    Player base_player;
+    AEGfxTexture* asteroid_texture = nullptr;
+    AEGfxTexture* fuel_pickup_texture = nullptr;
+
+    // check if the game is paused
+    bool isPaused;
+
 
 }
 
@@ -97,18 +103,19 @@ void Playing_Initialize() {
     //---------------------------------------
 
     camera.Magnitude() = 20.0f;
+
     camera.Position().x = base_player.Position().x;
     camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        obstacles[i].position.x = randFloat(0.0f, AEGfxGetWinMaxX() * 2.0f);
-        obstacles[i].position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
+    for (Obstacle& obstacle : obstacles) {
+        obstacle.position.x = randFloat(0.0f, AEGfxGetWinMaxX() * 2.0f);
+        obstacle.position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
         f32 random_size = randFloat(25.0f, 65.0f);
-        obstacles[i].half_size.x = random_size;
-        obstacles[i].half_size.y = random_size;
-        obstacles[i].velocity.x = randFloat(-80.0f, 80.0f);
-        obstacles[i].velocity.y = randFloat(-80.0f, 80.0f);
+        obstacle.half_size.x = random_size;
+        obstacle.half_size.y = random_size;
+        obstacle.velocity.x = randFloat(-80.0f, 80.0f);
+        obstacle.velocity.y = randFloat(-80.0f, 80.0f);
     }
 }
 
@@ -141,7 +148,8 @@ void Playing_Update() {
     }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
-    bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
+    bool isFlying = (AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_SPACE) 
+        || AEInputCheckCurr(AEVK_UP) ) && pFuel->HasFuel();
 
     if (pFuel) pFuel->Update(delta_time, isFlying);
 
@@ -151,8 +159,22 @@ void Playing_Update() {
     ANIMATION::player.Anim_Update(delta_time);
     //---------------------------------------
 
+
     stage_timer += delta_time;
     if (damage_timer > 0.0f) damage_timer -= delta_time;
+
+    // Obstacle Spawn after certain amt of time has passed
+    if (obstacle_last_spawn_time > k_obstacle_spawn_cooldown) {
+        obstacle_last_spawn_time = 0;
+        // Create obj here as more and more but want to limit it too
+        if (obstacles.size() < k_obstacle_count) {
+            obstacles.push_back(Obstacle());
+        }
+    }
+    else {
+        obstacle_last_spawn_time += delta_time;
+    }
+    // ========================================================================
 
     if (pFuel) {
         base_player.Movement(delta_time);
@@ -165,16 +187,15 @@ void Playing_Update() {
     f32 camX = camera.Position().x;
     // change this to based on player world pos
 	f32 offscreen_limit_left{ AEGfxGetWinMinX() - 100.0f };
+    for (Obstacle& obstacle : obstacles) {
+        obstacle.position.x += obstacle.velocity.x * delta_time;
+        obstacle.position.y += obstacle.velocity.y * delta_time;
 
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        obstacles[i].position.x += obstacles[i].velocity.x * delta_time;
-        obstacles[i].position.y += obstacles[i].velocity.y * delta_time;
+        if (obstacle.position.y > AEGfxGetWinMaxY() - 20.0f) obstacle.velocity.y *= -1;
+        if (obstacle.position.y < AEGfxGetWinMinY() + 20.0f) obstacle.velocity.y *= -1;
 
-        if (obstacles[i].position.y > AEGfxGetWinMaxY() - 20.0f) obstacles[i].velocity.y *= -1;
-        if (obstacles[i].position.y < AEGfxGetWinMinY() + 20.0f) obstacles[i].velocity.y *= -1;
-
-        if (obstacles[i].position.x < offscreen_limit_left) {
-            obstacles[i].Reset();
+        if (obstacle.position.x < offscreen_limit_left) {
+            obstacle.Reset();
         }
     }
 
@@ -205,8 +226,8 @@ void Playing_Update() {
     }
 
     bool took_damage = false;
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-        if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacles[i].position, &obstacles[i].half_size)) {
+    for (Obstacle const& obstacle : obstacles) {
+        if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacle.position, &obstacle.half_size)) {
             if (damage_timer <= 0.0f) {
                 ratsqueakAudio.Play();
                 base_player.Health() -= 1;
@@ -220,20 +241,27 @@ void Playing_Update() {
         camera.Set_Shaking();
         Credits_OnDamage();
         graphics::particleInit(base_player.Position().x, base_player.Position().y, 25);
+
+        // IF take damage then we want to destroy all obstacles 
+        for (Obstacle obstacle : obstacles) {
+            graphics::particleInit(obstacle.Position().x, obstacle.Position().y, 50);
+        }
+        obstacles.clear();
     }
 
     bool game_active = (base_player.Health() > 0) && (stage_timer < k_stage_duration);
     Credits_Update(delta_time, game_active);
 
     if (base_player.Health() <= 0) next = GAME_STATE_GAME_OVER;
-    // Remove this since we want to make it truly endless
-    //else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
+
     else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
 
     //Changing game states
+    // 
+    // Current credits minus credits at the start of the round
+    // outside of if condition to update during game
+    credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
     if (current != next) {
-        // Current credits minus credits at the start of the round
-        credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
         // TODO: Do something with the score value
         std::cout << "Finish Playing Credits " << credits_this_round << '\n';
         // Save current cheese score
@@ -272,14 +300,13 @@ void Playing_Draw() {
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
 
-    for (int i = 0; i < MAX_ACTIVE_OBSTACLES; ++i) {
-
+    for (Obstacle const& obstacle : obstacles) {
         //Animation______________________________
         ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
         //---------------------------------------
 
-        Obstacle* obstacle = &obstacles[i];
-        drawQuad(unit_square, obstacle->position.x, obstacle->position.y, obstacle->half_size.x * 2.0f, obstacle->half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        drawQuad(unit_square, obstacle.position.x, obstacle.position.y, obstacle.half_size.x * 2.0f, obstacle.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+
     }
 
     if (g_fuel_pickup.active) {
@@ -308,18 +335,22 @@ void Playing_Draw() {
 
     char cheese_text[64];
     sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
-    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 1.0f, 0.9f, 0.9f, 0.2f, 1.0f);
+
+    char score_text[64];
+    sprintf_s(score_text, "Score: %d", credits_this_round);
+    AEGfxPrint(ASSETS::Font(), score_text, -0.95f, 0.85f, 1.0f, 0.9f, 0.9f, 0.2f, 1.0f);
 
     char fps_text[64];
     sprintf_s(fps_text, "%.1f FPS", 1 / (f32)AEFrameRateControllerGetFrameTime());
-    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 1.0f, .0f, .0f, .0f, 1.0f);
 
-    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    /*AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     char timer_text[64];
     f32 time_left = k_stage_duration - stage_timer;
     if (time_left < 0.0f) time_left = 0.0f;
     sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
-    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);*/
 
     graphics::particleDraw(unit_circle);
 

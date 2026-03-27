@@ -7,8 +7,8 @@
 class Leaderboard {
 	public:
 		struct Score {
-			std::string name;
-			int score;
+			std::string name{};
+			int score{ 0 };
 		};
 
 	private:	
