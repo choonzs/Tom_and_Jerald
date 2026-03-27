@@ -257,9 +257,11 @@ void Playing_Update() {
     else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
 
     //Changing game states
+    // 
+    // Current credits minus credits at the start of the round
+    // outside of if condition to update during game
+    credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
     if (current != next) {
-        // Current credits minus credits at the start of the round
-        credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
         // TODO: Do something with the score value
         std::cout << "Finish Playing Credits " << credits_this_round << '\n';
         // Save current cheese score
@@ -333,18 +335,22 @@ void Playing_Draw() {
 
     char cheese_text[64];
     sprintf_s(cheese_text, "Cheese: %d", Credits_GetBalance());
-    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 0.4f, 0.9f, 0.9f, 0.2f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), cheese_text, -0.95f, 0.75f, 1.0f, 0.9f, 0.9f, 0.2f, 1.0f);
+
+    char score_text[64];
+    sprintf_s(score_text, "Score: %d", credits_this_round);
+    AEGfxPrint(ASSETS::Font(), score_text, -0.95f, 0.85f, 1.0f, 0.9f, 0.9f, 0.2f, 1.0f);
 
     char fps_text[64];
     sprintf_s(fps_text, "%.1f FPS", 1 / (f32)AEFrameRateControllerGetFrameTime());
-    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 0.4f, .0f, .0f, .0f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), fps_text, -0.95f, 0.65f, 1.0f, .0f, .0f, .0f, 1.0f);
 
-    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    /*AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     char timer_text[64];
     f32 time_left = k_stage_duration - stage_timer;
     if (time_left < 0.0f) time_left = 0.0f;
     sprintf_s(timer_text, "TIME LEFT: %.1f", time_left);
-    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);
+    AEGfxPrint(ASSETS::Font(), timer_text, -0.95f, 0.85f, 0.45f, 0.9f, 0.9f, 0.9f, 1.0f);*/
 
     graphics::particleDraw(unit_circle);
 
