@@ -6,8 +6,16 @@
 #include "Audio.hpp"           
 #include "Utils.hpp"
 #include <cmath>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
 
 int gMazeRewardsEarned = 0;
+bool gMazeFromPlaying = false;
+bool gMazeCompleted = false;
+bool gMazeSuccess = false;
 
 // ----------------------------------------------------------------------------
 // Simple maze representation
@@ -49,18 +57,126 @@ static AEGfxVertexList* unit_square = nullptr;
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
+static const char* gMazeFiles[] =
+{
+    "Assets/data/maze1.txt",
+    "Assets/data/maze2.txt",
+    "Assets/data/maze3.txt",
+    "Assets/data/maze4.txt",
+    "Assets/data/maze5.txt"
+};
+
+static constexpr int gMazeFileCount = sizeof(gMazeFiles) / sizeof(gMazeFiles[0]);
+static int gLastMazeIndex = -1;
+static std::vector<std::string> gLoadedMaze;
+static bool gUseLoadedMaze = false;
+static int GetMazeRows();
+static int GetMazeCols();
+static char GetMazeCell(int r, int c);
+
+
 static AEVec2 TileCenter(int r, int c)
 {
     AEVec2 p;
     p.x = kWorldLeft + (c + 0.5f) * kTileSize;
-    p.y = kWorldBottom + (kMazeRows - 1 - r + 0.5f) * kTileSize; // flip row
+    p.y = kWorldBottom + (GetMazeRows() - 1 - r + 0.5f) * kTileSize; // flip row
     return p;
+}
+
+static int GetMazeRows()
+{
+    if (gUseLoadedMaze)
+        return (int)gLoadedMaze.size();
+
+    return kMazeRows;
+}
+
+static int GetMazeCols()
+{
+    if (gUseLoadedMaze && !gLoadedMaze.empty())
+        return (int)gLoadedMaze[0].size();
+
+    return kMazeCols;
+}
+
+static char GetMazeCell(int r, int c)
+{
+    if (gUseLoadedMaze)
+        return gLoadedMaze[r][c];
+
+    return kMaze[r][c];
+}
+
+static bool LoadMazeFromFile(const char* fileName)
+{
+    std::ifstream file(fileName);
+    if (!file.is_open())
+        return false;
+
+    gLoadedMaze.clear();
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        if (!line.empty())
+            gLoadedMaze.push_back(line);
+    }
+
+    file.close();
+
+    if (gLoadedMaze.empty())
+        return false;
+
+    const int cols = (int)gLoadedMaze[0].size();
+
+    for (size_t i = 1; i < gLoadedMaze.size(); ++i)
+    {
+        if ((int)gLoadedMaze[i].size() != cols)
+        {
+            gLoadedMaze.clear();
+            return false;
+        }
+    }
+
+    gUseLoadedMaze = true;
+    return true;
+}
+
+static void LoadRandomMazeFile()
+{
+    gUseLoadedMaze = false;
+    gLoadedMaze.clear();
+
+    if (gMazeFileCount <= 0)
+        return;
+
+    int index = 0;
+
+    if (gMazeFileCount == 1)
+    {
+        index = 0;
+    }
+    else
+    {
+        do
+        {
+            index = rand() % gMazeFileCount;
+        } while (index == gLastMazeIndex);
+    }
+
+    if (LoadMazeFromFile(gMazeFiles[index]))
+        gLastMazeIndex = index;
 }
 
 static bool IsWallRC(int r, int c)
 {
-    if (r < 0 || r >= kMazeRows || c < 0 || c >= kMazeCols) return true;
-    return kMaze[r][c] == '#';
+    if (r < 0 || r >= GetMazeRows() || c < 0 || c >= GetMazeCols())
+        return true;
+
+    return GetMazeCell(r, c) == '#';
 }
 
 static void FindStartAndGoal()
@@ -68,11 +184,11 @@ static void FindStartAndGoal()
     bool foundS = false;
     bool foundG = false;
 
-    for (int r = 0; r < kMazeRows; ++r)
+    for (int r = 0; r < GetMazeRows(); ++r)
     {
-        for (int c = 0; c < kMazeCols; ++c)
+        for (int c = 0; c < GetMazeCols(); ++c)
         {
-            const char cell = kMaze[r][c];
+            const char cell = GetMazeCell(r, c);
 
             if (cell == 'S')
             {
@@ -91,7 +207,7 @@ static void FindStartAndGoal()
         gPlayerPos = TileCenter(1, 1);
 
     if (!foundG)
-        gGoalPos = TileCenter(kMazeRows - 2, kMazeCols - 2);
+        gGoalPos = TileCenter(GetMazeRows() - 2, GetMazeCols() - 2);
 }
 
 static float Clamp(float v, float lo, float hi)
@@ -154,7 +270,7 @@ static void ResolvePlayerVsWalls()
 
     const int approxC = (int)relX;
     const int approxRFromBottom = (int)relY;
-    const int approxR = (kMazeRows - 1) - approxRFromBottom;
+    const int approxR = (GetMazeRows() - 1) - approxRFromBottom;
 
     for (int dr = -2; dr <= 2; ++dr)
     {
@@ -180,6 +296,7 @@ static bool PlayerReachedGoal()
 
 void GameState_MazeLoad()
 {
+    srand((unsigned int)time(nullptr));
     createUnitSquare(&unit_square);
     AEGfxMeshStart();
     AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
@@ -213,7 +330,13 @@ void GameState_MazeLoad()
 
 void GameState_MazeInit()
 {
+    gMazeCompleted = false;
+
+    gMazeSuccess = false;
+
     AEGfxSetBackgroundColor(0.2f, 0.0f, 0.2f);
+
+    LoadRandomMazeFile();
 
     FindStartAndGoal();
 
@@ -230,7 +353,9 @@ void GameState_MazeUpdate()
 
     if (AEInputCheckTriggered(AEVK_ESCAPE))
     {
-        next = GAME_STATE_MENU;
+        gMazeCompleted = true;
+        gMazeSuccess = false;
+        next = gMazeFromPlaying ? GAME_STATE_PLAYING : GAME_STATE_MENU;
         return;
     }
 
@@ -260,7 +385,9 @@ void GameState_MazeUpdate()
     if (PlayerReachedGoal())
     {
         gMazeRewardsEarned += 1;
-        next = GAME_STATE_MENU; 
+        gMazeCompleted = true;
+        gMazeSuccess = true;
+        next = gMazeFromPlaying ? GAME_STATE_PLAYING : GAME_STATE_MENU;
     }
 }
 
@@ -273,11 +400,11 @@ void GameState_MazeDraw()
 
     AEGfxSetCamPosition(gPlayerPos.x, gPlayerPos.y);
 
-    for (int r = 0; r < kMazeRows; ++r)
+    for (int r = 0; r < GetMazeRows(); ++r)
     {
-        for (int c = 0; c < kMazeCols; ++c)
+        for (int c = 0; c < GetMazeCols(); ++c)
         {
-            const char t = kMaze[r][c];
+            const char t = GetMazeCell(r, c);
             const AEVec2 p = TileCenter(r, c);
 
             if (t == '#')
@@ -316,4 +443,6 @@ void GameState_MazeUnload()
         AEGfxMeshFree(unit_square);
         unit_square = nullptr;
     }
+    gLoadedMaze.clear();
+    gUseLoadedMaze = false;
 }

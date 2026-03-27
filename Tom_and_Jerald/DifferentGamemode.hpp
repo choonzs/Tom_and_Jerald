@@ -11,5 +11,8 @@ void GameState_MazeFree();
 void GameState_MazeUnload();
 
 extern int gMazeRewardsEarned;
+extern bool gMazeFromPlaying;
+extern bool gMazeCompleted;
+extern bool gMazeSuccess;
 
 #endif 

@@ -13,9 +13,12 @@
 #include "Player.hpp"
 #include "ImgFontInit.hpp"
 #include "Audio.hpp"
-
+#include "DifferentGamemode.hpp"
 
 namespace {
+
+    int gTotalScore = 0;
+
     // --- FIX: RESTORED MISSING CONSTANTS ---
     const f32 k_stage_duration = 120.0f;
     const f32 k_damage_cooldown = 1.0f;
@@ -39,6 +42,41 @@ namespace {
         // FIX: Proper initializer list strictly initializes pos to prevent compiler warnings
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
+    // Portal
+    namespace {
+        struct PortalData
+        {
+            AEVec2 pos{};
+            AEVec2 half_size{ 30.0f, 60.0f };
+            bool active = false;
+        };
+
+        struct SavedPlayingState
+        {
+            bool valid = false;
+            AEVec2 player_pos{};
+            AEVec2 player_vel{};
+            AEVec2 player_half_size{};
+            int player_health = 0;
+
+            f32 stage_timer = 0.0f;
+            f32 damage_timer = 0.0f;
+            f32 obstacle_last_spawn_time = 0.0f;
+
+            bool fuel_pickup_active = false;
+            decltype(g_fuel_pickup) fuel_pickup{};
+
+            std::vector<Obstacle> obstacles;
+        };
+
+        PortalData gMazePortal;
+        SavedPlayingState gSavedPlayingState;
+        bool gResumeFromMaze = false;
+
+        f32 gPortalRespawnTimer = 0.0f;
+        const f32 kPortalRespawnDelay = 5.0f;
+        bool gPortalWaitingToRespawn = false;
+    }
 
     s8 font_id;
 
@@ -68,7 +106,76 @@ void Playing_Load() {
     font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 }
 
+static void SavePlayingStateForMaze()
+{
+    gSavedPlayingState.valid = true;
+    gSavedPlayingState.player_pos = base_player.Position();
+    gSavedPlayingState.player_vel = base_player.Velocity();
+    gSavedPlayingState.player_half_size = base_player.Half_Size();
+    gSavedPlayingState.player_health = base_player.Health();
+
+    gSavedPlayingState.stage_timer = stage_timer;
+    gSavedPlayingState.damage_timer = damage_timer;
+    gSavedPlayingState.obstacle_last_spawn_time = obstacle_last_spawn_time;
+
+    gSavedPlayingState.fuel_pickup_active = g_fuel_pickup.active;
+    gSavedPlayingState.fuel_pickup = g_fuel_pickup;
+
+    gSavedPlayingState.obstacles = obstacles;
+}
+
+static void RestorePlayingStateFromMaze()
+{
+    if (!gSavedPlayingState.valid)
+        return;
+
+    base_player.Position() = gSavedPlayingState.player_pos;
+    base_player.Velocity() = gSavedPlayingState.player_vel;
+    base_player.Half_Size() = gSavedPlayingState.player_half_size;
+    base_player.Health() = gSavedPlayingState.player_health;
+
+    stage_timer = gSavedPlayingState.stage_timer;
+    damage_timer = gSavedPlayingState.damage_timer;
+    obstacle_last_spawn_time = gSavedPlayingState.obstacle_last_spawn_time;
+
+    g_fuel_pickup = gSavedPlayingState.fuel_pickup;
+    g_fuel_pickup.active = gSavedPlayingState.fuel_pickup_active;
+
+    obstacles = gSavedPlayingState.obstacles;
+
+    camera.Position().x = base_player.Position().x;
+    camera.Position().y = base_player.Position().y;
+    AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+}
+
+static void ApplyMazeOutcome()
+{
+    if (!gMazeCompleted)
+        return;
+
+    if (gMazeSuccess)
+    {
+        gTotalScore += 1000;
+        Credits_Add(300);
+        base_player.Health() = getMaxHealthFromUpgrades();
+    }
+    else
+    {
+        int new_health = (base_player.Health() + 1) / 2;
+        base_player.Health() = new_health;
+    }
+
+    gMazeCompleted = false;
+    gMazeSuccess = false;
+    gMazeFromPlaying = false;
+    gSavedPlayingState.valid = false;
+
+    if (base_player.Health() <= 0)
+        next = GAME_STATE_GAME_OVER;
+}
+
 void Playing_Initialize() {
+    
     createUnitSquare(&unit_square, 0.25f, 0.25f);
     createUnitCircles(&unit_circle);
     createUnitSquare(&(base_player.Mesh()), 0.25f, 0.25f);
@@ -91,6 +198,16 @@ void Playing_Initialize() {
     f32 upgraded_capacity = base_capacity * Upgrades_GetMaxFuelMultiplier();
     pFuel = new JetpackFuel(upgraded_capacity, 30.0f, 2.0f);
     g_fuel_pickup.active = false;
+
+    if (gResumeFromMaze && gSavedPlayingState.valid)
+    {
+        RestorePlayingStateFromMaze();
+        ApplyMazeOutcome();
+        gResumeFromMaze = false;
+        return;
+    }
+    gTotalScore = 0;
+
 
     //Animation______________________________
     //Background
@@ -117,6 +234,14 @@ void Playing_Initialize() {
         obstacle.velocity.x = randFloat(-80.0f, 80.0f);
         obstacle.velocity.y = randFloat(-80.0f, 80.0f);
     }
+
+    // Portal
+    gMazePortal.active = true;
+    gMazePortal.half_size = { 30.0f, 60.0f };
+    gMazePortal.pos.x = base_player.Position().x + 900.0f;
+    gMazePortal.pos.y = 0.0f;
+    gPortalWaitingToRespawn = false;
+    gPortalRespawnTimer = 0.0f;
 }
 
 void Playing_Update() {
@@ -148,6 +273,21 @@ void Playing_Update() {
     }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
+    //Portal Respawn Time
+    if (gPortalWaitingToRespawn)
+    {
+        gPortalRespawnTimer -= delta_time;
+
+        if (gPortalRespawnTimer <= 0.0f)
+        {
+            gMazePortal.active = true;
+            gPortalWaitingToRespawn = false;
+
+            gMazePortal.pos.x = base_player.Position().x + 900.0f;
+            gMazePortal.pos.y = randFloat(AEGfxGetWinMinY() + 80.0f, AEGfxGetWinMaxY() - 80.0f);
+        }
+    }
+
     bool isFlying = (AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_SPACE) 
         || AEInputCheckCurr(AEVK_UP) ) && pFuel->HasFuel();
 
@@ -196,6 +336,31 @@ void Playing_Update() {
 
         if (obstacle.position.x < offscreen_limit_left) {
             obstacle.Reset();
+        }
+    }
+
+    if (gMazePortal.active)
+    {
+        if (gMazePortal.pos.x < camera.Position().x - AEGfxGetWinMaxX())
+        {
+            gMazePortal.pos.x = camera.Position().x + 900.0f;
+            gMazePortal.pos.y = randFloat(AEGfxGetWinMinY() + 80.0f, AEGfxGetWinMaxY() - 80.0f);
+        }
+
+        if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &gMazePortal.pos, &gMazePortal.half_size))
+        {
+            SavePlayingStateForMaze();
+            gMazeFromPlaying = true;
+            gResumeFromMaze = true;
+            gMazeCompleted = false;
+            gMazeSuccess = false;
+
+            gMazePortal.active = false;
+            gPortalWaitingToRespawn = true;
+            gPortalRespawnTimer = kPortalRespawnDelay;
+
+            next = GAME_STATE_MAZE;
+            return;
         }
     }
 
@@ -260,7 +425,7 @@ void Playing_Update() {
     // 
     // Current credits minus credits at the start of the round
     // outside of if condition to update during game
-    credits_this_round = Credits_GetBalance() - Credits_GetInitBalance();
+    credits_this_round = gTotalScore + (Credits_GetBalance() - Credits_GetInitBalance());
     if (current != next) {
         // TODO: Do something with the score value
         std::cout << "Finish Playing Credits " << credits_this_round << '\n';
@@ -326,6 +491,18 @@ void Playing_Draw() {
         f32 world_x = base_player.Position().x;
         f32 world_y = base_player.Position().y + base_player.Half_Size().y + 20.0f;
         pFuel->Draw(world_x, world_y, 60.0f, 10.0f);
+    }
+
+    if (gMazePortal.active)
+    {
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxTextureSet(NULL, 0.0f, 0.0f);
+        drawQuad(unit_square,
+            gMazePortal.pos.x,
+            gMazePortal.pos.y,
+            gMazePortal.half_size.x * 2.0f,
+            gMazePortal.half_size.y * 2.0f,
+            0.4f, 0.0f, 1.0f, 1.0f);
     }
 
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
