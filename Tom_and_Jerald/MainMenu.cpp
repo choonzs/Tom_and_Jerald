@@ -44,7 +44,8 @@ void MainMenu_Load() {
 void MainMenu_Initialize() {
 	createUnitSquare(&unit_square);
 	createUnitSquare(&gameLogo, 0.25f, 0.25f);
-	createUnitSquare(&background);
+	createUnitSquare(&background, 0.25f, 0.25f);
+	createUnitSquare(&buttons, 0.25f, 0.25f);
 
 
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -65,6 +66,10 @@ void MainMenu_Initialize() {
 	//Animation______________________________
 	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
 	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);                 //Row, start col, frames, fps (GAMELOGO)
+	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
+	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);                 //Row, start col, frames, fps (BACKGROUND)
+	//ANIMATION::
+
 	//---------------------------------------
 
 	backgroundAudio.Play();
@@ -80,6 +85,7 @@ void MainMenu_Update() {
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
 	//Animation______________________________
 	ANIMATION::gameLogo.Anim_Update(delta_time);
+	ANIMATION::background.Anim_Update(delta_time);
 	//---------------------------------------
 
 
@@ -237,6 +243,15 @@ void MainMenu_Draw() {
 	if (mainMenu_flag == TRUE) {
 		AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f); //TEST DRAW BACKGRUNG HERE
 
+		//Animation______________________________
+		ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
+		drawQuad(background, 0, 0, window_width, window_height, 1.f, 1.f, 1.f, 0.7f);
+		ANIMATION::gameLogo.Anim_Draw(ASSETS::brandAssets); //Draws GAMELOGO
+		drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
+
+		//---------------------------------------
+
+
 		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f);
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
@@ -249,10 +264,6 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 
 
-		//Animation______________________________
-		ANIMATION::gameLogo.Anim_Draw(ASSETS::brandAssets); //Draws GAMELOGO
-		//---------------------------------------
-		drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
 		
 
 	}
@@ -262,6 +273,8 @@ void MainMenu_Draw() {
 void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
 	AEGfxMeshFree(gameLogo);
+	AEGfxMeshFree(background);
+	AEGfxMeshFree(buttons);
 }
 void MainMenu_Unload() {
 	AEGfxDestroyFont(font_id);

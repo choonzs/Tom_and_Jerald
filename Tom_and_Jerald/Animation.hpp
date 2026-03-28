@@ -48,6 +48,7 @@ namespace ANIMATION {
     extern AnimatedSprite asteroid;
     extern AnimatedSprite cheese;
     extern AnimatedSprite gameLogo;
+    extern AnimatedSprite UIButtons;
 
 
 }//Namespace ANIMATION

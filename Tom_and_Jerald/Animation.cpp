@@ -11,6 +11,7 @@ namespace ANIMATION {
     AnimatedSprite asteroid;
     AnimatedSprite cheese;
     AnimatedSprite gameLogo;
+    AnimatedSprite UIButtons;
         
     //Member functions__________________________
     //Initialize spritesheet
