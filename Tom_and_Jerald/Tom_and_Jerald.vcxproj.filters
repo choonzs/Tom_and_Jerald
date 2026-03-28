@@ -1,57 +1,213 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Animation.cpp" />
-    <ClCompile Include="Audio.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CustomLevel.cpp" />
-    <ClCompile Include="DifferentGamemode.cpp" />
-    <ClCompile Include="GameOver.cpp" />
-    <ClCompile Include="GameStateManager.cpp" />
-    <ClCompile Include="HighScores.cpp" />
-    <ClCompile Include="ImgFontInit.cpp" />
-    <ClCompile Include="Jetpack Fuel.cpp" />
-    <ClCompile Include="LevelEditor.cpp" />
-    <ClCompile Include="LevelTile.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainMenu.cpp" />
-    <ClCompile Include="Obstacle.cpp" />
-    <ClCompile Include="Particles.cpp" />
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Playing.cpp" />
-    <ClCompile Include="Credits.cpp" />
-    <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="Shop.cpp" />
-    <ClCompile Include="Upgrades.cpp" />
-    <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="Victory.cpp" />
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files\Input Management</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio.cpp">
+      <Filter>Source Files\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="Credits.cpp">
+      <Filter>Source Files\Game Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Jetpack Fuel.cpp">
+      <Filter>Source Files\Game Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Obstacle.cpp">
+      <Filter>Source Files\Game Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="Upgrades.cpp">
+      <Filter>Source Files\Game Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomLevel.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="DifferentGamemode.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="GameOver.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="HighScores.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelEditor.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="MainMenu.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Playing.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Shop.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Victory.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Particles.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStateManager.cpp">
+      <Filter>Source Files\GSM</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelTile.cpp">
+      <Filter>Source Files\Game Logic</Filter>
+    </ClCompile>
+    <ClCompile Include="ImgFontInit.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.hpp" />
-    <ClInclude Include="Audio.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="CustomLevel.hpp" />
-    <ClInclude Include="DifferentGamemode.hpp" />
-    <ClInclude Include="GameOver.hpp" />
-    <ClInclude Include="GameStateList.hpp" />
-    <ClInclude Include="GameStateManager.hpp" />
-    <ClInclude Include="Credits.hpp" />
-    <ClInclude Include="HighScores.hpp" />
-    <ClInclude Include="ImgFontInit.hpp" />
-    <ClInclude Include="JetpackFuel.hpp" />
-    <ClInclude Include="LevelEditor.hpp" />
-    <ClInclude Include="LevelTile.hpp" />
-    <ClInclude Include="MainMenu.hpp" />
-    <ClInclude Include="Obstacle.hpp" />
-    <ClInclude Include="Particles.hpp" />
-    <ClInclude Include="pch.hpp" />
-    <ClInclude Include="Player.hpp" />
-    <ClInclude Include="Playing.hpp" />
-    <ClInclude Include="Settings.hpp" />
-    <ClInclude Include="Shop.hpp" />
-    <ClInclude Include="Upgrades.hpp" />
-    <ClInclude Include="Utils.hpp" />
-    <ClInclude Include="Victory.hpp" />
+    <ClInclude Include="pch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Header Files\Input Management</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio.hpp">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Credits.hpp">
+      <Filter>Header Files\Game Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="JetpackFuel.hpp">
+      <Filter>Header Files\Game Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Obstacle.hpp">
+      <Filter>Header Files\Game Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Upgrades.hpp">
+      <Filter>Header Files\Game Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Particles.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomLevel.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="DifferentGamemode.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="GameOver.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="HighScores.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelEditor.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenu.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Playing.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Shop.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Victory.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.hpp">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateManager.hpp">
+      <Filter>Header Files\GSM</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateList.hpp">
+      <Filter>Header Files\GSM</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelTile.hpp">
+      <Filter>Header Files\Game Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgFontInit.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0b0c6b73-22ed-4ef0-9ddb-7a61d335e8f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{b1f5d198-7e92-417d-9639-47ac88e92272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input Management">
+      <UniqueIdentifier>{6831ffc2-f537-4ab1-82a2-7fa110f67212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input Management">
+      <UniqueIdentifier>{cf87cada-c923-4fd5-80b6-74ac6cd6761f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Audio">
+      <UniqueIdentifier>{c60db558-1ba8-4afd-a994-31c4ee88a0a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Audio">
+      <UniqueIdentifier>{89505e3f-e287-4959-a2f5-9f0ed0624375}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game Logic">
+      <UniqueIdentifier>{e4bdb38d-5a27-4ca3-8f31-aa5dbb265568}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game Logic">
+      <UniqueIdentifier>{0fd34b91-23eb-4dc3-847e-77463bf9c45b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{60b75518-53d2-45f6-8c1d-0efa59397e9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Levels">
+      <UniqueIdentifier>{fd05f311-8476-4702-a415-53411e9b618d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Levels">
+      <UniqueIdentifier>{a0b87d99-d0d4-4e69-8830-45aa4469d96f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Camera">
+      <UniqueIdentifier>{2156387f-d801-4cdd-89f4-e78d21a6f3ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{d2385b6d-f261-4a19-ba4c-cd1ec21d5bab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Animation">
+      <UniqueIdentifier>{abc31953-e9ea-4747-8ab3-ccd487f77f12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation">
+      <UniqueIdentifier>{18b2cc11-ca6d-4c5e-ae3e-88ce72665dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{212c33ac-1989-4c3b-aaf2-3e788330367a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GSM">
+      <UniqueIdentifier>{bed97812-6a15-415f-bca8-238ae886a641}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GSM">
+      <UniqueIdentifier>{a44cf7ec-a566-4dbf-afd3-9b94b3da75e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

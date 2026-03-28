@@ -217,6 +217,7 @@ void Playing_Initialize() {
     ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);                  //Row, start col, frames, fps (ASTERIOD)
     ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
     ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);                    //Row, start col, frames, fps (PLAYER)
+    // TODO Anim initialize
     //---------------------------------------
 
     camera.Magnitude() = 20.0f;
@@ -297,6 +298,7 @@ void Playing_Update() {
     //ANIMATION::background.Anim_Update(delta_time);
     ANIMATION::asteroid.Anim_Update(delta_time);
     ANIMATION::player.Anim_Update(delta_time);
+    // TODO Anim Update
     //---------------------------------------
 
 
@@ -448,10 +450,14 @@ void Playing_Draw() {
     f32 scroll_offset = fmodf(cam_x, bg_width);
     if (scroll_offset < 0.0f) scroll_offset += bg_width;
 
+
+    f32 base_x = cam_x - scroll_offset;
+    int base_frame = ((int)floorf(base_x / bg_width) % 4 + 4) % 4;
+
     // anchor tiles relative to camera with smooth offset
     for (int i = -1; i <= 2; ++i) {
-        f32 tile_x = cam_x - scroll_offset + i * bg_width;
-        int frame = ((int)floorf((cam_x - scroll_offset + i * bg_width) / bg_width) % 4 + 4) % 4;
+        f32 tile_x = base_x + i * bg_width;
+        int frame = (base_frame + i + 4) % 4;  
         f32 uv_x = frame * frame_width;
 
         AEGfxTextureSet(ASSETS::backgroundAssets, uv_x, 0.0f);
