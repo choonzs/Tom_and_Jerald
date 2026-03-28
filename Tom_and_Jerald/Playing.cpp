@@ -212,7 +212,7 @@ void Playing_Initialize() {
     //Animation______________________________
     //Background
     ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-    ANIMATION::background.Clip_Select(0, 0, 3, 2.0f);                 //Row, start col, frames, fps (BACKGROUND)
+    ANIMATION::background.Clip_Select(0, 0, 4, 1.0f);                 //Row, start col, frames, fps (BACKGROUND)
     ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");   //Total rows + columns
     ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);                  //Row, start col, frames, fps (ASTERIOD)
     ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
@@ -294,7 +294,7 @@ void Playing_Update() {
     if (pFuel) pFuel->Update(delta_time, isFlying);
 
     //Animation______________________________
-    ANIMATION::background.Anim_Update(delta_time);
+    //ANIMATION::background.Anim_Update(delta_time);
     ANIMATION::asteroid.Anim_Update(delta_time);
     ANIMATION::player.Anim_Update(delta_time);
     //---------------------------------------
@@ -442,19 +442,21 @@ void Playing_Draw() {
     f32 bg_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
     f32 bg_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
     f32 cam_x = camera.Position().x;
-
-    f32 offset = fmodf(cam_x, bg_width);
-    if (offset < 0) offset += bg_width;
-
-    f32 draw_start_x = cam_x - offset;
+    f32 frame_width = 1.0f / 4.0f;
 
 
-    //Animation______________________________
-    ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
-    //---------------------------------------
-    drawQuad(unit_square, draw_start_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
-    AEGfxTextureSet(ASSETS::backgroundAssets, ANIMATION::background.uv_offset_x + 0.25f, ANIMATION::background.uv_offset_y); //Offset by 1 frame
-    drawQuad(unit_square, draw_start_x + bg_width, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    f32 scroll_offset = fmodf(cam_x, bg_width);
+    if (scroll_offset < 0.0f) scroll_offset += bg_width;
+
+    // anchor tiles relative to camera with smooth offset
+    for (int i = -1; i <= 2; ++i) {
+        f32 tile_x = cam_x - scroll_offset + i * bg_width;
+        int frame = ((int)floorf((cam_x - scroll_offset + i * bg_width) / bg_width) % 4 + 4) % 4;
+        f32 uv_x = frame * frame_width;
+
+        AEGfxTextureSet(ASSETS::backgroundAssets, uv_x, 0.0f);
+        drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+    }
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
 

@@ -99,7 +99,6 @@ void MainMenu_Update() {
 
 
 	if (local_time < 3.0f) {
-		mainMenu_flag = FALSE;
 		teamName_flag = FALSE;
 
 		// Fade out: full opacity at 0s, invisible at 3s
@@ -128,7 +127,6 @@ void MainMenu_Update() {
 	}
 	else {
 		teamName_flag = TRUE;
-		mainMenu_flag = FALSE;
 	}
 
 
