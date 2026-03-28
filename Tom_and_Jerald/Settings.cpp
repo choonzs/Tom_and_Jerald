@@ -192,8 +192,9 @@ void Setting_Load() {
 
 void Settings_Initialize() {
     sliders.clear();
+
     // load the slider config text file
-    SliderLoadConfig("../../Assets/SliderConfig.txt");
+    SliderLoadConfig("Assets/SliderConfig.txt");
 
     // reset camera to origin so world-space mouse conversion is accurate
     AEGfxSetCamPosition(0.0f, 0.0f);
@@ -234,6 +235,7 @@ void Settings_Update() {
 
 // draws all sliders
 void Settings_Draw() {
+
     // Clear the screen & Set to Default Draw Settings
     AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);

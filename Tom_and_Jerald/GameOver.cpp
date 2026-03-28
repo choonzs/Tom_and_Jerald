@@ -51,18 +51,23 @@ void GameOver_Update() {
 			}
 		}
 		// backspace
-		if (AEInputCheckTriggered(AEVK_BACK)) {
+		if (AEInputCheckCurr(AEVK_BACK)) {
 			if (!newName.empty())
 				newName.pop_back();
 		}
 
 		// enter
 		if (AEInputCheckTriggered(AEVK_RETURN)) {
+			//Edge case empty player name
+			if (newName.empty()) {
+				newName = "rat";
+			}
 			// save to leaderboard
 			Leaderboard::Score newScore{ newName, credits_this_round };
 			currentboard->AddScore(newScore); // you need this function
 			currentboard->UpdateLeaderboard("Assets/data/HighScores.txt");
 			new_score = false; // done typing
+			credits_this_round = 0; // reset score for next game
 		}
 	}
 	else {

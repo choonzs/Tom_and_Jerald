@@ -38,10 +38,12 @@ bool ShopState::isCursorOverText(const char* text, f32 center_y, f32 scale, f32 
 	f32 width = 0.0f;
 	f32 height = 0.0f;
 	AEGfxGetPrintSize(font_id, text, scale, &width, &height);
-	f32 left = -width * 0.5f;
-	f32 right = width * 0.5f;
-	f32 bottom = center_y;
-	f32 top = center_y + height;
+	f32 padding = 0.08f; // match the padding used in drawButtonBackground
+
+	f32 left = -(width + padding) * 0.5f;
+	f32 right = (width + padding) * 0.5f;
+	f32 bottom = center_y - padding * 0.5f;           // centered, not bottom-anchored
+	f32 top = center_y + height + padding * 0.5f;
 	return cursor_x >= left && cursor_x <= right && cursor_y >= bottom && cursor_y <= top;
 }
 

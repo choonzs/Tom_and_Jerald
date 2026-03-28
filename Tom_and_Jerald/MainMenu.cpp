@@ -262,10 +262,7 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 
 
-		
-
 	}
-
 }
 
 void MainMenu_Free() {
