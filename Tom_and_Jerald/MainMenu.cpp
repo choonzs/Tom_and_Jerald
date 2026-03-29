@@ -31,6 +31,10 @@ namespace {
 
 	// txt files start w 1
 	unsigned int select_level{ 1 };
+
+	// Testing parallax using mouse
+	f32 parallax_x = 0.0f;
+	f32 parallax_y = 0.0f;
 }
 
 
@@ -87,6 +91,23 @@ void MainMenu_Update() {
 	ANIMATION::background.Anim_Update(delta_time);
 	//---------------------------------------
 
+	// Trying something with mouse
+	s32 mouseX_int{};
+	s32 mouseY_int{};
+
+	AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+
+	f32 nx = (static_cast<f32>(mouseX_int) / window_width) * 2.0f - 1.0f;
+	f32 ny = (static_cast<f32>(mouseY_int) / window_height) * 2.0f - 1.0f;
+
+	ny = -ny;
+
+	f32 target_x = nx * 30.0f;
+	f32 target_y = ny * 30.0f;
+
+	parallax_x += (target_x - parallax_x) * 0.1f;
+	parallax_y += (target_y - parallax_y) * 0.1f;
+	// ==========================================
 
 	if (IsMenuKeyTriggered()) {
 		clickAudio.Play();
@@ -242,9 +263,22 @@ void MainMenu_Draw() {
 
 		//Animation______________________________
 		ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
-		drawQuad(background, 0, 0, window_width, window_height, 1.f, 1.f, 1.f, 0.7f);
+		drawQuad(background,
+			parallax_x * 0.3f,
+			parallax_y * 0.3f,
+			window_width,
+			window_height,
+			1.f, 1.f, 1.f, 0.7f);
+		//drawQuad(background, 0, 0, window_width, window_height, 1.f, 1.f, 1.f, 0.7f);
 		ANIMATION::gameLogo.Anim_Draw(ASSETS::brandAssets); //Draws GAMELOGO
-		drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
+
+		drawQuad(gameLogo,
+			parallax_x * 0.8f,
+			250.0f + parallax_y * 0.8f,
+			350.0f,
+			350.0f,
+			1.f, 1.f, 1.f, 1.f);
+		//drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
 
 		//---------------------------------------
 

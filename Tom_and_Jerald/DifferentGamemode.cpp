@@ -150,12 +150,11 @@ static void LoadRandomMazeFile()
     gUseLoadedMaze = false;
     gLoadedMaze.clear();
 
-    if (gMazeFileCount <= 0)
-        return;
+    if (!gMazeFileCount) return;
 
     int index = 0;
 
-    if (gMazeFileCount == 1)
+    if constexpr (gMazeFileCount == 1)
     {
         index = 0;
     }

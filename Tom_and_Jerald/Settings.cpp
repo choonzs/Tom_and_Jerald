@@ -148,7 +148,7 @@ void Slider::FreeMeshes()
     handleMesh = nullptr;
 }
 
-void Slider::Draw(s8 font_id)
+void Slider::Draw(s8 font)
 {
     AEMtx33 transform, scale, trans;
 
@@ -172,10 +172,10 @@ void Slider::Draw(s8 font_id)
 
     // draw label and percentage 
     f32 labelY = mY / AEGfxGetWinMaxY();
-    AEGfxPrint(font_id, mLabel.c_str(), -0.8f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, mLabel.c_str(), -0.8f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
     char buffer[32];
     sprintf_s(buffer, 32, "%.0f%%", mValue * 100.f);
-    AEGfxPrint(font_id, buffer, 0.7f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, buffer, 0.7f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
 }
 
 // resets slider value and handle back to default
