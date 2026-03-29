@@ -217,6 +217,14 @@ void Playing_Initialize() {
     ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);                  //Row, start col, frames, fps (ASTERIOD)
     ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
     ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);                    //Row, start col, frames, fps (PLAYER)
+
+    ANIMATION::spike.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
+    // Spike at 1,1 of spritesheet with only 1 sprite
+    ANIMATION::spike.Clip_Select(1, 1, 1, 10.0f);                    //Row, start col, frames, fps (Spike)
+    
+    ANIMATION::wall.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
+    ANIMATION::wall.Clip_Select(1, 0, 1, 10.0f);                    //Row, start col, frames, fps (Wall)
+    
     // TODO Anim initialize
     //---------------------------------------
 
@@ -392,16 +400,48 @@ void Playing_Update() {
         }
     }
 
+	// check for obstacle-obstacle collisions and reset if they overlap to prevent unfair scenarios for the player
+    for (int i = 0; i < obstacles.size(); i++) {
+        for (int j = i + 1; j < obstacles.size(); j++) {
+            if (checkOverlap(&obstacles[i].position, &obstacles[i].half_size,
+                &obstacles[j].position, &obstacles[j].half_size)) {
+
+				// if one is an asteroid then we want to reset both to prevent unfair scenarios for the player
+                if (obstacles[i].type == Asteroid || obstacles[j].type == Asteroid) {
+                    graphics::particleInit(obstacles[i].Position().x, obstacles[i].Position().y, 50);
+                    obstacles[i].Reset();
+
+                    graphics::particleInit(obstacles[j].Position().x, obstacles[j].Position().y, 50);
+                    obstacles[j].Reset();
+                }
+                else {
+					// if both are spikes/walls then we just reset without any particles since no need for visual
+					obstacles[i].Reset();
+					obstacles[j].Reset();
+				}
+            }
+        }
+    }
+    
+
+	// Check for collisions of player with obstacles, if collide then take damage and set damage timer
     bool took_damage = false;
     for (Obstacle const& obstacle : obstacles) {
         if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &obstacle.position, &obstacle.half_size)) {
             if (damage_timer <= 0.0f) {
                 ratsqueakAudio.Play();
-                base_player.Health() -= 1;
+
+                if (obstacle.type == Wall) {// wall kill instantly
+					base_player.Health() -= base_player.Health();
+                }
+                else {base_player.Health() -= 1;}
+                
                 damage_timer = k_damage_cooldown;
                 took_damage = true;
             }
         }
+
+
     }
 
     if (took_damage) {
@@ -429,7 +469,6 @@ void Playing_Update() {
     // outside of if condition to update during game
     credits_this_round = gTotalScore + (Credits_GetBalance() - Credits_GetInitBalance());
     if (current != next) {
-        // TODO: Do something with the score value
         std::cout << "Finish Playing Credits " << credits_this_round << '\n';
         // Save current cheese score
         Credits_SaveFile("Assets/data/Cheese.txt");
@@ -472,13 +511,31 @@ void Playing_Draw() {
 
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
-
+    f32 obj_rotation{};
     for (Obstacle const& obstacle : obstacles) {
-        //Animation______________________________
-        ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
-        //---------------------------------------
+        switch (obstacle.type) {
+            case Asteroid:
+                //Animation______________________________
+                ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
+                //---------------------------------------
+                obj_rotation = 0.0f;
+                break;
+        
+            case Spike:
+                //Animation______________________________
+                ANIMATION::spike.Anim_Draw(ASSETS::backgroundAssets);   //Draws SPIKE
+                //---------------------------------------
+                obj_rotation = obstacle.rotation;
+                break;
+            case Wall:
+                //Animation______________________________
+                ANIMATION::wall.Anim_Draw(ASSETS::backgroundAssets);   //Draws Wall
+                //---------------------------------------
+                obj_rotation = obstacle.rotation;
+				break;
+        }
 
-        drawQuad(unit_square, obstacle.position.x, obstacle.position.y, obstacle.half_size.x * 2.0f, obstacle.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+        drawQuad(unit_square, obstacle.position.x, obstacle.position.y, obstacle.half_size.x * 2.0f, obstacle.half_size.y * 2.0f, 1.0f, 1.0f, 1.0f, 1.0f, obj_rotation);
 
     }
 

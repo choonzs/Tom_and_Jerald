@@ -34,18 +34,50 @@ void Obstacle::Reset()
     f32 max_y = AEGfxGetWinMaxY();
     f32 size_value = randomRange(25.0f, 70.0f);
 
-    type = randomRange(ObstacleType::Asteroid, ObstacleType::Spike);
+    type = randomRange(ObstacleType::Asteroid, ObstacleType::Wall);
+    std::cout << "Obstacle Type: " << type << std::endl;
+    
+    switch (type) {
+    case Asteroid:
+		rotation = 0.0f; // No rotation for asteroid
+        AEVec2Set(&half_size, size_value, size_value);
+        AEVec2Set(
+            &position,
+            // move it a little offscreen
+            max_x + half_size.x,
+            randomRange(min_y + size_value, max_y - size_value));
+        AEVec2Set(
+            &velocity,
+            randomRange(-220.0f, 0.0f),
+            randomRange(-220.0f, 220.0f));
+        break;
+    case Wall: // fall through, similar behaviour
+    case Spike: 
+        AEVec2Set(&half_size, size_value, size_value);
 
-    AEVec2Set(&half_size, size_value, size_value);
-    AEVec2Set(
-        &position,
-        // move it a little offscreen
-        max_x + half_size.x,
-        randomRange(min_y + size_value, max_y - size_value));
-    AEVec2Set(
-        &velocity,
-        randomRange(-220.0f, 0.0f),
-        randomRange(-220.0f, 220.0f));
+        // Randomly place on ceiling or floor
+        int on_ceiling = rand() % 2;
+
+        if (on_ceiling) {
+            // Draw on ceiling
+            AEVec2Set(
+                &position,
+                max_x + half_size.x,
+                max_y - half_size.y);
+            rotation = PI;
+        }
+        else {
+            // Draw on floor
+            AEVec2Set(
+                &position,
+                max_x + half_size.x,
+                min_y + half_size.y); 
+            rotation = 0.0f;
+        }
+
+        AEVec2Set(&velocity, 0.0f, 0.0f); // static obstacle 
+    }
+
 }
 
 // Obstacle::Update

@@ -40,6 +40,7 @@ const int& Leaderboard::LowestScore() {
 }
 
 void Leaderboard::AddScore(Score const& score) {
+	
 	highscores.push_back(score);
 
 	// Sort it in the right order descending

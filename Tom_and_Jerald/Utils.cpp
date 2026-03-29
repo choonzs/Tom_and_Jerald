@@ -73,20 +73,23 @@ void createUnitCircles(AEGfxVertexList** out_mesh) {
 
 
 
-void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha)
+void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha, f32 rotation_rad)
 {
-	AEMtx33 scale;
-	AEMtx33 translate;
-	AEMtx33 transform;
+	AEMtx33 scale, rot, translate, transform;
 
 	AEMtx33Scale(&scale, width, height);
+	AEMtx33RotDeg(&rot, AERadToDeg(rotation_rad));
 	AEMtx33Trans(&translate, center_x, center_y);
-	AEMtx33Concat(&transform, &translate, &scale);
+
+	AEMtx33Concat(&transform, &rot, &scale);
+	AEMtx33Concat(&transform, &translate, &transform);
 
 	AEGfxSetTransform(transform.m);
 	AEGfxSetColorToMultiply(red, green, blue, alpha);
 	AEGfxMeshDraw(mesh, AE_GFX_MDM_TRIANGLES);
 }
+
+
 
 
 bool checkOverlap(const AEVec2* position_a, const AEVec2* half_size_a, const AEVec2* position_b, const AEVec2* half_size_b)

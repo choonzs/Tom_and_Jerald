@@ -50,6 +50,8 @@ namespace ANIMATION {
     extern AnimatedSprite gameLogo;
     extern AnimatedSprite UIButtons;
     // TODO declare animatedsprite
+    extern AnimatedSprite spike;
+	extern AnimatedSprite wall;
 
 
 }//Namespace ANIMATION

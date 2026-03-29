@@ -21,7 +21,7 @@
 // ---------------------------------------------------------------------------
 // Represents Obstacle Type
 // ---------------------------------------------------------------------------
-enum ObstacleType : int { Non_Obstacle = 0, Asteroid = 1, Spike = 2 };
+enum ObstacleType : int { Non_Obstacle = 0, Asteroid = 1, Spike = 2, Wall = 3};
 // ---------------------------------------------------------------------------
 // Represents Obstacle Type
 // ---------------------------------------------------------------------------
@@ -61,6 +61,7 @@ public:
 	AEVec2 position{};
 	AEVec2 velocity{};
 	AEVec2 half_size{};
+	f32 rotation{};
 	//Obstacle() = default;
 
 	// Parameterized constructor for creating obstacles from level data

@@ -123,7 +123,7 @@ void createUnitCircles(AEGfxVertexList** out_mesh);
 \param[in] alpha
 	The alpha (transparency) component of the quad's color (0.0f to 1.0f).
 *******************************************************************************/
-void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red, f32 green, f32 blue, f32 alpha);
+void drawQuad(AEGfxVertexList* mesh, f32 center_x, f32 center_y, f32 width, f32 height, f32 red = 1.0f, f32 green = 1.0f, f32 blue = 1.0f, f32 alpha = 1.0f, f32 rotation_rad = 0.0f);
 
 /*!*****************************************************************************
 \brief

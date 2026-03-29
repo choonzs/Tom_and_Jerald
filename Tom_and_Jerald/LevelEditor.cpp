@@ -341,10 +341,6 @@ void LevelEditor_Draw() {
         if (tex) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(tex, 0, 0); }
         else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
         
-        // ehh??
-        //Animation______________________________
-        ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);   //Draws ASTEROID
-        //---------------------------------------
         AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
         };
     
