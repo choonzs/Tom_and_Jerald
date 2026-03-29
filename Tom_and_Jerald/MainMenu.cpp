@@ -80,8 +80,7 @@ void MainMenu_Initialize() {
 
 void MainMenu_Update() {
 	camera.Update();
-	camera.Set_Shaking();
-
+	
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
 	//Animation______________________________
 	ANIMATION::gameLogo.Anim_Update(delta_time);
