@@ -70,6 +70,8 @@ void ShopState::Initialize() {
 	
 	AEGfxSetCamPosition(0.0f, 0.0f);
 	AEInputShowCursor(true);
+
+	Upgrades_ReadFromFile("Assets/data/Upgrades.txt");
 }
 
 void ShopState::Update() {
@@ -93,18 +95,23 @@ void ShopState::Update() {
 	if (AEInputCheckTriggered(AEVK_LBUTTON)) {
 		if (isCursorOverText(hp_text, k_health_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeHealth() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeHealth();
+			Upgrades_WriteToFile("Assets/data/Upgrades.txt");
 		}
 		else if (isCursorOverText(size_text, k_size_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeSize() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeSize();
+			Upgrades_WriteToFile("Assets/data/Upgrades.txt");
 		}
 		else if (isCursorOverText(cap_text, k_fuel_cap_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeFuelCap() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeFuelCap();
+			Upgrades_WriteToFile("Assets/data/Upgrades.txt");
 		}
 		else if (isCursorOverText(spawn_text, k_fuel_spawn_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeFuelSpawn() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeFuelSpawn();
+			Upgrades_WriteToFile("Assets/data/Upgrades.txt");
 		}
 		else if (isCursorOverText(restore_text, k_fuel_restore_button_y, k_button_scale, cx, cy) && Upgrades_CanUpgradeFuelRestore() && Credits_Spend(k_upgrade_cost)) {
 			Upgrades_UpgradeFuelRestore();
+			Upgrades_WriteToFile("Assets/data/Upgrades.txt");
 		}
 	}
 }
@@ -170,3 +177,5 @@ void Shop_Update() { g_shop.Update(); }
 void Shop_Draw() { g_shop.Draw(); }
 void Shop_Free() { g_shop.Free(); }
 void Shop_Unload() { g_shop.Unload(); }
+
+

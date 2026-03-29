@@ -40,4 +40,7 @@ bool Upgrades_UpgradeFuelCap();
 bool Upgrades_UpgradeFuelSpawn();
 bool Upgrades_UpgradeFuelRestore();
 
+
+bool Upgrades_ReadFromFile(std::string filename);
+bool Upgrades_WriteToFile(std::string filename);
 #endif // UPGRADES_HPP

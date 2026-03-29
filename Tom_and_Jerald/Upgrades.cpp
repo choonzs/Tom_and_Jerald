@@ -95,3 +95,28 @@ bool Upgrades_UpgradeFuelRestore()
     ++fuel_restore_level;
     return true;
 }
+
+
+bool Upgrades_ReadFromFile(std::string filename)
+{
+    std::ifstream inFile(filename);
+    if (!inFile) {
+        std::cerr << "Error: Unable to open : " << filename << std::endl;
+        return false;
+	}
+    inFile >> size_level >> health_level >> fuel_cap_level >> fuel_spawn_level >> fuel_restore_level;
+    inFile.close();
+	return true;
+}
+
+bool Upgrades_WriteToFile(std::string filename)
+{
+	std::ofstream outFile(filename);
+    if (!outFile) {
+        std::cerr << "Error: Unable to open : " << filename << std::endl;
+        return false;
+    }
+    outFile << size_level << " " << health_level << " " << fuel_cap_level << " " << fuel_spawn_level << " " << fuel_restore_level;
+	outFile.close();
+    return true;
+}
