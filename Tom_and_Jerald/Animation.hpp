@@ -48,7 +48,7 @@ namespace ANIMATION {
     extern AnimatedSprite asteroid;
     extern AnimatedSprite cheese;
     extern AnimatedSprite gameLogo;
-    extern AnimatedSprite UIButtons;
+    extern AnimatedSprite UIButton;
     // TODO declare animatedsprite
     extern AnimatedSprite spike;
 	extern AnimatedSprite wall;

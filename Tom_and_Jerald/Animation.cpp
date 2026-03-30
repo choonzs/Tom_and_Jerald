@@ -11,7 +11,7 @@ namespace ANIMATION {
     AnimatedSprite asteroid;
     AnimatedSprite cheese;
     AnimatedSprite gameLogo;
-    AnimatedSprite UIButtons;
+    AnimatedSprite UIButton;
     // TODO define animatedsprite
     AnimatedSprite spike;
     AnimatedSprite wall;
