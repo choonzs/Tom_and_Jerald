@@ -95,7 +95,7 @@ namespace {
     // check if the game is paused
     bool isPaused;
 
-
+    BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
 }
 
 int getMaxHealthFromUpgrades();
@@ -175,6 +175,7 @@ static void ApplyMazeOutcome()
 }
 
 void Playing_Initialize() {
+	quitting_flag = FALSE;
     
     createUnitSquare(&unit_square, 0.25f, 0.25f);
     createUnitCircles(&unit_circle);
@@ -255,10 +256,22 @@ void Playing_Initialize() {
 
 void Playing_Update() {
     if (AEInputCheckTriggered(AEVK_P)) { isPaused = !isPaused; } // toggle pause
-    
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
 
     if (isPaused) {
+        // Destructive confirmation for quitting the game
+        if (quitting_flag == TRUE) {
+            // Click Y to quit, N to cancel
+            if (AEInputCheckTriggered(AEVK_Y)) {
+                // Quitting the game
+                next = GAME_STATE_MENU;
+            }
+            else if (AEInputCheckTriggered(AEVK_N)) {
+                quitting_flag = FALSE;
+            }
+        }
+        // ==================================================
+
+
         if (AEInputCheckTriggered(AEVK_R)) {
             // return back to the game
             isPaused = false;
@@ -269,12 +282,14 @@ void Playing_Update() {
         }
         else if (AEInputCheckTriggered(AEVK_2))
         {
-            next = GAME_STATE_MENU;
+            //next = GAME_STATE_MENU;
+            quitting_flag = TRUE;
         }
-        else if (AEInputCheckTriggered(AEVK_3))
+        /*else if (AEInputCheckTriggered(AEVK_3))
         {
             next = GAME_STATE_QUIT;
-        }
+            quitting_flag = TRUE;
+        }*/
         else {
             //next = GAME_STATE_RESTART;
         }
@@ -461,8 +476,6 @@ void Playing_Update() {
 
     if (base_player.Health() <= 0) next = GAME_STATE_GAME_OVER;
 
-    else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
-
     //Changing game states
     // 
     // Current credits minus credits at the start of the round
@@ -474,7 +487,7 @@ void Playing_Update() {
         Credits_SaveFile("Assets/data/Cheese.txt");
     }
     else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
-    else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
+    else if (0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
 }
 
 void Playing_Draw() {
@@ -608,7 +621,13 @@ void Playing_Draw() {
     drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
     drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);
     drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.2f, 0.7f);
-    drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
+    //drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
+
+    if (quitting_flag == TRUE) {
+        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", -0.8f, 0.7f);
+    }
+
+    
 }
 
 void Playing_Free() {
