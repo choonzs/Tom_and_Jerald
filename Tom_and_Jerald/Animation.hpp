@@ -31,9 +31,9 @@ namespace ANIMATION {
 
         //Updates animation clip to run
         void Anim_Update(f32 delta_time);
+
         //Renders the clip
-        void Anim_Draw
-        (AEGfxTexture* Texture) const;
+        void Anim_Draw(AEGfxTexture* Texture) const;
 
     private: //Helper functions_________________________
         //Snaps UV to frame, private so that only AnimatedSprite class can call

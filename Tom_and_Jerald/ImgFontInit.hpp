@@ -4,13 +4,13 @@
 #pragma once
 
 namespace ASSETS {
-	extern AEGfxTexture* backgroundTexture;
-	extern AEGfxTexture* copyrightText;
-	extern AEGfxTexture* copyrightLogo;
-	extern AEGfxTexture* backgroundAssets;  //Background + obstacles
-	extern AEGfxTexture* otherAssets;		//Other assets + UI
-	extern AEGfxTexture* playerAssets;		//Player + customization
-	extern AEGfxTexture* brandAssets;		//Game name
+	extern AEGfxTexture* (copyrightText);		//Copyright assets
+	extern AEGfxTexture* (copyrightLogo);
+	extern AEGfxTexture* (playerAssets);		//Player + customization assets
+	extern AEGfxTexture* (backgroundAssets);	//Background + obstacles assets
+	extern AEGfxTexture* (otherAssets);			//Other game assets
+	extern AEGfxTexture* (brandAssets);		    //Game title assets
+	extern AEGfxTexture* (UIAssets);			//UI assets
 
 	void Init_Images();
 	void Init_Font();

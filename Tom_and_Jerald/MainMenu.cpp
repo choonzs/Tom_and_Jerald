@@ -14,7 +14,7 @@ namespace {
 	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
 	AEGfxVertexList* buttons = nullptr;				//For buttons
-	AEGfxVertexList* background = nullptr;			//FOr background
+	AEGfxVertexList* background = nullptr;			//For background
 
 	int counter{};
 	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
@@ -26,9 +26,10 @@ namespace {
 	f32 window_width;								//Window Width
 	f32 window_height;								//Window Height
 
-	BOOL mainMenu_flag;
-	BOOL teamName_flag;
+	BOOL mainMenu_flag;								//For main menu access, plays after teamname splashscreen
+	BOOL teamName_flag;								//For teamname splashscreen, plays after copyright splashscreen
 	BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
+
 
 	// txt files start w 1
 	unsigned int select_level{ 1 };
@@ -70,12 +71,12 @@ void MainMenu_Initialize() {
 
 	quitting_flag = FALSE; //False on default, triggers when player clicks escape or closes window
 
-	//Animation______________________________
-	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);                 //Row, start col, frames, fps (GAMELOGO)
-	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);                 //Row, start col, frames, fps (BACKGROUND)
-	//ANIMATION::
+	//ANIMATION______________________________
+	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt");			//Total rows + columns file
+	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);							//Row, start col, frames, fps (GAMELOGO)
+
+	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
+	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
 
 	//---------------------------------------
 
@@ -89,7 +90,7 @@ void MainMenu_Update() {
 	camera.Update();
 	
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
-	//Animation______________________________
+	//ANIMATION______________________________
 	ANIMATION::gameLogo.Anim_Update(delta_time);
 	ANIMATION::background.Anim_Update(delta_time);
 	//---------------------------------------
@@ -298,7 +299,7 @@ void MainMenu_Draw() {
 		//---------------------------------------
 
 
-		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f);
+		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f); //start,shop, leveledit,hs,settings,exit
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
 		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f); //Link this to main game delete after

@@ -83,7 +83,7 @@ namespace ANIMATION {
 //Private functions_________________________
     //Snaps UV to frame, private so that only AnimatedSprite class can call
     void AnimatedSprite::RecalcUV() {
-        uv_offset_x = uv_width * static_cast<f32>(col_start + current_index); //Selects col + steps to the end of the clip
+        uv_offset_x = uv_width * static_cast<f32>(col_start + current_index);//Selects col + steps to the end of the clip
         uv_offset_y = uv_height * static_cast<f32>(active_row);         //Selects row where clip resides
     }
 
