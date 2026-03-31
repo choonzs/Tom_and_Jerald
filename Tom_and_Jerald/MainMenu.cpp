@@ -28,6 +28,7 @@ namespace {
 
 	BOOL mainMenu_flag;
 	BOOL teamName_flag;
+	BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
 
 	// txt files start w 1
 	unsigned int select_level{ 1 };
@@ -66,6 +67,8 @@ void MainMenu_Initialize() {
 
 	mainMenu_flag = FALSE; //False on default, triggers main menu after teamname
 	teamName_flag = FALSE; //False on defualt, triggers after splashscreen
+
+	quitting_flag = FALSE; //False on default, triggers when player clicks escape or closes window
 
 	//Animation______________________________
 	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
@@ -149,7 +152,18 @@ void MainMenu_Update() {
 		teamName_flag = TRUE;
 	}
 
-
+	// Destructive confirmation for quitting the game
+	if (quitting_flag == TRUE) {
+		// Click Y to quit, N to cancel
+		if (AEInputCheckTriggered(AEVK_Y)) {
+			// Quitting the game
+			next = GAME_STATE_QUIT;
+		}
+		else if (AEInputCheckTriggered(AEVK_N)) {
+			quitting_flag = FALSE;
+		}
+	}
+	// ===========================================
 
 	if (mainMenu_flag == TRUE) {
 		//Temp for switching levels
@@ -176,8 +190,9 @@ void MainMenu_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 		{
+			quitting_flag = true;
 			// Quitting the game
-			next = GAME_STATE_QUIT;
+			//next = GAME_STATE_QUIT;
 		}
 		else if (AEInputCheckTriggered(AEVK_C))
 		{
@@ -294,7 +309,9 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 
-
+		if (quitting_flag == TRUE) {
+			drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO QUIT? (Y/N)", -0.8f, 0.7f);
+		}
 	}
 }
 
