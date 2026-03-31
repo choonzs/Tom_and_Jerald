@@ -8,6 +8,7 @@
 #include "Audio.hpp"
 #include "ImgFontInit.hpp"
 #include "Animation.hpp"
+#include "UI.hpp"
 
 namespace {
 	s8 font_id;
@@ -77,8 +78,16 @@ void MainMenu_Initialize() {
 
 	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
 	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
+	//UI BUTTONS-----------------------------
+	UI::startBtn.UI_Init(0.0f, 0.0f, 200.0f, 200.0f);						//TODO: clean this up + add more buttons later
+	UI::startBtn.UI_Select(UI::UIButtons::buttonKey::start);
 
-	//---------------------------------------
+	UI::shopBtn.UI_Init(-300.0f, 0.0f, 200.0f, 200.0f);
+	UI::shopBtn.UI_Select(UI::UIButtons::buttonKey::shop);
+
+	UI::exitBtn.UI_Init(300.0f, 0.0f, 200.0f, 200.0f);
+	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
+	//_______________________________________
 
 	backgroundAudio.Play();
 
@@ -277,7 +286,7 @@ void MainMenu_Draw() {
 	if (mainMenu_flag == TRUE) {
 		AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f); //TEST DRAW BACKGRUNG HERE
 
-		//Animation______________________________
+		//ANIMATION______________________________
 		ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
 		drawQuad(background,
 			parallax_x * 0.3f,
@@ -295,7 +304,10 @@ void MainMenu_Draw() {
 			350.0f,
 			1.f, 1.f, 1.f, 1.f);
 		//drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
-
+		//UI BUTTONS_____________________________
+		UI::startBtn.UI_Draw(ASSETS::UIAssets);
+		UI::shopBtn.UI_Draw(ASSETS::UIAssets);
+		UI::exitBtn.UI_Draw(ASSETS::UIAssets);
 		//---------------------------------------
 
 
