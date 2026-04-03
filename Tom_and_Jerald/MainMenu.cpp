@@ -379,7 +379,7 @@ void MainMenu_Draw() {
 		f32 half = 100.0f;
 
 		f32 labelScale = 1.0f;
-		f32 labelDropY = -130.0f; // world units below button center
+		f32 labelDropY = -100.0f; // world units below button center
 
 		bool hoverStart = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
 		bool hoverShop = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
@@ -397,10 +397,10 @@ void MainMenu_Draw() {
 
 
 		if (quitting_flag == TRUE) {
-			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.8f, 0.8f);
+			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.8f, 0.9f);
 		}
 		else {
-			drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.8f, 0.8f);
+			drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.8f, 0.9f);
 		}
 
 	}
