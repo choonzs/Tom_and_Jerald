@@ -8,13 +8,14 @@
 #include "Audio.hpp"
 #include "ImgFontInit.hpp"
 #include "Animation.hpp"
+#include "UI.hpp"
 
 namespace {
 	s8 font_id;
 	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
 	AEGfxVertexList* buttons = nullptr;				//For buttons
-	AEGfxVertexList* background = nullptr;			//FOr background
+	AEGfxVertexList* background = nullptr;			//For background
 
 	int counter{};
 	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
@@ -26,8 +27,10 @@ namespace {
 	f32 window_width;								//Window Width
 	f32 window_height;								//Window Height
 
-	BOOL mainMenu_flag;
-	BOOL teamName_flag;
+	BOOL mainMenu_flag;								//For main menu access, plays after teamname splashscreen
+	BOOL teamName_flag;								//For teamname splashscreen, plays after copyright splashscreen
+	BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
+
 
 	// txt files start w 1
 	unsigned int select_level{ 1 };
@@ -67,14 +70,24 @@ void MainMenu_Initialize() {
 	mainMenu_flag = FALSE; //False on default, triggers main menu after teamname
 	teamName_flag = FALSE; //False on defualt, triggers after splashscreen
 
-	//Animation______________________________
-	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);                 //Row, start col, frames, fps (GAMELOGO)
-	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns file located in bin>debuc.assets idk why
-	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);                 //Row, start col, frames, fps (BACKGROUND)
-	//ANIMATION::
+	quitting_flag = FALSE; //False on default, triggers when player clicks escape or closes window
 
-	//---------------------------------------
+	//ANIMATION______________________________
+	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt");			//Total rows + columns file
+	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);							//Row, start col, frames, fps (GAMELOGO)
+
+	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
+	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
+	//UI BUTTONS-----------------------------
+	UI::startBtn.UI_Init(0.0f, 0.0f, 200.0f, 200.0f);						//TODO: clean this up + add more buttons later
+	UI::startBtn.UI_Select(UI::UIButtons::buttonKey::start);
+
+	UI::shopBtn.UI_Init(-300.0f, 0.0f, 200.0f, 200.0f);
+	UI::shopBtn.UI_Select(UI::UIButtons::buttonKey::shop);
+
+	UI::exitBtn.UI_Init(300.0f, 0.0f, 200.0f, 200.0f);
+	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
+	//_______________________________________
 
 	backgroundAudio.Play();
 
@@ -86,7 +99,7 @@ void MainMenu_Update() {
 	camera.Update();
 	
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
-	//Animation______________________________
+	//ANIMATION______________________________
 	ANIMATION::gameLogo.Anim_Update(delta_time);
 	ANIMATION::background.Anim_Update(delta_time);
 	//---------------------------------------
@@ -149,7 +162,18 @@ void MainMenu_Update() {
 		teamName_flag = TRUE;
 	}
 
-
+	// Destructive confirmation for quitting the game
+	if (quitting_flag == TRUE) {
+		// Click Y to quit, N to cancel
+		if (AEInputCheckTriggered(AEVK_Y)) {
+			// Quitting the game
+			next = GAME_STATE_QUIT;
+		}
+		else if (AEInputCheckTriggered(AEVK_N)) {
+			quitting_flag = FALSE;
+		}
+	}
+	// ===========================================
 
 	if (mainMenu_flag == TRUE) {
 		//Temp for switching levels
@@ -176,8 +200,9 @@ void MainMenu_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 		{
+			quitting_flag = true;
 			// Quitting the game
-			next = GAME_STATE_QUIT;
+			//next = GAME_STATE_QUIT;
 		}
 		else if (AEInputCheckTriggered(AEVK_C))
 		{
@@ -265,7 +290,7 @@ void MainMenu_Draw() {
 	if (mainMenu_flag == TRUE) {
 		AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f); //TEST DRAW BACKGRUNG HERE
 
-		//Animation______________________________
+		//ANIMATION______________________________
 		ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
 		drawQuad(background,
 			parallax_x * 0.3f,
@@ -283,11 +308,14 @@ void MainMenu_Draw() {
 			350.0f,
 			1.f, 1.f, 1.f, 1.f);
 		//drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
-
+		//UI BUTTONS_____________________________
+		UI::startBtn.UI_Draw(ASSETS::UIAssets);
+		UI::shopBtn.UI_Draw(ASSETS::UIAssets);
+		UI::exitBtn.UI_Draw(ASSETS::UIAssets);
 		//---------------------------------------
 
 
-		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f);
+		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f); //start,shop, leveledit,hs,settings,exit
 		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
 		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
 		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f); //Link this to main game delete after
@@ -299,7 +327,9 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 
-
+		if (quitting_flag == TRUE) {
+			drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO QUIT? (Y/N)", -0.8f, 0.7f);
+		}
 	}
 }
 

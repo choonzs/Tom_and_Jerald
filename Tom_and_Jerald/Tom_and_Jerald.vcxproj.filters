@@ -76,6 +76,9 @@
     <ClCompile Include="ImgFontInit.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -153,6 +156,7 @@
     <ClInclude Include="ImgFontInit.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="UI.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

@@ -31,9 +31,9 @@ namespace ANIMATION {
 
         //Updates animation clip to run
         void Anim_Update(f32 delta_time);
+
         //Renders the clip
-        void Anim_Draw
-        (AEGfxTexture* Texture) const;
+        void Anim_Draw(AEGfxTexture* Texture) const;
 
     private: //Helper functions_________________________
         //Snaps UV to frame, private so that only AnimatedSprite class can call
@@ -48,7 +48,7 @@ namespace ANIMATION {
     extern AnimatedSprite asteroid;
     extern AnimatedSprite cheese;
     extern AnimatedSprite gameLogo;
-    extern AnimatedSprite UIButtons;
+    extern AnimatedSprite UIButton;
     // TODO declare animatedsprite
     extern AnimatedSprite spike;
 	extern AnimatedSprite wall;
