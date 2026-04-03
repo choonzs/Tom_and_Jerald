@@ -78,7 +78,8 @@ namespace {
         bool gPortalWaitingToRespawn = false;
     }
 
-    s8 font_id;
+    s8 font_id = -1;
+    BOOL quitting_flag = FALSE;
 
     f32 stage_timer = 0.0f;
     f32 damage_timer = 0.0f;
