@@ -79,6 +79,10 @@
     <ClCompile Include="UI.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="CreditsScreen.cpp" />
+    <ClCompile Include="GameCredits.cpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -157,6 +161,8 @@
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="UI.hpp" />
+    <ClInclude Include="CreditsScreen.hpp" />
+    <ClInclude Include="GameCredits.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

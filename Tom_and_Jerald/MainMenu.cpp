@@ -14,7 +14,6 @@ namespace {
 	s8 font_id; // Reference to the font ID created in ImgFontInit, used for drawing text in this scene
 	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
-	AEGfxVertexList* buttons = nullptr;				//For buttons
 	AEGfxVertexList* background = nullptr;			//For background
 
 	int counter{};
@@ -54,8 +53,6 @@ void MainMenu_Initialize() {
 	createUnitSquare(&unit_square);
 	createUnitSquare(&gameLogo, 0.25f, 0.25f);
 	createUnitSquare(&background, 0.25f, 0.25f);
-	createUnitSquare(&buttons, 0.25f, 0.25f);
-
 
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -81,13 +78,24 @@ void MainMenu_Initialize() {
 	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
 	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
 	//UI BUTTONS-----------------------------
-	UI::startBtn.UI_Init(0.0f, 0.0f, 200.0f, 200.0f);						//TODO: clean this up + add more buttons later
+	// Top row: start, shop, lvlEditor
+	UI::startBtn.UI_Init(-325.0f, 50.0f, 200.0f, 200.0f);
 	UI::startBtn.UI_Select(UI::UIButtons::buttonKey::start);
 
-	UI::shopBtn.UI_Init(-300.0f, 0.0f, 200.0f, 200.0f);
+	UI::shopBtn.UI_Init(0.0f, 50.0f, 200.0f, 200.0f);
 	UI::shopBtn.UI_Select(UI::UIButtons::buttonKey::shop);
 
-	UI::exitBtn.UI_Init(300.0f, 0.0f, 200.0f, 200.0f);
+	UI::lvlEditBtn.UI_Init(325.0f, 50.0f, 200.0f, 200.0f);
+	UI::lvlEditBtn.UI_Select(UI::UIButtons::buttonKey::lvlEditor);
+
+	// Bottom row: highscore, settings, exit
+	UI::highscoreBtn.UI_Init(-325.0f, -200.0f, 200.0f, 200.0f);
+	UI::highscoreBtn.UI_Select(UI::UIButtons::buttonKey::highscore);
+
+	UI::settingsBtn.UI_Init(0.0f, -200.0f, 200.0f, 200.0f);
+	UI::settingsBtn.UI_Select(UI::UIButtons::buttonKey::settings);
+
+	UI::exitBtn.UI_Init(325.0f, -200.0f, 200.0f, 200.0f);
 	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
 	//_______________________________________
 
@@ -178,6 +186,31 @@ void MainMenu_Update() {
 	// ===========================================
 
 	if (mainMenu_flag == TRUE) {
+
+		// Mouse click on buttons
+		if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+			s32 mouseX_int{}, mouseY_int{};
+			AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+
+			f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
+			f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
+
+			f32 half = 100.0f;
+
+			bool hoverStart = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+			bool hoverShop = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+			bool hoverLvlEdit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+			bool hoverHighscore = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+			bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+			bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+
+			if (hoverStart)     next = GAME_STATE_PLAYING;
+			if (hoverShop)      next = GAME_STATE_SHOP;
+			if (hoverLvlEdit)   next = GAME_STATE_LEVEL_EDITOR;
+			if (hoverHighscore) next = GAME_STATE_HIGHSCORE;
+			if (hoverSettings)  next = GAME_STATE_SETTINGS;
+			if (hoverExit)      quitting_flag = TRUE;
+		}
 		//Temp for switching levels
 		if (AEInputCheckTriggered(AEVK_A)) {
 			if ((select_level) > 1) { --select_level; }
@@ -254,27 +287,41 @@ void MainMenu_Update() {
 	}
 
 	if (teamName_flag == TRUE) {
-		if (local_time < 5.0f) {
+		if (local_time < 6.0f) {
 			mainMenu_flag = FALSE;
 
 			AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
-			//Runs the team name after the splashscreen
-			f32 teamNameAlpha = 1.0f - (local_time / 5.0f);
 
-			//Default settings
-			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-			AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
-			AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);
-			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+			f32 teamNameAlpha{};
 
-			//Runs the splashscreen
-			AEGfxSetTransparency(teamNameAlpha);
-			drawCenteredText(font_id, "TOM AND JERALD", 0.5f, 1.1f, 0.0f, 0.0f, teamNameAlpha);
+			// Fade IN: 3.0 -> 4.0s
+			if (local_time < 4.0f) {
+				teamNameAlpha = (local_time - 3.0f) / 1.0f;
+			}
+			// Hold: 4.0 -> 4.5s
+			else if (local_time < 4.5f) {
+				teamNameAlpha = 1.0f;
+			}
+			// Fade OUT: 4.5 -> 6.0s
+			else {
+				teamNameAlpha = 1.0f - ((local_time - 4.5f) / 1.5f);
+			}
 
+			teamNameAlpha = AEClamp(teamNameAlpha, 0.0f, 1.0f);
 
+			// Only draw if actually visible
+			if (teamNameAlpha > 0.01f) {
+				AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+				AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+				AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);
+				AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+				AEGfxSetTransparency(teamNameAlpha);
+
+				drawCenteredText(font_id, "TOM AND", 0.05f, 2.0f, 0.0f, 0.0f, teamNameAlpha);
+				drawCenteredText(font_id, "JERALD", -0.07f, 2.0f, 0.0f, 0.0f, teamNameAlpha);
+			}
 
 			local_time += delta_time;
-
 		}
 		else {
 			mainMenu_flag = TRUE;
@@ -314,34 +361,48 @@ void MainMenu_Draw() {
 		UI::startBtn.UI_Draw(ASSETS::UIAssets);
 		UI::shopBtn.UI_Draw(ASSETS::UIAssets);
 		UI::exitBtn.UI_Draw(ASSETS::UIAssets);
+		UI::lvlEditBtn.UI_Draw(ASSETS::UIAssets);
+		UI::highscoreBtn.UI_Draw(ASSETS::UIAssets);
+		UI::settingsBtn.UI_Draw(ASSETS::UIAssets);
 		//---------------------------------------
 
+		// Button label on hover
+// Get mouse position in world space
+		s32 mouseX_int{}, mouseY_int{};
+		AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
-		drawCenteredText(font_id, "TUTORIAL (ENTER)", 0.3f, 0.7f); //start,shop, leveledit,hs,settings,exit
-		drawCenteredText(font_id, "SHOP (S)", 0.2f, 0.7f);
-		drawCenteredText(font_id, "LEVEL EDITOR (E)", 0.1f, 0.7f);
-		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f); //Link this to main game delete after
-		drawCenteredText(font_id, buffer, -0.1f, 0.7f); 
-		drawCenteredText(font_id, "HIGH SCORES (H)", -0.2f, 0.7f);
-		drawCenteredText(font_id, "CREDITS (I)", -0.3f, 0.7f);
-		drawCenteredText(font_id, "SETTINGS (T)", -0.4f, 0.7f);
-		/*drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
-		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
-		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);*/
+		// Convert screen coords to AEGfx world coords
+		f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
+		f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
 
-		/*if (quitting_flag == TRUE) {
-			drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO QUIT? (Y/N)", -0.8f, 0.7f);
-		}*/
+		// Button size half-extents (buttons are 200x200)
+		f32 half = 100.0f;
+
+		f32 labelScale = 1.0f;
+		f32 labelDropY = -130.0f; // world units below button center
+
+		bool hoverStart = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+		bool hoverShop = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+		bool hoverLvlEdit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
+		bool hoverHighscore = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+		bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+		bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+
+		if (hoverStart)     drawCenteredText(font_id, "START (ENTER)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, -325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverShop)      drawCenteredText(font_id, "SHOP (S)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, 0.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverLvlEdit)   drawCenteredText(font_id, "LEVEL EDIT (E)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, 325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverHighscore) drawCenteredText(font_id, "HIGH SCORES (H)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, -325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverSettings)  drawCenteredText(font_id, "SETTINGS (T)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 0.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverExit)      drawCenteredText(font_id, "EXIT (ESC)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+
 
 		if (quitting_flag == TRUE) {
-			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.5f, 0.7f);
+			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.8f, 0.8f);
 		}
 		else {
-			drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
+			drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.8f, 0.8f);
 		}
 
-		drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.6f, 0.65f);
-		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.7f, 0.65f);
 	}
 }
 
@@ -349,7 +410,6 @@ void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
 	AEGfxMeshFree(gameLogo);
 	AEGfxMeshFree(background);
-	AEGfxMeshFree(buttons);
 }
 void MainMenu_Unload() {
 	UI::startBtn.UI_Free();

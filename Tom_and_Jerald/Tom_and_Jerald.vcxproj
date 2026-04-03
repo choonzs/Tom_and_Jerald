@@ -109,6 +109,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CustomLevel.cpp" />
     <ClCompile Include="DifferentGamemode.cpp" />
+    <ClCompile Include="GameCredits.cpp" />
     <ClCompile Include="GameOver.cpp" />
     <ClCompile Include="GameStateManager.cpp" />
     <ClCompile Include="HighScores.cpp" />
@@ -138,6 +139,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="CustomLevel.hpp" />
     <ClInclude Include="DifferentGamemode.hpp" />
+    <ClInclude Include="GameCredits.hpp" />
     <ClInclude Include="GameOver.hpp" />
     <ClInclude Include="GameStateList.hpp" />
     <ClInclude Include="GameStateManager.hpp" />
