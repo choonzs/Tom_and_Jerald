@@ -105,6 +105,7 @@ void GSM_Update()
 		fpDraw = HighScore_Draw;
 		fpFree = HighScore_Free;
 		fpUnload = HighScore_Unload;
+		break;
 	case GAME_STATE_CREDITS:
 		fpLoad       = CreditsScreen_Load;
 		fpInitialize = CreditsScreen_Initialize;

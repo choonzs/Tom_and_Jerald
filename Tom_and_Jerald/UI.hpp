@@ -39,6 +39,9 @@ namespace UI {
 		//Renders the button
 		void UI_Draw(AEGfxTexture* texture) const;
 
+		// Explicitly free mesh (required when changing screens, otherwise memory leak)
+		void UI_Free();
+
 		//Destructor to free mesh
 		~UIButtons();
 	};//End class UIButtons

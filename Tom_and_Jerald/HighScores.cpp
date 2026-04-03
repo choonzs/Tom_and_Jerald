@@ -30,13 +30,8 @@ void Leaderboard::UpdateLeaderboard(std::string const& filename) {
 }
 const int& Leaderboard::LowestScore() {
 	static const int default_score{ 0 };
-	if (highscores.empty()) {
-		return default_score;
-	}
-	else {
-		return highscores.back().score;
-
-	}
+	if (highscores.empty()) return 0;
+	return highscores.back().score;
 }
 
 void Leaderboard::AddScore(Score const& score) {
@@ -78,8 +73,8 @@ void HighScore_Update() {
 void HighScore_Draw() {
 	f32 y_pos{ 0.5f };
 	drawCenteredText(font_id, "LEADERBOARD", y_pos, 1.1f, 0.0f, 0.0f, 1.0f, 0.0f);
-	const std::vector<Leaderboard::Score> DeepCopyHighScores(currentboard->HighScores());
-	for (Leaderboard::Score entry : DeepCopyHighScores) {
+	const std::vector<Leaderboard::Score>& scores = currentboard->HighScores();
+	for (Leaderboard::Score entry : scores) {
 		y_pos -= 0.1f;
 		// ===== FORMATTED OUTPUT FOR LEADERBOARD ENTRY ============================
 		std::stringstream ss;
@@ -95,12 +90,11 @@ void HighScore_Draw() {
 	}
 }
 void HighScore_Free() {
-
+	delete currentboard;
+	currentboard = nullptr;
 }
 void HighScore_Unload() {
 	AEGfxDestroyFont(font_id);
 	// dealloc memory for current board
-	delete currentboard;
-	currentboard = nullptr;
 }
 

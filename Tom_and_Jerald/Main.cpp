@@ -6,6 +6,7 @@
 
 // For memory leak detection
 #define _CRTDBG_MAP_ALLOC
+#define _DEBUG_MEM_LEAK // Set to debug for mem leak
 #include <crtdbg.h>
 // ---------------------------------------------------------------------------
 // main
@@ -17,7 +18,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	// Use this for sanity check
-	//_CrtSetBreakAlloc(388); // break on first leak
+	#ifdef _DEBUG_MEM_LEAK
+	//_CrtSetBreakAlloc();
+	#endif
 	// ====================================
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -30,6 +33,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	AESysSetWindowTitle("Tom and Jerald - Prototype");
 	AESysReset();
 
+	#ifdef _DEBUG_MEM_LEAK
+	_CrtMemState s1;
+	_CrtMemCheckpoint(&s1);  // snapshot AFTER engine is done allocating
+	#endif
 	// initialize all audio assets before the GSM loop starts
 	AudioInit();
 	// GSM LOOP
@@ -72,9 +79,20 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 	}
 
+
 	// free all audio assets after the GSM loop ends
 	AudioFree();
 
 	// free the system
 	AESysExit();
+
+	#ifdef _DEBUG_MEM_LEAK
+		_CrtMemState s2;
+		_CrtMemCheckpoint(&s2);  // snapshot at end
+
+		_CrtMemState diff;
+		if (_CrtMemDifference(&diff, &s1, &s2)) {
+			_CrtMemDumpStatistics(&diff);  // only shows our leaks & not AE ones
+		}
+	#endif 
 }

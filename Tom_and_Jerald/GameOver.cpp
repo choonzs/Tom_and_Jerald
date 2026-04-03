@@ -117,12 +117,12 @@ void GameOver_Draw() {
 
 void GameOver_Free() {
 	if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
+	// dealloc memory for current board
+	delete currentboard;
+	currentboard = nullptr;
 }
 
 void GameOver_Unload() {
 	AEGfxDestroyFont(font_id);
 
-	// dealloc memory for current board
-	delete currentboard;
-	currentboard = nullptr;
 }

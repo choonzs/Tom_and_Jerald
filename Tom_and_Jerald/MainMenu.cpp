@@ -340,6 +340,10 @@ void MainMenu_Free() {
 	AEGfxMeshFree(buttons);
 }
 void MainMenu_Unload() {
+	UI::startBtn.UI_Free();
+	UI::shopBtn.UI_Free();
+	UI::exitBtn.UI_Free();
+
 	AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();
 }

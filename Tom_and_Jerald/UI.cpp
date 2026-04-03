@@ -26,6 +26,14 @@ namespace UI {
         sprite.Anim_Draw(texture);                          // sets the UV
         drawQuad(mesh, posX, posY, width, height, 1.0f, 1.0f, 1.0f, 1.0f);
     }
+
+	// Needed to free mesh when changing screens, otherwise memory leak, also called in destructor
+    void UIButtons::UI_Free() {
+        if (mesh) {
+            AEGfxMeshFree(mesh);
+            mesh = nullptr;
+		}
+    }
     //Destructor to free mesh
     UIButtons::~UIButtons() {
         if (mesh) {
