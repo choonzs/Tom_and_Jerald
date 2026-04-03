@@ -29,7 +29,7 @@ public:
     }
     ~Player();
 
-    void Movement(f32 delta_time);
+    void Movement(f32 delta_time, bool canThrust = true);
 
     // Getters and Setters
     AEVec2& Position() { return position; }

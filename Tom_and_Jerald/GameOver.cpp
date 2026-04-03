@@ -116,7 +116,7 @@ void GameOver_Draw() {
 }
 
 void GameOver_Free() {
-	AEGfxMeshFree(unit_square);
+	if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
 }
 
 void GameOver_Unload() {

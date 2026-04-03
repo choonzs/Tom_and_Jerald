@@ -174,7 +174,6 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 				}
 			}
 		}
-		_CrtDumpMemoryLeaks(); // prints currently allocated memory
 		inFile.close();
 	}
 	level_end_x = 1000.0f; // Adding some buffer to the end of the level

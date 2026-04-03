@@ -215,6 +215,10 @@ void MainMenu_Update() {
 		{
 			next = GAME_STATE_HIGHSCORE;
 		}
+		else if (AEInputCheckTriggered(AEVK_I))
+		{
+			next = GAME_STATE_CREDITS;
+		}
 		else {
 			current = GAME_STATE_MENU;
 			// Refreshing the next state to stay in menu
@@ -289,8 +293,9 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "MAZE (M)", 0.0f, 0.7f); //Link this to main game delete after
 		drawCenteredText(font_id, buffer, -0.1f, 0.7f); 
 		drawCenteredText(font_id, "HIGH SCORES (H)", -0.2f, 0.7f);
-		drawCenteredText(font_id, "SETTINGS (T)", -0.3f, 0.7f);
-		drawCenteredText(font_id, "EXIT (ESC)", -0.4f, 0.7f);
+		drawCenteredText(font_id, "CREDITS (I)", -0.3f, 0.7f);
+		drawCenteredText(font_id, "SETTINGS (T)", -0.4f, 0.7f);
+		drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
 		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
 

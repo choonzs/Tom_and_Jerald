@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r 'new ' ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
+      "Bash(grep -v \"//\")",
+      "Bash(grep -r 'delete ' ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
+      "Bash(grep -r \"malloc\" ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
+      "Bash(grep -r \"malloc\\\\|free\\\\|new\\\\|delete\" ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
+      "Bash(wc -l ./Tom_and_Jerald/*.cpp ./Tom_and_Jerald/*.hpp)"
+    ]
+  }
+}

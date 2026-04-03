@@ -12,6 +12,7 @@
 #include "DifferentGamemode.hpp"
 #include "HighScores.hpp"
 #include "Settings.hpp"
+#include "CreditsScreen.hpp"
 
 int current{}, previous{}, next{};
 
@@ -104,6 +105,14 @@ void GSM_Update()
 		fpDraw = HighScore_Draw;
 		fpFree = HighScore_Free;
 		fpUnload = HighScore_Unload;
+	case GAME_STATE_CREDITS:
+		fpLoad       = CreditsScreen_Load;
+		fpInitialize = CreditsScreen_Initialize;
+		fpUpdate     = CreditsScreen_Update;
+		fpDraw       = CreditsScreen_Draw;
+		fpFree       = CreditsScreen_Free;
+		fpUnload     = CreditsScreen_Unload;
+		break;
 	case GAME_STATE_RESTART:
 		// RESTART is handled in Main.cpp by resetting current/next
 		// to previous. No function pointers needed.

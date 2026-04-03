@@ -95,6 +95,10 @@ namespace {
     // check if the game is paused
     bool isPaused;
 
+    // Fuel pickup spawn timer (10-20 second random interval)
+    f32 g_fuel_spawn_timer = 0.0f;
+    f32 g_fuel_spawn_interval = 15.0f;
+
 
 }
 
@@ -196,8 +200,14 @@ void Playing_Initialize() {
 
     f32 base_capacity = 100.0f;
     f32 upgraded_capacity = base_capacity * Upgrades_GetMaxFuelMultiplier();
-    pFuel = new JetpackFuel(upgraded_capacity, 30.0f, 2.0f);
+    // Drain rate: at full fuel, continuous thrust drains fuel in exactly 30 seconds.
+    // total_drain = passiveDrain + burnRate = upgraded_capacity / 30
+    const f32 k_passive_drain = 1.0f;
+    f32 burn_rate = (upgraded_capacity / 30.0f) - k_passive_drain;
+    pFuel = new JetpackFuel(upgraded_capacity, burn_rate, k_passive_drain);
     g_fuel_pickup.active = false;
+    g_fuel_spawn_timer = 0.0f;
+    g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
 
     if (gResumeFromMaze && gSavedPlayingState.valid)
     {
@@ -327,7 +337,7 @@ void Playing_Update() {
     // ========================================================================
 
     if (pFuel) {
-        base_player.Movement(delta_time);
+        base_player.Movement(delta_time, isFlying);
     }
 
 	camera.Follow(base_player.Position());
@@ -375,17 +385,20 @@ void Playing_Update() {
     }
 
     if (pFuel) {
-        f32 fuel_ratio = pFuel->GetCurrentFuel() / pFuel->GetMaxFuel();
-
-        if (!g_fuel_pickup.active && fuel_ratio <= 0.50f) {
-            f32 spawnOffset = AEGfxGetWinMaxX() + 200.0f;
-            if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
-                spawnOffset = -AEGfxGetWinMaxX() - 200.0f;
+        // Timer-based fuel pickup spawn: every 10-20 seconds
+        if (!g_fuel_pickup.active) {
+            g_fuel_spawn_timer += delta_time;
+            if (g_fuel_spawn_timer >= g_fuel_spawn_interval) {
+                f32 spawnOffset = AEGfxGetWinMaxX() + 200.0f;
+                if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
+                    spawnOffset = -AEGfxGetWinMaxX() - 200.0f;
+                }
+                g_fuel_pickup.pos.x = camX + spawnOffset;
+                g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
+                g_fuel_pickup.active = true;
+                g_fuel_spawn_timer = 0.0f;
+                g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
             }
-
-            g_fuel_pickup.pos.x = camX + spawnOffset;
-            g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-            g_fuel_pickup.active = true;
         }
 
         if (g_fuel_pickup.active) {
@@ -393,6 +406,8 @@ void Playing_Update() {
             if (checkOverlap(&base_player.Position(), &base_player.Half_Size(), &g_fuel_pickup.pos, &p_half)) {
                 pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
                 g_fuel_pickup.active = false;
+                g_fuel_spawn_timer = 0.0f;
+                g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
             }
             if (std::abs(g_fuel_pickup.pos.x - camX) > AEGfxGetWinMaxX() + 500.0f) {
                 g_fuel_pickup.active = false;
@@ -612,14 +627,17 @@ void Playing_Draw() {
 }
 
 void Playing_Free() {
-    AEGfxMeshFree(unit_square);
-    AEGfxMeshFree(unit_circle);
- 
-    AEGfxMeshFree(bgMesh);
+    if (unit_square)  { AEGfxMeshFree(unit_square);  unit_square  = nullptr; }
+    if (unit_circle)  { AEGfxMeshFree(unit_circle);  unit_circle  = nullptr; }
+    if (bgMesh)       { AEGfxMeshFree(bgMesh);        bgMesh       = nullptr; }
+    // Free the player mesh separately (base_player is static, its dtor runs at shutdown
+    // which is too late; free here so restarts don't accumulate leaked meshes)
+    if (base_player.Mesh()) { AEGfxMeshFree(base_player.Mesh()); base_player.Mesh() = nullptr; }
     if (pFuel) { delete pFuel; pFuel = nullptr; }
 }
 
 void Playing_Unload() {
+    AEGfxDestroyFont(font_id);
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
     isPaused = false;

@@ -40,6 +40,8 @@ namespace {
         FuelPickup() : pos{ 0.0f, 0.0f }, active(false), size(30.0f) {}
     } g_fuel_pickup;
 
+    f32 g_fuel_spawn_timer = 0.0f;
+    f32 g_fuel_spawn_interval = 15.0f;
 }
 
 void CustomLevel_Load() {
@@ -78,8 +80,12 @@ void CustomLevel_Initialize() {
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
     f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
-    pFuel = new JetpackFuel(upg_fuel, 30.0f, 2.0f);
+    const f32 k_passive_drain = 1.0f;
+    f32 burn_rate = (upg_fuel / 30.0f) - k_passive_drain;
+    pFuel = new JetpackFuel(upg_fuel, burn_rate, k_passive_drain);
     g_fuel_pickup.active = false;
+    g_fuel_spawn_timer = 0.0f;
+    g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
 
 
     std::cout << map_tiles.size() << "before tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
@@ -105,10 +111,10 @@ void CustomLevel_Update() {
     if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
     if (damage_timer > 0.0f) damage_timer -= dt;
 
-    bool isFlying = AEInputCheckCurr(AEVK_SPACE) && pFuel->HasFuel();
+    bool isFlying = (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) && pFuel->HasFuel();
     pFuel->Update(dt, isFlying);
 
-    (*custom_player).Movement(dt);
+    (*custom_player).Movement(dt, isFlying);
     //Animation______________________________
     ANIMATION::background.Anim_Update(dt);
     ANIMATION::player.Anim_Update(dt);
@@ -152,15 +158,20 @@ void CustomLevel_Update() {
         Credits_OnDamage();
     }
 
-    f32 fuel_ratio = pFuel->GetCurrentFuel() / pFuel->GetMaxFuel();
-    if (!g_fuel_pickup.active && fuel_ratio <= 0.50f) {
-        f32 spawnOffset = AEGfxGetWinMaxX() + 200.0f;
-        if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
-            spawnOffset = -AEGfxGetWinMaxX() - 200.0f;
+    // Timer-based fuel pickup spawn: every 10-20 seconds
+    if (!g_fuel_pickup.active) {
+        g_fuel_spawn_timer += dt;
+        if (g_fuel_spawn_timer >= g_fuel_spawn_interval) {
+            f32 spawnOffset = AEGfxGetWinMaxX() + 200.0f;
+            if (AEInputCheckCurr(AEVK_A) || AEInputCheckCurr(AEVK_LEFT)) {
+                spawnOffset = -AEGfxGetWinMaxX() - 200.0f;
+            }
+            g_fuel_pickup.pos.x = camX + spawnOffset;
+            g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
+            g_fuel_pickup.active = true;
+            g_fuel_spawn_timer = 0.0f;
+            g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
         }
-        g_fuel_pickup.pos.x = camX + spawnOffset;
-        g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
-        g_fuel_pickup.active = true;
     }
 
     if (g_fuel_pickup.active) {
@@ -168,6 +179,8 @@ void CustomLevel_Update() {
         if (checkOverlap(&(*custom_player).Position(), &(*custom_player).Half_Size(), &g_fuel_pickup.pos, &p_half)) {
             pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
             g_fuel_pickup.active = false;
+            g_fuel_spawn_timer = 0.0f;
+            g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
         }
         if (std::abs(g_fuel_pickup.pos.x - camX) > AEGfxGetWinMaxX() + 500.0f) {
             g_fuel_pickup.active = false;
@@ -309,7 +322,7 @@ void CustomLevel_Draw() {
 void CustomLevel_Free() {
 	std::cout << "Freeing Custom Level Resources\n";
 
-    AEGfxMeshFree(unit_square);
+    if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
     
     
 	// Free map tile vector memory by swapping with an empty vector

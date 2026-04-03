@@ -28,14 +28,15 @@ bool PlayerConfig::LoadFromFile(const char* filename) {
 }
 
 
-void Player::Movement(f32 dt) {
-    
+void Player::Movement(f32 dt, bool canThrust) {
+
     AEVec2 added{};
     // If no input by default gravity will pull the player down
     AEVec2Set(&added, 0.0f, 0.0f);
 
     // 1. VERTICAL MOVEMENT (Jetpack / Gravity)
-    if (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) {
+    bool thrustInput = AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP);
+    if (thrustInput && canThrust) {
 		added.y += static_cast<f32>(Config().Acceleration() * dt);
     }
     else {

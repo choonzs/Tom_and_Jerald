@@ -39,14 +39,22 @@ namespace {
     f32 obstacle_scale{}; //by default
 
     // Textures & Meshes
-    AEGfxTexture* texSquare = nullptr;
-    AEGfxTexture* texSpike = nullptr;
-
     AEGfxVertexList* meshWhite = nullptr;
     AEGfxVertexList* meshUIBg = nullptr;
     AEGfxVertexList* meshSlotBg = nullptr;
     AEGfxVertexList* meshSlotBorder = nullptr;
     AEGfxVertexList* meshGrid = nullptr;
+    // Icon mesh: UV covers one cell of the 4x4 spritesheet (0 to 0.25)
+    AEGfxVertexList* meshIcon = nullptr;
+
+    // Spritesheet UV offsets for SS_BackgroundAssets.png (4x4 grid, each cell = 0.25)
+    // Asteroid: row 2, col 0  -> uv offset (0.00, 0.50)
+    // Spike:    row 1, col 1  -> uv offset (0.25, 0.25)
+    constexpr f32 UV_ASTEROID_X = 0.00f;
+    constexpr f32 UV_ASTEROID_Y = 0.50f;
+    constexpr f32 UV_SPIKE_X    = 0.25f;
+    constexpr f32 UV_SPIKE_Y    = 0.25f;
+    constexpr f32 UV_CELL       = 0.25f;
 
     AEGfxVertexList* CreateSquareMesh(u32 color) {
         AEGfxMeshStart();
@@ -57,8 +65,6 @@ namespace {
 }
 
 void LevelEditor_Load() {
-    texSquare = AEGfxTextureLoad("Assets/Square.png");
-    texSpike = AEGfxTextureLoad("Assets/Spike.png");
     ASSETS::Init_Font();
     ASSETS::Init_Images();
 }
@@ -81,10 +87,21 @@ void LevelEditor_Initialize() {
     meshSlotBorder = CreateSquareMesh(0xFFF9A03F);
     meshGrid = CreateSquareMesh(0x1AFFFFFF);
 
+    // Icon mesh with UV covering a single 4x4 spritesheet cell (0 to 0.25)
+    AEGfxMeshStart();
+    AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, UV_CELL,
+                 0.5f, -0.5f, 0xFFFFFFFF, UV_CELL, UV_CELL,
+                -0.5f,  0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    AEGfxTriAdd( 0.5f, -0.5f, 0xFFFFFFFF, UV_CELL, UV_CELL,
+                 0.5f,  0.5f, 0xFFFFFFFF, UV_CELL, 0.0f,
+                -0.5f,  0.5f, 0xFFFFFFFF, 0.0f, 0.0f);
+    meshIcon = AEGfxMeshEnd();
+
     // Animations
-    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");   //Total rows + columns
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");
     ANIMATION::asteroid.Clip_Select(2, 0, 2, 10.0f);
-    // =================
+    ANIMATION::spike.ImportFromFile("Assets/AnimationData.txt");
+    ANIMATION::spike.Clip_Select(1, 1, 1, 10.0f);
 }
 
 void LevelEditor_Update() {
@@ -292,10 +309,19 @@ void LevelEditor_Draw() {
                 AEMtx33Concat(&transform, &trans, &scale);
                 AEGfxSetTransform(transform.m);
 
-                if (tile == 1 && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
-                else if (tile == 2 && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
-                else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
-                AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
+                if (tile == Asteroid && ASSETS::backgroundAssets) {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxTextureSet(ASSETS::backgroundAssets, UV_ASTEROID_X, UV_ASTEROID_Y);
+                }
+                else if (tile == Spike && ASSETS::backgroundAssets) {
+                    AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+                    AEGfxTextureSet(ASSETS::backgroundAssets, UV_SPIKE_X, UV_SPIKE_Y);
+                }
+                else {
+                    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+                    AEGfxTextureSet(NULL, 0, 0);
+                }
+                AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
             }
         }
     }
@@ -316,8 +342,10 @@ void LevelEditor_Draw() {
     f32 slotSize = 100.0f;
     f32 iconSize = 70.0f;
 
-    auto DrawToolBox = [&](f32 sY, int tileType, AEGfxTexture* tex) {
-        if (currentTool == tileType) {
+    // DrawToolBox uses Anim_Draw which resets ColorToMultiply/Add before texturing,
+    // preventing color-state bleed from preceding COLOR-mode mesh draws.
+    auto DrawToolBox = [&](f32 sY, ObstacleType type, ANIMATION::AnimatedSprite& anim) {
+        if (currentTool == type) {
             AEMtx33Scale(&scale, slotSize + 8.0f, slotSize + 8.0f);
             AEMtx33Trans(&trans, slotCenterX, sY);
             AEMtx33Concat(&transform, &trans, &scale);
@@ -335,17 +363,16 @@ void LevelEditor_Draw() {
         AEGfxTextureSet(NULL, 0, 0);
         AEGfxMeshDraw(meshSlotBg, AE_GFX_MDM_TRIANGLES);
 
+        // Anim_Draw sets TEXTURE mode + resets color state, then we draw the mesh
+        anim.Anim_Draw(ASSETS::backgroundAssets);
         AEMtx33Scale(&scale, iconSize, iconSize);
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
-        if (tex) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(tex, 0, 0); }
-        else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
-        
-        AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
+        AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
         };
-    
-    DrawToolBox(slot1Y, Asteroid, texSquare);
-    DrawToolBox(slot2Y, Spike, texSpike);
+
+    DrawToolBox(slot1Y, Asteroid, ANIMATION::asteroid);
+    DrawToolBox(slot2Y, Spike,    ANIMATION::spike);
 
     // 4. Draw drag preview attached to mouse cursor
     if (isDragging && mouseX < -halfW + uiWidth) {
@@ -354,10 +381,19 @@ void LevelEditor_Draw() {
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
 
-        if (currentTool == Asteroid && texSquare) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSquare, 0, 0); }
-        else if (currentTool == Spike && texSpike) { AEGfxSetRenderMode(AE_GFX_RM_TEXTURE); AEGfxTextureSet(texSpike, 0, 0); }
-        else { AEGfxSetRenderMode(AE_GFX_RM_COLOR); AEGfxTextureSet(NULL, 0, 0); }
-        AEGfxMeshDraw(meshWhite, AE_GFX_MDM_TRIANGLES);
+        if (currentTool == Asteroid && ASSETS::backgroundAssets) {
+            AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+            AEGfxTextureSet(ASSETS::backgroundAssets, UV_ASTEROID_X, UV_ASTEROID_Y);
+        }
+        else if (currentTool == Spike && ASSETS::backgroundAssets) {
+            AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+            AEGfxTextureSet(ASSETS::backgroundAssets, UV_SPIKE_X, UV_SPIKE_Y);
+        }
+        else {
+            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            AEGfxTextureSet(NULL, 0, 0);
+        }
+        AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
     }
     
     // 5. Draw UI Text (representing velocity and scale values)
@@ -436,16 +472,15 @@ void LevelEditor_Free() {
     mapTiles.clear();
     std::vector<std::vector<LevelTile>>().swap(mapTiles);
 
-    if (meshWhite) AEGfxMeshFree(meshWhite);
-    if (meshUIBg) AEGfxMeshFree(meshUIBg);
-    if (meshSlotBg) AEGfxMeshFree(meshSlotBg);
-    if (meshSlotBorder) AEGfxMeshFree(meshSlotBorder);
-    if (meshGrid) AEGfxMeshFree(meshGrid);
+    if (meshWhite)      { AEGfxMeshFree(meshWhite);      meshWhite      = nullptr; }
+    if (meshUIBg)       { AEGfxMeshFree(meshUIBg);       meshUIBg       = nullptr; }
+    if (meshSlotBg)     { AEGfxMeshFree(meshSlotBg);     meshSlotBg     = nullptr; }
+    if (meshSlotBorder) { AEGfxMeshFree(meshSlotBorder); meshSlotBorder = nullptr; }
+    if (meshGrid)       { AEGfxMeshFree(meshGrid);       meshGrid       = nullptr; }
+    if (meshIcon)       { AEGfxMeshFree(meshIcon);       meshIcon       = nullptr; }
 }
 
 void LevelEditor_Unload() {
-    if (texSquare) AEGfxTextureUnload(texSquare);
-    if (texSpike) AEGfxTextureUnload(texSpike);
     ASSETS::Unload_Font();
     ASSETS::Unload_Images();
 }
