@@ -7,6 +7,7 @@
 #include "Audio.hpp"
 #include "Credits.hpp"
 #include "HighScores.hpp"
+#include "ImgFontInit.hpp"
 
 namespace {
 	s8 font_id;
@@ -22,7 +23,8 @@ namespace {
 }
 
 void GameOver_Load() {
-	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	ASSETS::Init_Font();
+	font_id = ASSETS::Font();
 }
 
 void GameOver_Initialize() {

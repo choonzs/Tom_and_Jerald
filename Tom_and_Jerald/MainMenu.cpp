@@ -325,13 +325,23 @@ void MainMenu_Draw() {
 		drawCenteredText(font_id, "HIGH SCORES (H)", -0.2f, 0.7f);
 		drawCenteredText(font_id, "CREDITS (I)", -0.3f, 0.7f);
 		drawCenteredText(font_id, "SETTINGS (T)", -0.4f, 0.7f);
-		drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
+		/*drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
 		drawCenteredText(font_id, "MOVE: WASD / ARROWS", -0.5f, 0.45f);
-		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);
+		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.6f, 0.45f);*/
+
+		/*if (quitting_flag == TRUE) {
+			drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO QUIT? (Y/N)", -0.8f, 0.7f);
+		}*/
 
 		if (quitting_flag == TRUE) {
-			drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO QUIT? (Y/N)", -0.8f, 0.7f);
+			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.5f, 0.7f);
 		}
+		else {
+			drawCenteredText(font_id, "EXIT (ESC)", -0.5f, 0.7f);
+		}
+
+		drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.6f, 0.65f);
+		drawCenteredText(font_id, "AVOID THE OBSTACLES FOR 30 SECONDS", -0.7f, 0.65f);
 	}
 }
 

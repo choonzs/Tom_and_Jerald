@@ -4,6 +4,7 @@
 #include "Utils.hpp"
 #include "GameStateManager.hpp"
 #include "Audio.hpp"
+#include "ImgFontInit.hpp"
 
 namespace {
     // This instance lives only within this file
@@ -13,7 +14,8 @@ namespace {
 // --- Class Method Implementations ---
 
 void VictoryState::Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+    ASSETS::Init_Font();
+    font_id = ASSETS::Font();
 }
 
 void VictoryState::Initialize() {
@@ -58,7 +60,7 @@ void VictoryState::Free() {
 
 void VictoryState::Unload() {
     if (font_id != -1) {
-        AEGfxDestroyFont(font_id);
+        ASSETS::Unload_Font();
         font_id = -1;
     }
 }

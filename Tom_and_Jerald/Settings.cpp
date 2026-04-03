@@ -3,6 +3,7 @@
 #include "GameStateList.hpp"
 #include "Settings.hpp"
 #include "Audio.hpp"
+#include "ImgFontInit.hpp"
 
 namespace {
     // all sliders stored in one array
@@ -172,10 +173,10 @@ void Slider::Draw(s8 font)
 
     // draw label and percentage 
     f32 labelY = mY / AEGfxGetWinMaxY();
-    AEGfxPrint(font, mLabel.c_str(), -0.8f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, mLabel.c_str(), -0.8f, labelY, 0.7f, 1.f, 1.f, 1.f, 1.f);
     char buffer[32];
     sprintf_s(buffer, 32, "%.0f%%", mValue * 100.f);
-    AEGfxPrint(font, buffer, 0.7f, labelY, 0.5f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, buffer, 0.7f, labelY, 0.7f, 1.f, 1.f, 1.f, 1.f);
 }
 
 // resets slider value and handle back to default
@@ -187,7 +188,8 @@ void Slider::Reset()
 
 void Setting_Load() {
     // load font for settings screen
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+    ASSETS::Init_Font();
+    font_id = ASSETS::Font();
 }
 
 void Settings_Initialize() {
@@ -260,5 +262,5 @@ void Settings_Free() {
 }
 
 void Settings_Unload() {
-    AEGfxDestroyFont(font_id);
+    ASSETS::Unload_Font();
 }

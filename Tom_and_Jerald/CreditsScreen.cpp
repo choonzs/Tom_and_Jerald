@@ -19,8 +19,9 @@ namespace {
 }
 
 void CreditsScreen_Load() {
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
     ASSETS::Init_Images();
+    ASSETS::Init_Font();
+    font_id = ASSETS::Font();
 }
 
 void CreditsScreen_Initialize() {
@@ -134,6 +135,6 @@ void CreditsScreen_Free() {
 }
 
 void CreditsScreen_Unload() {
-    AEGfxDestroyFont(font_id);
+    ASSETS::Unload_Font();
     ASSETS::Unload_Images();
 }

@@ -108,7 +108,7 @@ int getMaxHealthFromUpgrades();
 void Playing_Load() {
     ASSETS::Init_Images();
     ASSETS::Init_Font();
-    font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+    font_id = ASSETS::Font();
 }
 
 static void SavePlayingStateForMaze()
@@ -667,7 +667,6 @@ void Playing_Free() {
 }
 
 void Playing_Unload() {
-    AEGfxDestroyFont(font_id);
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
     isPaused = false;
