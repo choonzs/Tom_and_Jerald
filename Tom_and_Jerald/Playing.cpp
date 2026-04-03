@@ -230,12 +230,12 @@ void Playing_Initialize() {
     ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
     ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);                    //Row, start col, frames, fps (PLAYER)
 
-    ANIMATION::spike.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
+    ANIMATION::spike.ImportFromFile("Assets/AnimationData.txt");      //Total rows + columns
     // Spike at 1,1 of spritesheet with only 1 sprite
-    ANIMATION::spike.Clip_Select(1, 1, 1, 10.0f);                    //Row, start col, frames, fps (Spike)
+    ANIMATION::spike.Clip_Select(1, 1, 1, 10.0f);                     //Row, start col, frames, fps (Spike)
     
-    ANIMATION::wall.ImportFromFile("Assets/AnimationData.txt");     //Total rows + columns
-    ANIMATION::wall.Clip_Select(1, 0, 1, 10.0f);                    //Row, start col, frames, fps (Wall)
+    ANIMATION::wall.ImportFromFile("Assets/AnimationData.txt");       //Total rows + columns
+    ANIMATION::wall.Clip_Select(1, 0, 1, 10.0f);                      //Row, start col, frames, fps (Wall)
     
     // TODO Anim initialize
     //---------------------------------------

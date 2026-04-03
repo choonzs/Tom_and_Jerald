@@ -50,6 +50,9 @@ namespace UI {
 	extern UIButtons startBtn;
 	extern UIButtons shopBtn;
 	extern UIButtons exitBtn;
+	extern UIButtons lvlEditBtn;
+	extern UIButtons highscoreBtn;
+	extern UIButtons settingsBtn;
 
 
 }//End namespace UI
