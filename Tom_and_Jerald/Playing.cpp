@@ -285,6 +285,7 @@ void Playing_Update() {
 
         if (AEInputCheckTriggered(AEVK_R)) {
             // return back to the game
+            quitting_flag = FALSE;
             isPaused = false;
         }
         else if (AEInputCheckTriggered(AEVK_1))
@@ -633,14 +634,23 @@ void Playing_Draw() {
     // draw overlay
     drawQuad(bgMesh, camX, camY, 320.f, 220.f, 0.06f, 0.07f, 0.09f, 1.f);
     // draw text
-    drawCenteredText(font_id, "PAUSED", 0.35f, 1.0f);
+    /*drawCenteredText(font_id, "PAUSED", 0.25f, 1.0f);
     drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
-    drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);
-    drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.2f, 0.7f);
+    drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);*/
+    //drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.2f, 0.7f);
     //drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
+    /*if (quitting_flag == TRUE) {
+        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", -0.4f, 0.7f);
+    }*/
 
     if (quitting_flag == TRUE) {
-        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", -0.8f, 0.7f);
+        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", 0.0f, 0.7f);
+    }
+    else {
+        drawCenteredText(font_id, "PAUSED", 0.25f, 1.0f);
+        drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
+        drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);
+        drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.25f, 0.7f);
     }
 
     

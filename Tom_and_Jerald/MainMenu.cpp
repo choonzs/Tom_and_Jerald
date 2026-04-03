@@ -122,9 +122,9 @@ void MainMenu_Update() {
 	parallax_y += (target_y - parallax_y) * 0.1f;
 	// ==========================================
 
-	if (IsMenuKeyTriggered()) {
+	/*if (IsMenuKeyTriggered()) {
 		clickAudio.Play();
-	}
+	}*/
 
 	if (AEInputCheckTriggered(AEVK_LBUTTON)) { //Player clicks a button
 		clickAudio.Play();

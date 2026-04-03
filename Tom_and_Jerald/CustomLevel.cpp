@@ -13,6 +13,7 @@
 #include "LevelTile.hpp"
 #include "ImgFontInit.hpp"
 #include "LevelEditor.hpp"
+#include "Audio.hpp"
 
 namespace {
     Player* custom_player;
@@ -138,6 +139,7 @@ void CustomLevel_Update() {
 
         if (checkOverlap(( &(*custom_player).Position()), &(*custom_player).Half_Size(), iter->PositionPtr(), iter->HalfSizePtr())) {
             if (damage_timer <= 0.0f) {
+                ratsqueakAudio.Play();
                 (*custom_player).Health() -= 1;
                 damage_timer = 1.0f;
                 took_damage = true;

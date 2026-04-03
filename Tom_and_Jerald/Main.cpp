@@ -42,7 +42,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// GSM LOOP
 	while (current != GAME_STATE_QUIT)
 	{
-		clickAudio.Play();
 		// when the window is closed
 		if (0 == AESysDoesWindowExist()) {
 			current = GAME_STATE_QUIT;
@@ -62,6 +61,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// INNER GAME LOOP - runs every frame while state hasn't changed
 			while (current == next) {
 				AESysFrameStart();      // Signal frame start (updates input, frame timer)
+				if (IsMenuKeyTriggered()) {
+					clickAudio.Play();
+				}
 				fpUpdate();             // Run game logic (physics, collisions, input)
 				fpDraw();               // Render the current frame
 				AESysFrameEnd();        // Signal frame end (enforces frame rate, swaps buffers)

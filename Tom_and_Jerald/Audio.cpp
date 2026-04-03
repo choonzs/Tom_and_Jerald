@@ -9,15 +9,17 @@ bool IsMenuKeyTriggered()
         AEInputCheckTriggered(AEVK_E) ||
         AEInputCheckTriggered(AEVK_P) ||
         AEInputCheckTriggered(AEVK_R) ||
-        AEInputCheckTriggered(AEVK_ESCAPE) ||
+        AEInputCheckTriggered(AEVK_Y) ||
+        AEInputCheckTriggered(AEVK_I) ||
+        AEInputCheckTriggered(AEVK_N) ||
         AEInputCheckTriggered(AEVK_C) ||
         AEInputCheckTriggered(AEVK_T) ||
-        AEInputCheckTriggered(AEVK_N) ||
         AEInputCheckTriggered(AEVK_M) ||
         AEInputCheckTriggered(AEVK_H) ||
         AEInputCheckTriggered(AEVK_1) ||
         AEInputCheckTriggered(AEVK_2) ||
         AEInputCheckTriggered(AEVK_3) ||
+        AEInputCheckTriggered(AEVK_ESCAPE) ||
         AEInputCheckTriggered(AEVK_LBUTTON);
 }
 
