@@ -25,7 +25,8 @@ namespace ASSETS {
 	}
 
 	void Init_Font() {
-		font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+		//font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+		font_id = AEGfxCreateFont("Assets/Jersey20-Regular.ttf", 32);
 	}
 	s8& Font() {return font_id;}
 

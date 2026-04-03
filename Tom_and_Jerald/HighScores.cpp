@@ -5,6 +5,7 @@
 #include "Audio.hpp"
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
+#include "ImgFontInit.hpp"
 
 Leaderboard::Leaderboard(std::string const& filename) {
 	std::ifstream ifs(filename);
@@ -56,7 +57,8 @@ namespace {
 // ===================================================================================
 // SCENE MANAGEMENT
 void HighScore_Load() {
-	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	ASSETS::Init_Font();
+	font_id = ASSETS::Font();
 }
 void HighScore_Initialize() {
 	currentboard = new Leaderboard("Assets/data/HighScores.txt");
@@ -77,16 +79,22 @@ void HighScore_Draw() {
 	for (Leaderboard::Score entry : scores) {
 		y_pos -= 0.1f;
 		// ===== FORMATTED OUTPUT FOR LEADERBOARD ENTRY ============================
-		std::stringstream ss;
-		ss << entry.name;
+		//std::stringstream ss;
+		//ss << std::left << std::setw(20) << entry.name;
 
-		for (size_t i{ entry.name.size() }; i < 20; ++i) {
-			ss << " ";
-		}
-		ss << entry.score;
-		std::string formatted_entry = ss.str();
-		// =========================================================================
-		drawCenteredText(font_id, formatted_entry.c_str(), y_pos, 0.8f, 0.0f, 0.0f);
+		//ss << std::right << std::setw(5) << entry.score;
+		//std::string formatted_entry = ss.str();
+		//// =========================================================================
+		//drawCenteredText(font_id, formatted_entry.c_str(), y_pos, 0.8f, 0.0f, 0.0f);
+		const f32 LEFT_X = -0.1f;
+		drawText(font_id, entry.name.c_str(), 0.8f, LEFT_X, y_pos);
+
+		// Draw score right-anchored at a fixed right column
+		const f32 RIGHT_X = 0.1f;
+		std::string score_str = std::to_string(entry.score);
+		f32 score_width = 0.0f, score_height = 0.0f;
+		AEGfxGetPrintSize(font_id, score_str.c_str(), 0.8f, &score_width, &score_height);
+		drawText(font_id, score_str.c_str(), 0.8f, RIGHT_X - score_width, y_pos);
 	}
 }
 void HighScore_Free() {
@@ -94,7 +102,7 @@ void HighScore_Free() {
 	currentboard = nullptr;
 }
 void HighScore_Unload() {
-	AEGfxDestroyFont(font_id);
+	ASSETS::Unload_Font();
 	// dealloc memory for current board
 }
 

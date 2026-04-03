@@ -11,7 +11,7 @@
 #include "UI.hpp"
 
 namespace {
-	s8 font_id;
+	s8 font_id; // Reference to the font ID created in ImgFontInit, used for drawing text in this scene
 	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
 	AEGfxVertexList* buttons = nullptr;				//For buttons
@@ -43,8 +43,10 @@ namespace {
 
 //LOAD
 void MainMenu_Load() {
-	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	//font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	ASSETS::Init_Images();
+	ASSETS::Init_Font();
+	font_id = ASSETS::Font();
 }
 
 //INITIALIZE
@@ -344,6 +346,7 @@ void MainMenu_Unload() {
 	UI::shopBtn.UI_Free();
 	UI::exitBtn.UI_Free();
 
-	AEGfxDestroyFont(font_id);
+	//AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();
+	ASSETS::Unload_Font();
 }
