@@ -7,18 +7,20 @@ namespace UI {
 	class UIButtons {
 	public: //Enum members______________________________
 		enum class buttonKey {	//Needs to be set in spritesheet order
-			blank = 0, 
-			pause = 1, 
-			start = 2, 
+			blank = 0,
+			pause = 1,
+			start = 2,
 			shop = 3,
-			lvlEditor = 4, 
-			highscore = 5, 
+			lvlEditor = 4,
+			highscore = 5,
 			settings = 6,
-			exit = 7, 
+			exit = 7,
 			back = 8,
 			restart = 9,
 			no = 10,
-			yes = 11
+			yes = 11,
+			credits = 12,
+			lvlSelector = 13
 		};//End enum class buttons
 
 	public: //Data members______________________________
@@ -71,6 +73,8 @@ namespace UI {
 	extern UIButtons lvlEditBtn;
 	extern UIButtons highscoreBtn;
 	extern UIButtons settingsBtn;
+	extern UIButtons creditsBtn;
+	extern UIButtons lvlSelectorBtn;
 
 
 }//End namespace UI

@@ -266,7 +266,7 @@ void Playing_Initialize() {
     ANIMATION::wall.Clip_Select(1, 0, 1, 10.0f);                      //Row, start col, frames, fps (Wall)
 
 	ANIMATION::cat.ImportFromFile("Assets/AnimationData.txt");        //Total rows + columns
-	ANIMATION::cat.Clip_Select(3, 0, 4, 5.0f);                       //Row, start col, frames, fps (Cat)
+	ANIMATION::cat.Clip_Select(3, 0, 4, 5.0f);                        //Row, start col, frames, fps (Cat)
     
     // TODO Anim initialize
     //---------------------------------------

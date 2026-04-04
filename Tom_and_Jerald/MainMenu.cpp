@@ -89,24 +89,29 @@ void MainMenu_Initialize() {
 	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
 	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
 	//UI BUTTONS-----------------------------
-	// Top row: start, shop, lvlEditor
-	UI::startBtn.UI_Init(-325.0f, 50.0f, 200.0f, 200.0f);
+	const f32 btnSize = 200.0f;
+	const f32 colSpacing = 325.0f;
+	const f32 rowTop = 50.0f;
+	const f32 rowBot = -200.0f;
+
+	// Top row: start, shop, lvlEditor, lvlSelector
+	UI::startBtn.UI_Init(-colSpacing * 1.5f, rowTop, btnSize, btnSize);
 	UI::startBtn.UI_Select(UI::UIButtons::buttonKey::start);
-
-	UI::shopBtn.UI_Init(0.0f, 50.0f, 200.0f, 200.0f);
+	UI::shopBtn.UI_Init(-colSpacing * 0.5f, rowTop, btnSize, btnSize);
 	UI::shopBtn.UI_Select(UI::UIButtons::buttonKey::shop);
-
-	UI::lvlEditBtn.UI_Init(325.0f, 50.0f, 200.0f, 200.0f);
+	UI::lvlEditBtn.UI_Init(colSpacing * 0.5f, rowTop, btnSize, btnSize);
 	UI::lvlEditBtn.UI_Select(UI::UIButtons::buttonKey::lvlEditor);
+	UI::lvlSelectorBtn.UI_Init(colSpacing * 1.5f, rowTop, btnSize, btnSize);
+	UI::lvlSelectorBtn.UI_Select(UI::UIButtons::buttonKey::lvlSelector);
 
-	// Bottom row: highscore, settings, exit
-	UI::highscoreBtn.UI_Init(-325.0f, -200.0f, 200.0f, 200.0f);
+	// Bottom row: highscore, settings, credits, exit
+	UI::highscoreBtn.UI_Init(-colSpacing * 1.5f, rowBot, btnSize, btnSize);
 	UI::highscoreBtn.UI_Select(UI::UIButtons::buttonKey::highscore);
-
-	UI::settingsBtn.UI_Init(0.0f, -200.0f, 200.0f, 200.0f);
+	UI::settingsBtn.UI_Init(-colSpacing * 0.5f, rowBot, btnSize, btnSize);
 	UI::settingsBtn.UI_Select(UI::UIButtons::buttonKey::settings);
-
-	UI::exitBtn.UI_Init(325.0f, -200.0f, 200.0f, 200.0f);
+	UI::creditsBtn.UI_Init(colSpacing * 0.5f, rowBot, btnSize, btnSize);
+	UI::creditsBtn.UI_Select(UI::UIButtons::buttonKey::credits);
+	UI::exitBtn.UI_Init(colSpacing * 1.5f, rowBot, btnSize, btnSize);
 	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
 	//_______________________________________
 
@@ -243,19 +248,16 @@ void MainMenu_Update() {
 
 			f32 half = 100.0f;
 
-			bool hoverStart = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-			bool hoverShop = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-			bool hoverLvlEdit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-			bool hoverHighscore = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
-			bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
-			bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+			if (UI::startBtn.UI_IsHovered(mouseX, mouseY))      tutorialPromptOpen = TRUE;
+			if (UI::shopBtn.UI_IsHovered(mouseX, mouseY))       next = GAME_STATE_SHOP;
+			if (UI::lvlEditBtn.UI_IsHovered(mouseX, mouseY))    next = GAME_STATE_LEVEL_EDITOR;
+			if (UI::lvlSelectorBtn.UI_IsHovered(mouseX, mouseY)) { ScanLevelFiles(level_files); levelSelectOpen = true; }
+			if (UI::highscoreBtn.UI_IsHovered(mouseX, mouseY))  next = GAME_STATE_HIGHSCORE;
+			if (UI::settingsBtn.UI_IsHovered(mouseX, mouseY))   next = GAME_STATE_SETTINGS;
+			if (UI::creditsBtn.UI_IsHovered(mouseX, mouseY))    next = GAME_STATE_CREDITS;
+			if (UI::exitBtn.UI_IsHovered(mouseX, mouseY))       quitting_flag = TRUE;
 
-			if (hoverStart)		tutorialPromptOpen = TRUE;
-			if (hoverShop)      next = GAME_STATE_SHOP;
-			if (hoverLvlEdit)   next = GAME_STATE_LEVEL_EDITOR;
-			if (hoverHighscore) next = GAME_STATE_HIGHSCORE;
-			if (hoverSettings)  next = GAME_STATE_SETTINGS;
-			if (hoverExit)      quitting_flag = TRUE;
+
 		}
 		//Temp for switching levels
 		if (AEInputCheckTriggered(AEVK_A)) {
@@ -265,14 +267,7 @@ void MainMenu_Update() {
 			++select_level;
 		}
 
-		// Temp, kai please help change condition to a button thanks
-		// TYYYYYYYYYYYYYYY
-		if (AEInputCheckTriggered(AEVK_C)) {
-			ScanLevelFiles(level_files);
-			levelSelectOpen = !levelSelectOpen;
-			levelSelectCursor = 0;
-			levelScrollOffset = 0;
-		}
+		
 		if (levelSelectOpen) {
 			if (AEInputCheckTriggered(AEVK_UP) || AEInputCheckTriggered(AEVK_W)) {
 				if (levelSelectCursor > 0) --levelSelectCursor;
@@ -348,31 +343,12 @@ void MainMenu_Update() {
 			// Quitting the game
 			//next = GAME_STATE_QUIT;
 		}
-		else if (AEInputCheckTriggered(AEVK_C))
+		else if (AEInputCheckTriggered(AEVK_I))
 		{
-			/*levelSelectOpen = !levelSelectOpen;
-
-			// Write down text file number that we need to open 
-			// shld move to util cpp to avoid clutter
-			std::string filename;
-
-			// Shorten for easier readability
-			namespace fs = std::filesystem;
-			// Create "MapLevel" directory if it doesn't exist
-			if (fs::create_directory("MapLevel")) {
-				//std::cout << "Directory 'MapLevel' created successfully.\n";
-			}
-			filename = "MapLevel/LoadLevel.txt";
-			// Opens output file stream and writes the level number to load, trunc to remove anything inside
-			std::ofstream outFile(filename, std::ios::trunc);
-			if (outFile.is_open()) {
-				outFile << select_level;
-				outFile.close();
-			}
-			// --------------------------------------------------
-
-
-			next = GAME_STATE_CUSTOM_PLAY;*/
+			ScanLevelFiles(level_files);
+			levelSelectOpen = !levelSelectOpen;
+			levelSelectCursor = 0;
+			levelScrollOffset = 0;
 		}
 		else if (AEInputCheckTriggered(AEVK_T))
 		{
@@ -386,10 +362,11 @@ void MainMenu_Update() {
 		{
 			next = GAME_STATE_HIGHSCORE;
 		}
-		else if (AEInputCheckTriggered(AEVK_I))
+		else if (AEInputCheckTriggered(AEVK_C))
 		{
 			next = GAME_STATE_CREDITS;
 		}
+		
 		else {
 			current = GAME_STATE_MENU;
 			// Refreshing the next state to stay in menu
@@ -475,6 +452,8 @@ void MainMenu_Draw() {
 		UI::lvlEditBtn.UI_Draw(ASSETS::UIAssets);
 		UI::highscoreBtn.UI_Draw(ASSETS::UIAssets);
 		UI::settingsBtn.UI_Draw(ASSETS::UIAssets);
+		UI::creditsBtn.UI_Draw(ASSETS::UIAssets);
+		UI::lvlSelectorBtn.UI_Draw(ASSETS::UIAssets);
 		//---------------------------------------
 
 		// Button label on hover
@@ -486,18 +465,14 @@ void MainMenu_Draw() {
 		f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
 		f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
 
-		// Button size half-extents (buttons are 200x200)
-		f32 half = 100.0f;
-
-		f32 labelScale = 1.0f;
-		f32 labelDropY = -100.0f; // world units below button center
-
 		bool hoverStart = UI::startBtn.UI_IsHovered(mouseX, mouseY);		//Using default values in class
 		bool hoverShop = UI::shopBtn.UI_IsHovered(mouseX, mouseY);
 		bool hoverLvlEdit = UI::lvlEditBtn.UI_IsHovered(mouseX, mouseY);
 		bool hoverHighscore = UI::highscoreBtn.UI_IsHovered(mouseX, mouseY);
 		bool hoverSettings = UI::settingsBtn.UI_IsHovered(mouseX, mouseY);
 		bool hoverExit = UI::exitBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverCredits = UI::creditsBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverLvlSelector = UI::lvlSelectorBtn.UI_IsHovered(mouseX, mouseY);
 
 		if (hoverStart)     UI::startBtn.UI_DrawHoverText(font_id, "START (ENTER)");
 		if (hoverShop)      UI::shopBtn.UI_DrawHoverText(font_id, "SHOP (S)");
@@ -505,6 +480,8 @@ void MainMenu_Draw() {
 		if (hoverHighscore) UI::highscoreBtn.UI_DrawHoverText(font_id, "HIGH SCORES (H)");
 		if (hoverSettings)  UI::settingsBtn.UI_DrawHoverText(font_id, "SETTINGS (T)");
 		if (hoverExit)      UI::exitBtn.UI_DrawHoverText(font_id, "EXIT (ESC)");
+		if (hoverCredits)     UI::creditsBtn.UI_DrawHoverText(font_id, "CREDITS (C)");
+		if (hoverLvlSelector) UI::lvlSelectorBtn.UI_DrawHoverText(font_id, "LEVEL SELECT (I)");
 
 		if (levelSelectOpen) {
 			// Panel
@@ -622,6 +599,8 @@ void MainMenu_Unload() {
 	UI::lvlEditBtn.UI_Free();
 	UI::highscoreBtn.UI_Free();
 	UI::settingsBtn.UI_Free();
+	UI::creditsBtn.UI_Free();
+	UI::lvlSelectorBtn.UI_Free();
 
 	//AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();
