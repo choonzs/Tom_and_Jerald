@@ -210,11 +210,13 @@ void Playing_Initialize() {
 
     createUnitSquare(&bgMesh, 0.25f, 0.25f, 1.0);
 
+    // Changing Player size
     f32 size_reduction = Upgrades_GetSizeReduction();
-    f32 upgraded_half_size = 20.0f - size_reduction;
+    f32 upgraded_half_size = 50.0f - size_reduction;
     if (upgraded_half_size < 10.0f) upgraded_half_size = 10.0f;
     AEVec2Set(&(base_player.Position()), 0.0f, 0.0f);
     AEVec2Set(&(base_player.Half_Size()), upgraded_half_size, upgraded_half_size);
+    // ==================================
     base_player.Health() = getMaxHealthFromUpgrades();
 
     stage_timer = 0.0f;

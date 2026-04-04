@@ -69,7 +69,7 @@ void Player::Movement(f32 dt, bool canThrust) {
     AEVec2Set(&position, f32(position.x + velocity.x * dt), f32(position.y + velocity.y * dt));
     
     // 4. PREVENT FALLING INTO THE VOID
-    f32 bottomBoundary = AEGfxGetWinMinY() + half_size.y;
+    f32 bottomBoundary = AEGfxGetWinMinY() + half_size.y + 50.0f;
     if (position.y < bottomBoundary) {
         position.y = bottomBoundary;
         velocity.y = 0.0f;

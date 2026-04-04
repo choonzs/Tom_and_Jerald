@@ -27,11 +27,12 @@ class Cat {
 		AEVec2 m_pos{};
 		AEVec2 m_half_size{ 100.0f, 100.0f };
 		AEVec2 m_velocity{};
+		f32 m_floor_y{};// set on Init from window bounds
 
 		f32  m_chase_speed = 120.0f;
-		f32  m_floor_y = 0.0f;     // set on Init from window bounds
 		bool m_active = true;
 
+		static constexpr f32 k_floor_offset = 50.0f; 
 		static constexpr f32 k_x_offset = -200.0f; // start behind player
 		static constexpr f32 k_target_offset = -150.0f; // chases to this gap
 		static constexpr f32 k_min_scale = 1.0f;
@@ -44,7 +45,7 @@ class Cat {
 		bool m_is_grounded = false;
 
 		static constexpr f32 k_gravity = -800.0f;
-		static constexpr f32 k_jump_force = 600.0f;  
+		static constexpr f32 k_jump_force = 600.0f; 
 
 
 };

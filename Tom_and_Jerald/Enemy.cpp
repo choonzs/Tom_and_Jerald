@@ -10,7 +10,7 @@ Cat::Cat()
 
 void Cat::Init(AEVec2 player_pos)
 {
-    m_floor_y = AEGfxGetWinMinY() + m_half_size.y;
+    m_floor_y = AEGfxGetWinMinY() + m_half_size.y + k_floor_offset;
     m_pos.x = player_pos.x - AEGfxGetWinMaxX() - m_half_size.x;
     m_pos.y = m_floor_y;
     m_active = true;
@@ -21,7 +21,7 @@ void Cat::Update(f32 delta_time, AEVec2 player_pos)
 {
     if (!m_active) return;
 
-    f32 floor_y = AEGfxGetWinMinY() + m_half_size.y;
+    f32 floor_y = AEGfxGetWinMinY() + m_half_size.y + k_floor_offset;
 
     //X: rubber-band chase behind player
     f32 target_x = player_pos.x;

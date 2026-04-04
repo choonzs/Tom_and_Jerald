@@ -189,7 +189,7 @@ void MainMenu_Update() {
 
 		// Mouse click on buttons
 		if (AEInputCheckTriggered(AEVK_LBUTTON)) {
-			s32 mouseX_int{}, mouseY_int{};
+			
 			AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
 			f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);

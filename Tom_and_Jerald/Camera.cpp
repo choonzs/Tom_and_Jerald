@@ -2,6 +2,7 @@
 #include "Camera.hpp"
 #include "Utils.hpp"
 
+
 // Set Shaking Mode On
 void Camera::Set_Shaking() {
 	camera_shaking = true;
@@ -12,6 +13,7 @@ void Camera::Update() {
 	f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
 	// Checks if camera is in shaking mode, increment timer until it reaches the set amt of time to shake
 	if (camera_shaking) {
+		std::cout << "Camera shaking, timer: " << timer << '\n';
 		timer += delta_time;
 		if (timer >= duration) {
 			camera_shaking = false;

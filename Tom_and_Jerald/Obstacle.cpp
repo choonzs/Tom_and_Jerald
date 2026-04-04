@@ -45,7 +45,7 @@ void Obstacle::Reset()
             &position,
             // move it a little offscreen
             max_x + half_size.x,
-            randomRange(min_y + size_value, max_y - size_value));
+            randomRange(min_y + size_value + 50.0f, max_y - size_value));
         AEVec2Set(
             &velocity,
             randomRange(-220.0f, 0.0f),
@@ -71,7 +71,7 @@ void Obstacle::Reset()
             AEVec2Set(
                 &position,
                 max_x + half_size.x,
-                min_y + half_size.y); 
+                min_y + half_size.y + 50.0f); 
             rotation = 0.0f;
         }
 
@@ -114,7 +114,7 @@ void Obstacle::Update(f32 dt, f32 camX, f32 offscreen_limit, bool endless = true
     position.y += velocity.y * dt;
 
     // Bounce off top and bottom of the screen
-    velocity.y = ((position.y > AEGfxGetWinMaxY() - 20.0f) or (position.y < AEGfxGetWinMinY() + 20.0f))
+    velocity.y = ((position.y > AEGfxGetWinMaxY() - 20.0f) or (position.y < AEGfxGetWinMinY() + 20.0f + 50.0f))
         ? -std::abs(velocity.y) : velocity.y;
 
 
