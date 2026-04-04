@@ -29,7 +29,7 @@ void Leaderboard::UpdateLeaderboard(std::string const& filename) {
 	}
 	ofs.close();
 }
-const int& Leaderboard::LowestScore() {
+const int Leaderboard::LowestScore() {
 	static const int default_score{ 0 };
 	if (highscores.empty()) return 0;
 	return highscores.back().score;

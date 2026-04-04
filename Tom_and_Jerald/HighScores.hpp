@@ -21,7 +21,7 @@ class Leaderboard {
 		// Update textfile
 		void UpdateLeaderboard(std::string const& filename);
 		void AddScore(Score const& newScore);
-		const int& LowestScore();
+		const int LowestScore();
 		
 		// Accessor & Mutator of vector
 		std::vector<Score>const& HighScores() const { return highscores; }

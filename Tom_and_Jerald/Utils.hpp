@@ -169,7 +169,4 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health);
 *******************************************************************************/
 void LoadLevelDataFromFile(std::string filename, f32& level_end_x, std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
 
-
-
-void ScanLevelFiles(std::vector<std::string>& level_files);
 #endif // !UTILS_H

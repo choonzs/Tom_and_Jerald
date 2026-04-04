@@ -45,7 +45,8 @@ namespace {
 	f32 parallax_x = 0.0f;
 	f32 parallax_y = 0.0f;
 }
-
+//Forward declarations
+static void ScanLevelFiles(std::vector<std::string>& level_files);
 
 //LOAD
 void MainMenu_Load() {
@@ -488,8 +489,8 @@ void MainMenu_Draw() {
 			// Mouse position for hover
 			s32 mx{}, my{};
 			AEInputGetCursorPosition(&mx, &my);
-			f32 mouseX = static_cast<f32>(mx) - (window_width * 0.5f);
-			f32 mouseY = -(static_cast<f32>(my) - (window_height * 0.5f));
+			mouseX = static_cast<f32>(mx) - (window_width * 0.5f);
+			mouseY = -(static_cast<f32>(my) - (window_height * 0.5f));
 
 			f32 list_top = 150.0f;
 			f32 row_height = 35.0f;
@@ -553,4 +554,21 @@ void MainMenu_Unload() {
 	//AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();
 	ASSETS::Unload_Font();
+}
+
+
+// For Custom Level Selection, scans MapLevel directory for ExportedLevelN.txt files and populates level_files vector with their names (without .txt)
+static void ScanLevelFiles(std::vector<std::string>& level_files_vect)
+{
+	level_files_vect.clear();
+	namespace fs = std::filesystem;
+
+	if (!fs::exists("MapLevel")) return;
+
+	// Collect all .txt files named ExportedLevelN
+	for (int i = 1; ; ++i) {
+		std::string path = "MapLevel/ExportedLevel" + std::to_string(i) + ".txt";
+		if (!fs::exists(path)) break; // stop at first gap
+		level_files_vect.push_back("ExportedLevel" + std::to_string(i));
+	}
 }

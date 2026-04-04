@@ -181,17 +181,3 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 }
 
 
-void ScanLevelFiles(std::vector<std::string>& level_files)
-{
-	level_files.clear();
-	namespace fs = std::filesystem;
-
-	if (!fs::exists("MapLevel")) return;
-
-	// Collect all .txt files named ExportedLevelN
-	for (int i = 1; ; ++i) {
-		std::string path = "MapLevel/ExportedLevel" + std::to_string(i) + ".txt";
-		if (!fs::exists(path)) break; // stop at first gap
-		level_files.push_back("ExportedLevel" + std::to_string(i));
-	}
-}
