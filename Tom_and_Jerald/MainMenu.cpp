@@ -31,10 +31,17 @@ namespace {
 	BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
 
 
+	// Select Custom Level
+	BOOL levelSelectOpen{ false };
 	// txt files start w 1
 	unsigned int select_level{ 1 };
+	std::vector<std::string> level_files;
+	int levelSelectCursor = 0; // which item is highlighted
+	int levelScrollOffset = 0; // how much the list is scrolled
+	const int k_visible_rows = 5; // visible rows in the level select menu
+	// ========================
 
-	// Testing parallax using mouse
+	// Parallax using mouse
 	f32 parallax_x = 0.0f;
 	f32 parallax_y = 0.0f;
 }
@@ -219,6 +226,70 @@ void MainMenu_Update() {
 			++select_level;
 		}
 
+		// Temp, kai please help change condition to a button thanks
+		// TYYYYYYYYYYYYYYY
+		if (AEInputCheckTriggered(AEVK_C)) {
+			ScanLevelFiles(level_files);
+			levelSelectOpen = !levelSelectOpen;
+			levelSelectCursor = 0;
+			levelScrollOffset = 0;
+		}
+		if (levelSelectOpen) {
+			if (AEInputCheckTriggered(AEVK_UP) || AEInputCheckTriggered(AEVK_W)) {
+				if (levelSelectCursor > 0) --levelSelectCursor;
+				if (levelSelectCursor < levelScrollOffset)
+					levelScrollOffset = levelSelectCursor;
+			}
+			if (AEInputCheckTriggered(AEVK_DOWN) || AEInputCheckTriggered(AEVK_S)) {
+				if (levelSelectCursor < (int)level_files.size())++levelSelectCursor;
+				if (levelSelectCursor >= levelScrollOffset + k_visible_rows)
+					levelScrollOffset = levelSelectCursor - k_visible_rows + 1;
+			}
+			if (AEInputCheckTriggered(AEVK_RETURN)) {
+				select_level = levelSelectCursor + 1;
+				namespace fs = std::filesystem;
+				fs::create_directory("MapLevel");
+				std::ofstream outFile("MapLevel/LoadLevel.txt", std::ios::trunc);
+				if (outFile.is_open()) { outFile << select_level; outFile.close(); }
+				next = GAME_STATE_CUSTOM_PLAY;
+				levelSelectOpen = false;
+			}
+			if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+				levelSelectOpen = false;
+			}
+			// Mouse click selection
+			if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+				s32 mx{}, my{};
+				AEInputGetCursorPosition(&mx, &my);
+				f32 mouseX = static_cast<f32>(mx) - (window_width * 0.5f);
+				f32 mouseY = -(static_cast<f32>(my) - (window_height * 0.5f));
+
+				f32 list_top = 150.0f;
+				f32 row_height = 35.0f;
+				f32 panel_half_w = 200.0f;
+
+				for (int i = 0; i < (int)level_files.size(); ++i) {
+					f32 row_y = list_top - i * row_height;
+					if (mouseX >= -panel_half_w && mouseX <= panel_half_w &&
+						mouseY >= row_y - row_height * 0.5f && mouseY <= row_y + row_height * 0.5f)
+					{
+						levelSelectCursor = i;
+						// Double click / single click to confirm
+						namespace fs = std::filesystem;
+						fs::create_directory("MapLevel");
+						std::ofstream outFile("MapLevel/LoadLevel.txt", std::ios::trunc);
+						if (outFile.is_open()) { outFile << (levelSelectCursor + 1); outFile.close(); }
+						next = GAME_STATE_CUSTOM_PLAY;
+						levelSelectOpen = false;
+						break;
+					}
+				}
+			}
+
+			return; // block all other input while open
+		}
+
+
 		// Menu Controls
 		if (AEInputCheckTriggered(AEVK_RETURN))
 		{
@@ -241,6 +312,8 @@ void MainMenu_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_C))
 		{
+			/*levelSelectOpen = !levelSelectOpen;
+
 			// Write down text file number that we need to open 
 			// shld move to util cpp to avoid clutter
 			std::string filename;
@@ -261,7 +334,7 @@ void MainMenu_Update() {
 			// --------------------------------------------------
 
 
-			next = GAME_STATE_CUSTOM_PLAY;
+			next = GAME_STATE_CUSTOM_PLAY;*/
 		}
 		else if (AEInputCheckTriggered(AEVK_T))
 		{
@@ -367,7 +440,7 @@ void MainMenu_Draw() {
 		//---------------------------------------
 
 		// Button label on hover
-// Get mouse position in world space
+		// Get mouse position in world space
 		s32 mouseX_int{}, mouseY_int{};
 		AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
@@ -395,6 +468,64 @@ void MainMenu_Draw() {
 		if (hoverSettings)  drawCenteredText(font_id, "SETTINGS (T)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 0.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
 		if (hoverExit)      drawCenteredText(font_id, "EXIT (ESC)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
 
+		if (levelSelectOpen) {
+			// Panel
+			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+			AEGfxTextureSet(NULL, 0.0f, 0.0f);
+			drawQuad(unit_square, 0.0f, 50.0f, 450.0f, 420.0f, 0.06f, 0.07f, 0.09f, 0.97f);
+
+			drawCenteredText(font_id, "SELECT A LEVEL", 0.55f, 1.0f);
+			drawCenteredText(font_id, "UP/DOWN   ENTER TO PLAY   ESC CANCEL", -0.65f, 0.45f);
+
+			// Scroll indicator
+			if (levelScrollOffset > 0) {
+				drawCenteredText(font_id, "^ more(W) ^", 0.42f, 0.6f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f);
+			}
+			if (levelScrollOffset + k_visible_rows < (int)level_files.size()) {
+				drawCenteredText(font_id, "v more(S) v", -0.15f, 0.6f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 1.0f);
+			}
+
+			// Mouse position for hover
+			s32 mx{}, my{};
+			AEInputGetCursorPosition(&mx, &my);
+			f32 mouseX = static_cast<f32>(mx) - (window_width * 0.5f);
+			f32 mouseY = -(static_cast<f32>(my) - (window_height * 0.5f));
+
+			f32 list_top = 150.0f;
+			f32 row_height = 35.0f;
+			f32 panel_half_w = 200.0f;
+
+			int visible_count = min((int)level_files.size() - levelScrollOffset, k_visible_rows);
+
+			for (int i = 0; i < visible_count; ++i) {
+				int actual_index = i + levelScrollOffset;
+				f32 row_y = list_top - i * row_height;
+				f32 norm_y = row_y / (window_height * 0.5f);
+
+				bool isKeySelected = (actual_index == levelSelectCursor);
+				bool isHovered = (mouseX >= -panel_half_w && mouseX <= panel_half_w &&
+					mouseY >= row_y - row_height * 0.5f &&
+					mouseY <= row_y + row_height * 0.5f);
+
+				if (isKeySelected) {
+					// Keyboard selected — blue bar
+					drawQuad(unit_square, 0.0f, row_y, 420.0f, 30.0f, 0.2f, 0.3f, 0.6f, 1.0f);
+				}
+				else if (isHovered) {
+					// Mouse hover — lighter bar
+					drawQuad(unit_square, 0.0f, row_y, 420.0f, 30.0f, 0.15f, 0.2f, 0.35f, 1.0f);
+					levelSelectCursor = actual_index; // sync keyboard cursor to hover
+				}
+
+				char name_buf[64];
+				sprintf_s(name_buf, "%s", level_files[actual_index].c_str());
+
+				f32 r = (isKeySelected || isHovered) ? 1.0f : 0.7f;
+				f32 g = (isKeySelected || isHovered) ? 1.0f : 0.7f;
+				f32 b = (isKeySelected || isHovered) ? 1.0f : 0.7f;
+				drawCenteredText(font_id, name_buf, norm_y - 0.02f, 0.75f, 0.0f, 0.0f, r, g, b, 1.0f);
+			}
+		}
 
 		if (quitting_flag == TRUE) {
 			drawCenteredText(font_id, "ARE YOU SURE? (Y/N)", -0.8f, 0.9f);
