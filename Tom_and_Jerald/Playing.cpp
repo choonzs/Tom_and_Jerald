@@ -14,11 +14,15 @@
 #include "ImgFontInit.hpp"
 #include "Audio.hpp"
 #include "DifferentGamemode.hpp"
+#include "UI.hpp"
 #include "Enemy.hpp"
 
 namespace {
 
     int gTotalScore = 0;
+
+    //f32 window_width;								//Window Width
+    //f32 window_height;								//Window Height
 
     // --- FIX: RESTORED MISSING CONSTANTS ---
     const f32 k_stage_duration = 120.0f;
@@ -267,6 +271,23 @@ void Playing_Initialize() {
     // TODO Anim initialize
     //---------------------------------------
 
+
+    //UI BUTTONS-----------------------------
+    UI::resumeBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::resumeBtn.UI_Select(UI::UIButtons::buttonKey::pause);
+
+    UI::restartBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::restartBtn.UI_Select(UI::UIButtons::buttonKey::restart);
+
+    UI::menuBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::menuBtn.UI_Select(UI::UIButtons::buttonKey::back);
+
+    UI::yesBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::yesBtn.UI_Select(UI::UIButtons::buttonKey::yes);
+
+    UI::noBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
+
     camera.Magnitude() = 20.0f;
 
     camera.Position().x = base_player.Position().x;
@@ -294,6 +315,8 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
+    s32 mouseX_int{};
+    s32 mouseY_int{};
 	// Check if window is closed
     if (0 == AESysDoesWindowExist()) {
         next = GAME_STATE_QUIT;
@@ -315,6 +338,51 @@ void Playing_Update() {
             }
         }
         // ==================================================
+
+        if (AEInputCheckTriggered(AEVK_LBUTTON)) {
+            float camX = camera.Position().x;
+            float camY = camera.Position().y;
+
+            AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+
+            f32 half = 75.0f;
+
+            f32 mouseX = static_cast<f32>(mouseX_int) - AEGfxGetWinMaxX();
+            f32 mouseY = -(static_cast<f32>(mouseY_int) - AEGfxGetWinMaxY());
+
+            bool hoverResume =
+                (mouseX >= UI::resumeBtn.posX && mouseX <= UI::resumeBtn.posX && mouseY >= UI::resumeBtn.posY && mouseY <= UI::resumeBtn.posY);
+
+            bool hoverRestart =
+                (mouseX >= UI::restartBtn.posX && mouseX <= UI::restartBtn.posX && mouseY >= UI::restartBtn.posY && mouseY <= UI::restartBtn.posY);
+
+            bool hoverBack =
+                (mouseX >= UI::menuBtn.posX && mouseX <= UI::menuBtn.posX && mouseY >= UI::menuBtn.posY && mouseY <= UI::menuBtn.posY);
+
+            bool hoverYes =
+                (mouseX >= UI::yesBtn.posX && mouseX <= UI::yesBtn.posX && mouseY >= UI::yesBtn.posY && mouseY <= UI::yesBtn.posY);
+
+            bool hoverNo =
+                (mouseX >= UI::noBtn.posX && mouseX <= UI::noBtn.posX && mouseY >= UI::noBtn.posY && mouseY <= UI::noBtn.posY);
+
+            if (hoverResume) {
+                quitting_flag = FALSE;
+                isPaused = false;
+            }
+            if (hoverRestart) {
+                next = GAME_STATE_RESTART;
+                isPaused = false;
+            }
+            if (hoverBack) {
+                quitting_flag = TRUE;
+            }
+            if (hoverYes) {
+                next = GAME_STATE_MENU;
+            }
+            if (hoverNo) {
+                quitting_flag = FALSE;
+            }
+        }
 
 
         if (AEInputCheckTriggered(AEVK_R)) {
@@ -691,30 +759,69 @@ void Playing_Draw() {
 
     float camX = camera.Position().x;
     float camY = camera.Position().y;
+    UI::resumeBtn.posX = camX-250.0f;  UI::resumeBtn.posY = camY-50.0f;
+    UI::restartBtn.posX = camX;     UI::restartBtn.posY = camY -50.0f;
+    UI::menuBtn.posX = camX+250.0f;  UI::menuBtn.posY = camY -50.0f;
+    UI::yesBtn.posX = camX -125.0f; UI::yesBtn.posY = camY -50.0f;
+    UI::noBtn.posX = camX+125.0f;  UI::noBtn.posY = camY -50.0f;
+
+    f32 half = 75.0f;
+    f32 labelDropY = -90.0f;
+    f32 labelScale = 1.0f;
+
+    // Mouse world position
+    s32 mouseX_int{}, mouseY_int{};
+    AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+    f32 mouseX = static_cast<f32>(mouseX_int) - AEGfxGetWinMaxX() + camX;
+    f32 mouseY = -(static_cast<f32>(mouseY_int) - AEGfxGetWinMaxY()) + camY;
 
     // draw overlay
-    drawQuad(bgMesh, camX, camY, 320.f, 220.f, 0.06f, 0.07f, 0.09f, 1.f);
+    drawQuad(bgMesh, camX, camY, 400.f, 270.f, 0.06f, 0.07f, 0.09f, 0.8f);
     // draw text
-    /*drawCenteredText(font_id, "PAUSED", 0.25f, 1.0f);
-    drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
-    drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);*/
-    //drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.2f, 0.7f);
-    //drawCenteredText(font_id, "EXIT (3)", -0.3f, 0.7f);
-    /*if (quitting_flag == TRUE) {
-        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", -0.4f, 0.7f);
-    }*/
 
     if (quitting_flag == TRUE) {
-        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK? (Y/N)", 0.0f, 0.7f);
+        // -- Confirmation screen --
+        drawCenteredText(font_id, "ARE YOU SURE YOU WANT TO GO BACK?", 0.20f, 1.0f);
+
+        bool hoverYes = (mouseX >= UI::yesBtn.posX - half && mouseX <= UI::yesBtn.posX + half && mouseY >= UI::yesBtn.posY - half && mouseY <= UI::yesBtn.posY + half);
+        bool hoverNo = (mouseX >= UI::noBtn.posX - half && mouseX <= UI::noBtn.posX + half && mouseY >= UI::noBtn.posY - half && mouseY <= UI::noBtn.posY + half);
+
+        AEGfxSetColorToAdd(hoverYes ? 0.3f : 0.f, hoverYes ? 0.3f : 0.f, 0.f, 0.f); UI::yesBtn.UI_Draw(ASSETS::UIAssets);
+        AEGfxSetColorToAdd(hoverNo ? 0.3f : 0.f, hoverNo ? 0.3f : 0.f, 0.f, 0.f); UI::noBtn.UI_Draw(ASSETS::UIAssets);
+        AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f); // reset
+
+        if (hoverYes) drawCenteredText(font_id, "YES [Y]",
+            (UI::yesBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::yesBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+        if (hoverNo)  drawCenteredText(font_id, "NO [N]",
+            (UI::noBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::noBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
     }
     else {
-        drawCenteredText(font_id, "PAUSED", 0.25f, 1.0f);
-        drawCenteredText(font_id, "RETURN BACK TO GAME (R)", 0.05f, 0.7f);
-        drawCenteredText(font_id, "RESTART (1)", -0.1f, 0.7f);
-        drawCenteredText(font_id, "RETURN TO MAIN MENU (2)", -0.25f, 0.7f);
-    }
+        // -- Normal pause screen --
+        drawCenteredText(font_id, "PAUSED", 0.20f, 1.0f);
 
-    
+        bool hoverResume = (mouseX >= UI::resumeBtn.posX - half && mouseX <= UI::resumeBtn.posX + half && mouseY >= UI::resumeBtn.posY - half && mouseY <= UI::resumeBtn.posY + half);
+        bool hoverRestart = (mouseX >= UI::restartBtn.posX - half && mouseX <= UI::restartBtn.posX + half && mouseY >= UI::restartBtn.posY - half && mouseY <= UI::restartBtn.posY + half);
+        bool hoverBack = (mouseX >= UI::menuBtn.posX - half && mouseX <= UI::menuBtn.posX + half && mouseY >= UI::menuBtn.posY - half && mouseY <= UI::menuBtn.posY + half);
+
+        // tint hovered button yellow, others white
+        AEGfxSetColorToAdd(hoverResume ? 0.3f : 0.f, hoverResume ? 0.3f : 0.f, 0.f, 0.f); UI::resumeBtn.UI_Draw(ASSETS::UIAssets);
+        AEGfxSetColorToAdd(hoverRestart ? 0.3f : 0.f, hoverRestart ? 0.3f : 0.f, 0.f, 0.f); UI::restartBtn.UI_Draw(ASSETS::UIAssets);
+        AEGfxSetColorToAdd(hoverBack ? 0.3f : 0.f, hoverBack ? 0.3f : 0.f, 0.f, 0.f); UI::menuBtn.UI_Draw(ASSETS::UIAssets);
+        AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f); // reset
+
+        if (hoverResume)  drawCenteredText(font_id, "RESUME [R]",
+            (UI::resumeBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::resumeBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+        if (hoverRestart) drawCenteredText(font_id, "RESTART [1]",
+            (UI::restartBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::restartBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+        if (hoverBack)    drawCenteredText(font_id, "MAIN MENU [2]",
+            (UI::menuBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::menuBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+
+    }
 }
 
 void Playing_Free() {
@@ -736,6 +843,11 @@ void Playing_Free() {
 void Playing_Unload() {
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
+    UI::resumeBtn.UI_Free();
+    UI::restartBtn.UI_Free();
+    UI::yesBtn.UI_Free();
+    UI::noBtn.UI_Free();
+    UI::menuBtn.UI_Free();
     isPaused = false;
 }
 

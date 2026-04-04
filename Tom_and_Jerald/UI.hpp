@@ -15,7 +15,10 @@ namespace UI {
 			highscore = 5, 
 			settings = 6,
 			exit = 7, 
-			back = 8
+			back = 8,
+			restart = 9,
+			no = 10,
+			yes = 11
 		};//End enum class buttons
 
 	public: //Data members______________________________
@@ -49,6 +52,11 @@ namespace UI {
 	//Instances
 	extern UIButtons startBtn;
 	extern UIButtons shopBtn;
+	extern UIButtons menuBtn;
+	extern UIButtons resumeBtn;
+	extern UIButtons restartBtn;
+	extern UIButtons yesBtn;
+	extern UIButtons noBtn;
 	extern UIButtons exitBtn;
 	extern UIButtons lvlEditBtn;
 	extern UIButtons highscoreBtn;

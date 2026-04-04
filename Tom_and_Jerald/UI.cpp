@@ -6,6 +6,11 @@ namespace UI {
     //Instances
     UIButtons startBtn;
     UIButtons shopBtn;
+    UIButtons menuBtn;
+    UIButtons resumeBtn;
+    UIButtons restartBtn;
+    UIButtons yesBtn;
+    UIButtons noBtn;
     UIButtons exitBtn;
     UIButtons lvlEditBtn;
     UIButtons highscoreBtn;
