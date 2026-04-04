@@ -3,6 +3,7 @@
 #include "Animation.hpp"
 #include "Utils.hpp"
 namespace UI {
+
     //Instances
     UIButtons startBtn;
     UIButtons shopBtn;
@@ -21,35 +22,34 @@ namespace UI {
         posY = y;
         width = w;
         height = h;
-        createUnitSquare(&mesh, 0.25f, 0.25f); //create mesh here, not globally
-        sprite.ImportFromFile("Assets/AnimationData.txt");  // load spritesheet layout
+        createUnitSquare(&mesh, 0.25f, 0.25f);                  //Create mesh here, not globally
+        sprite.ImportFromFile("Assets/AnimationData.txt");      //Load spritesheet layout
     }
     void UIButtons::UI_Select(buttonKey button_type) {
-        key = static_cast<int>(button_type); //convert enum to int, store in key // e.g. start = 2
-        u32 col = key % 4;   // which column on the sheet // 2 % 4 = 2 ->  column 2
-        u32 row = key / 4;   // which row on the sheet // 2 / 4 = 0 ->  row 0
-        sprite.Clip_Select(row, col, 1);  // 1 frame = static, no animation
+        key = static_cast<int>(button_type);                    //Convert enum to int, store in key (eg. start = 2)
+        u32 col = key % 4;                                      //Which column on the sheet (eg. 2 % 4 = 2  ->  column 2)
+        u32 row = key / 4;                                      //Which row on the sheet (eg. 2 / 4 = 0 ->  row 0)
+        sprite.Clip_Select(row, col, 1);                        //1 frame = static, no animation
     }
     void UIButtons::UI_Draw(AEGfxTexture* texture) const {
-        sprite.Anim_Draw(texture);                          // sets the UV
+        sprite.Anim_Draw(texture);                              //Sets the UV
         drawQuad(mesh, posX, posY, width, height, 1.0f, 1.0f, 1.0f, 1.0f);
     }
     void UIButtons::UI_DrawHoverText(s8 font, const char* text, f32 dropY, f32 scale) const {
         drawCenteredText( font, text,
-            (posY - dropY) / AEGfxGetWinMaxY(), //Y with offset
-            scale,                   //Scale
-            posX / AEGfxGetWinMaxX(), //X coord normalized
-            0.0f,                      //Y coord
-            1.f, 1.f, 1.f, 1.f);    //RGB
+            (posY - dropY) / AEGfxGetWinMaxY(),                 //Y with offset
+            scale,                                              //Scale
+            posX / AEGfxGetWinMaxX(),                           //X coord normalized
+            0.0f,                                               //Y coord
+            1.f, 1.f, 1.f, 1.f);                                //RGBA
     }
-
 
     bool UIButtons::UI_IsHovered(f32 mouseX, f32 mouseY, f32 half) const {
         return (mouseX >= posX - half && mouseX <= posX + half &&
             mouseY >= posY - half && mouseY <= posY + half);
     }
 
-	// Needed to free mesh when changing screens, otherwise memory leak, also called in destructor
+	//Needed to free mesh when changing screens, otherwise memory leak, also called in destructor
     void UIButtons::UI_Free() {
         if (mesh) {
             AEGfxMeshFree(mesh);

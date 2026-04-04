@@ -6,7 +6,7 @@ namespace UI {
 
 	class UIButtons {
 	public: //Enum members______________________________
-		enum class buttonKey { //Needs to be set in spritesheet order
+		enum class buttonKey {	//Needs to be set in spritesheet order
 			blank = 0, 
 			pause = 1, 
 			start = 2, 
@@ -26,13 +26,13 @@ namespace UI {
 		f32 posY{ 0.0f };
 		f32 width{ 50.0f };
 		f32 height{ 50.0f };
-		f32 dropY{ 100.0f };  //For text offset on hover
-		f32 scale{ 1.0f };    //For scale of text displayed on hover
-		f32 half{ 100.0f };    //For bool check
+		f32 dropY{ 100.0f };	//For text offset on hover
+		f32 scale{ 1.0f };		//For scale of text displayed on hover
+		f32 half{ 100.0f };		//For bool check
 
 		int key{ 0 };
 		AEGfxVertexList* mesh{ nullptr };//The quad to draw on, defaulted to nullptr
-		ANIMATION::AnimatedSprite sprite; //The sprite to draw
+		ANIMATION::AnimatedSprite sprite;//The sprite to draw
 
 	public: //Member functions__________________________
 		//Initialize buttons
@@ -40,7 +40,7 @@ namespace UI {
 
 
 		//Set up specific button
-		void UI_Select(buttonKey button_type);		//Takes in enum to choose button type
+		void UI_Select(buttonKey button_type);//Takes in enum to choose button type
 
 
 		//Renders the button
@@ -56,6 +56,7 @@ namespace UI {
 
 		//Destructor to free mesh
 		~UIButtons();
+
 	};//End class UIButtons
 	
 	//Instances
