@@ -462,12 +462,12 @@ void MainMenu_Draw() {
 		bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
 		bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
 
-		if (hoverStart)     drawCenteredText(font_id, "START (ENTER)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, -325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
-		if (hoverShop)      drawCenteredText(font_id, "SHOP (S)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, 0.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
-		if (hoverLvlEdit)   drawCenteredText(font_id, "LEVEL EDIT (E)", (50.0f + labelDropY) / (window_height * 0.5f), labelScale, 325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
-		if (hoverHighscore) drawCenteredText(font_id, "HIGH SCORES (H)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, -325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
-		if (hoverSettings)  drawCenteredText(font_id, "SETTINGS (T)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 0.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
-		if (hoverExit)      drawCenteredText(font_id, "EXIT (ESC)", (-200.0f + labelDropY) / (window_height * 0.5f), labelScale, 325.0f / (window_width * 0.5f), 0.0f, 1.f, 1.f, 1.f, 1.f);
+		if (hoverStart)     UI::startBtn.UI_DrawHoverText(font_id, "START (ENTER)");
+		if (hoverShop)      UI::shopBtn.UI_DrawHoverText(font_id, "SHOP (S)");
+		if (hoverLvlEdit)   UI::lvlEditBtn.UI_DrawHoverText(font_id, "LEVEL EDIT (E)");
+		if (hoverHighscore) UI::highscoreBtn.UI_DrawHoverText(font_id, "HIGH SCORES (H)");
+		if (hoverSettings)  UI::settingsBtn.UI_DrawHoverText(font_id, "SETTINGS (T)");
+		if (hoverExit)      UI::exitBtn.UI_DrawHoverText(font_id, "EXIT (ESC)");
 
 		if (levelSelectOpen) {
 			// Panel

@@ -34,6 +34,16 @@ namespace UI {
         sprite.Anim_Draw(texture);                          // sets the UV
         drawQuad(mesh, posX, posY, width, height, 1.0f, 1.0f, 1.0f, 1.0f);
     }
+    void UIButtons::UI_DrawHoverText(s8 font, const char* text) const {
+        drawCenteredText( font, text,
+            (posY - dropY) / AEGfxGetWinMaxY(), //Y with offset
+            scale,                   //Scale
+            posX / AEGfxGetWinMaxX(), //X coord normalized
+            0.0f,                      //Y coord
+            1.f, 1.f, 1.f, 1.f);    //RGB
+    }
+
+
 
 	// Needed to free mesh when changing screens, otherwise memory leak, also called in destructor
     void UIButtons::UI_Free() {
