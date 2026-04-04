@@ -455,12 +455,12 @@ void MainMenu_Draw() {
 		f32 labelScale = 1.0f;
 		f32 labelDropY = -100.0f; // world units below button center
 
-		bool hoverStart = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-		bool hoverShop = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-		bool hoverLvlEdit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= 50.0f - half && mouseY <= 50.0f + half);
-		bool hoverHighscore = (mouseX >= -325.0f - half && mouseX <= -325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
-		bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
-		bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
+		bool hoverStart = UI::startBtn.UI_IsHovered(mouseX, mouseY);		//Using default values in class
+		bool hoverShop = UI::shopBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverLvlEdit = UI::lvlEditBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverHighscore = UI::highscoreBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverSettings = UI::settingsBtn.UI_IsHovered(mouseX, mouseY);
+		bool hoverExit = UI::exitBtn.UI_IsHovered(mouseX, mouseY);
 
 		if (hoverStart)     UI::startBtn.UI_DrawHoverText(font_id, "START (ENTER)");
 		if (hoverShop)      UI::shopBtn.UI_DrawHoverText(font_id, "SHOP (S)");

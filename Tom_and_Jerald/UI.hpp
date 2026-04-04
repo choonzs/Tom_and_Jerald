@@ -26,8 +26,10 @@ namespace UI {
 		f32 posY{ 0.0f };
 		f32 width{ 50.0f };
 		f32 height{ 50.0f };
-		f32 dropY{ 100.0f };
-		f32 scale{ 1.0f };
+		f32 dropY{ 100.0f };  //For text offset on hover
+		f32 scale{ 1.0f };    //For scale of text displayed on hover
+		f32 half{ 100.0f };    //For bool check
+
 		int key{ 0 };
 		AEGfxVertexList* mesh{ nullptr };//The quad to draw on, defaulted to nullptr
 		ANIMATION::AnimatedSprite sprite; //The sprite to draw
@@ -44,7 +46,10 @@ namespace UI {
 		//Renders the button
 		void UI_Draw(AEGfxTexture* texture) const;
 		//Renders the text on hover
-		void UI_DrawHoverText(s8 font, const char* text) const;
+		void UI_DrawHoverText(s8 font, const char* text, f32 dropY = 100.0f, f32 scale = 1.0f) const;
+
+		//Checks for hover
+		bool UI_IsHovered(f32 mouseX, f32 mouseY, f32 half = 100.0f) const;
 
 		// Explicitly free mesh (required when changing screens, otherwise memory leak)
 		void UI_Free();

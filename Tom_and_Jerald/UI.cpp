@@ -34,7 +34,7 @@ namespace UI {
         sprite.Anim_Draw(texture);                          // sets the UV
         drawQuad(mesh, posX, posY, width, height, 1.0f, 1.0f, 1.0f, 1.0f);
     }
-    void UIButtons::UI_DrawHoverText(s8 font, const char* text) const {
+    void UIButtons::UI_DrawHoverText(s8 font, const char* text, f32 dropY, f32 scale) const {
         drawCenteredText( font, text,
             (posY - dropY) / AEGfxGetWinMaxY(), //Y with offset
             scale,                   //Scale
@@ -44,6 +44,10 @@ namespace UI {
     }
 
 
+    bool UIButtons::UI_IsHovered(f32 mouseX, f32 mouseY, f32 half) const {
+        return (mouseX >= posX - half && mouseX <= posX + half &&
+            mouseY >= posY - half && mouseY <= posY + half);
+    }
 
 	// Needed to free mesh when changing screens, otherwise memory leak, also called in destructor
     void UIButtons::UI_Free() {
