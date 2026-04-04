@@ -41,6 +41,9 @@ namespace {
 	const int k_visible_rows = 5; // visible rows in the level select menu
 	// ========================
 
+	// Select Tutorial
+	BOOL tutorialPromptOpen{ false };
+
 	// Parallax using mouse
 	f32 parallax_x = 0.0f;
 	f32 parallax_y = 0.0f;
@@ -194,7 +197,42 @@ void MainMenu_Update() {
 	// ===========================================
 
 	if (mainMenu_flag == TRUE) {
+		if (tutorialPromptOpen)
+		{
+			if (AEInputCheckTriggered(AEVK_ESCAPE))
+			{
+				tutorialPromptOpen = FALSE;
+				return;
+			}
 
+			if (AEInputCheckTriggered(AEVK_LBUTTON))
+			{
+				s32 mouseX_int{}, mouseY_int{};
+				AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+
+				f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
+				f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
+
+				bool hoverYes = (mouseX >= -180.0f && mouseX <= -40.0f &&
+					mouseY >= -110.0f && mouseY <= -50.0f);
+
+				bool hoverNo = (mouseX >= 40.0f && mouseX <= 180.0f &&
+					mouseY >= -110.0f && mouseY <= -50.0f);
+
+				if (hoverYes)
+				{
+					tutorialPromptOpen = FALSE;
+					next = GAME_STATE_TUTORIAL;
+				}
+				else if (hoverNo)
+				{
+					tutorialPromptOpen = FALSE;
+					next = GAME_STATE_PLAYING;
+				}
+			}
+
+			return;
+		}
 		// Mouse click on buttons
 		if (AEInputCheckTriggered(AEVK_LBUTTON)) {
 			
@@ -212,7 +250,7 @@ void MainMenu_Update() {
 			bool hoverSettings = (mouseX >= 0.0f - half && mouseX <= 0.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
 			bool hoverExit = (mouseX >= 325.0f - half && mouseX <= 325.0f + half && mouseY >= -200.0f - half && mouseY <= -200.0f + half);
 
-			if (hoverStart)     next = GAME_STATE_PLAYING;
+			if (hoverStart)		tutorialPromptOpen = TRUE;
 			if (hoverShop)      next = GAME_STATE_SHOP;
 			if (hoverLvlEdit)   next = GAME_STATE_LEVEL_EDITOR;
 			if (hoverHighscore) next = GAME_STATE_HIGHSCORE;
@@ -294,8 +332,7 @@ void MainMenu_Update() {
 		// Menu Controls
 		if (AEInputCheckTriggered(AEVK_RETURN))
 		{
-			// Moving to playing state
-			next = GAME_STATE_PLAYING;
+			tutorialPromptOpen = TRUE;
 		}
 		else if (AEInputCheckTriggered(AEVK_S))
 		{
@@ -535,6 +572,32 @@ void MainMenu_Draw() {
 			drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.8f, 0.9f);
 		}
 
+		if (tutorialPromptOpen)
+		{
+			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+			AEGfxTextureSet(NULL, 0.0f, 0.0f);
+			AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+			AEGfxSetTransparency(1.0f);
+
+			// dark overlay
+			drawQuad(unit_square, 0.0f, 0.0f, window_width, window_height, 0.0f, 0.0f, 0.0f, 0.55f);
+
+			// popup panel
+			drawQuad(unit_square, 0.0f, -20.0f, 520.0f, 240.0f, 0.08f, 0.09f, 0.12f, 0.95f);
+
+			// buttons
+			drawQuad(unit_square, -110.0f, -80.0f, 140.0f, 60.0f, 0.20f, 0.55f, 0.20f, 1.0f);
+			drawQuad(unit_square, 110.0f, -80.0f, 140.0f, 60.0f, 0.60f, 0.20f, 0.20f, 1.0f);
+
+			AEGfxPrint(font_id, "Do you need a tutorial?", -0.22f, 0.08f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			f32 yesX = -110.0f / (window_width * 0.5f);
+			f32 noX = 110.0f / (window_width * 0.5f);
+			f32 y = -80.0f / (window_height * 0.5f);
+
+			AEGfxPrint(font_id, "YES", yesX - 0.05f, y - 0.02f, 0.7f, 1, 1, 1, 1);
+			AEGfxPrint(font_id, "NO", noX - 0.03f, y - 0.02f, 0.7f, 1, 1, 1, 1);
+		}
 	}
 }
 

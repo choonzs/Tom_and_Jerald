@@ -83,6 +83,10 @@
     <ClCompile Include="GameCredits.cpp">
       <Filter>Header Files\Levels</Filter>
     </ClCompile>
+    <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Tutorial.cpp">
+      <Filter>Source Files\Levels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.hpp">
@@ -163,6 +167,10 @@
     <ClInclude Include="UI.hpp" />
     <ClInclude Include="CreditsScreen.hpp" />
     <ClInclude Include="GameCredits.hpp" />
+    <ClInclude Include="Enemy.hpp" />
+    <ClInclude Include="Tutorial.hpp">
+      <Filter>Header Files\Levels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

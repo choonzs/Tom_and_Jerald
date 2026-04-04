@@ -13,6 +13,7 @@
 #include "HighScores.hpp"
 #include "Settings.hpp"
 #include "CreditsScreen.hpp"
+#include "Tutorial.hpp"
 
 int current{}, previous{}, next{};
 
@@ -97,6 +98,14 @@ void GSM_Update()
 		fpDraw = GameState_MazeDraw;
 		fpFree = GameState_MazeFree;
 		fpUnload = GameState_MazeUnload;
+		break;
+	case GAME_STATE_TUTORIAL:
+		fpLoad = Tutorial_Load;
+		fpInitialize = Tutorial_Initialize;
+		fpUpdate = Tutorial_Update;
+		fpDraw = Tutorial_Draw;
+		fpFree = Tutorial_Free;
+		fpUnload = Tutorial_Unload;
 		break;
 	case GAME_STATE_HIGHSCORE:
 		fpLoad = HighScore_Load;
