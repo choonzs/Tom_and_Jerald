@@ -17,12 +17,11 @@
 
 namespace {
     Player* custom_player;
-    
-    int select_level{}; // needed for finding which level to load
 
-    // issues w this
+    int select_level{};
+
     std::vector<LevelTile> map_tiles{};
-	s8 font_id;
+    s8 font_id = -1;
     const int MAX_ACTIVE_OBSTACLES = 10;
     ObstacleSystem obstacle_system;
     Camera camera;
@@ -32,6 +31,13 @@ namespace {
 
     f32 damage_timer = 0.0f;
     f32 level_end_x = 1000.0f;
+
+    // Hot-reload: track which file is loaded and its last write time
+    std::string  g_level_filename;
+    std::filesystem::file_time_type g_level_last_write;
+    f32          g_reload_check_timer = 0.0f;
+    bool         g_reload_flash       = false;
+    f32          g_reload_flash_timer = 0.0f;
 
     struct FuelPickup {
         AEVec2 pos;
@@ -61,8 +67,10 @@ void CustomLevel_Initialize() {
     ANIMATION::background.Clip_Select(0, 0, 3, 5.0f);
     ANIMATION::player.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
     ANIMATION::player.Clip_Select(0, 0, 3, 10.0f);
-    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt"); //Total rows + columns
+    ANIMATION::asteroid.ImportFromFile("Assets/AnimationData.txt");
     ANIMATION::asteroid.Clip_Select(2, 0, 3, 10.0f);
+    ANIMATION::spike.ImportFromFile("Assets/AnimationData.txt");
+    ANIMATION::spike.Clip_Select(1, 1, 1, 10.0f);
     //---------------------------------------
     damage_timer = 0.0f;
 
@@ -89,21 +97,22 @@ void CustomLevel_Initialize() {
     g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
 
 
-    std::cout << map_tiles.size() << "before tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
-
     // Get level to load from this file
     std::ifstream inFile("MapLevel/LoadLevel.txt");
     inFile >> select_level;
     inFile.close();
 
-    std::string filename;
-    filename = "MapLevel/ExportedLevel" + std::to_string(select_level) + ".txt";
-	
+    g_level_filename = "MapLevel/ExportedLevel" + std::to_string(select_level) + ".txt";
+
     // Load level data from file, populating map_tiles and obstacle_system
-	LoadLevelDataFromFile(filename, level_end_x, map_tiles, obstacle_system);
+    LoadLevelDataFromFile(g_level_filename, level_end_x, map_tiles, obstacle_system);
 
-
-    std::cout << map_tiles.size() << "after tiles loaded" << obstacle_system.Obstacles().size() << "obstacles loaded" << '\n';
+    // Snapshot last-write time for hot-reload detection
+    g_reload_check_timer = 0.0f;
+    g_reload_flash       = false;
+    g_reload_flash_timer = 0.0f;
+    if (std::filesystem::exists(g_level_filename))
+        g_level_last_write = std::filesystem::last_write_time(g_level_filename);
 
 }
 
@@ -119,7 +128,28 @@ void CustomLevel_Update() {
     //Animation______________________________
     ANIMATION::background.Anim_Update(dt);
     ANIMATION::player.Anim_Update(dt);
+    ANIMATION::asteroid.Anim_Update(dt);
     //---------------------------------------
+
+    // Hot-reload: check every second whether the level file changed on disk
+    g_reload_check_timer += dt;
+    if (g_reload_check_timer >= 1.0f) {
+        g_reload_check_timer = 0.0f;
+        if (std::filesystem::exists(g_level_filename)) {
+            auto new_time = std::filesystem::last_write_time(g_level_filename);
+            if (new_time != g_level_last_write) {
+                g_level_last_write = new_time;
+                map_tiles.clear();
+                obstacle_system.Obstacles().clear();
+                level_end_x = 1000.0f;
+                LoadLevelDataFromFile(g_level_filename, level_end_x, map_tiles, obstacle_system);
+                g_reload_flash       = true;
+                g_reload_flash_timer = 2.0f;
+            }
+        }
+    }
+    if (g_reload_flash_timer > 0.0f) g_reload_flash_timer -= dt;
+    else                               g_reload_flash = false;
 
 	// Camera follows player, but update also update to ensure shake if toggle is set
     camera.Follow((*custom_player).Position());
@@ -268,7 +298,7 @@ void CustomLevel_Draw() {
             break;
         case ObstacleType::Spike:
             //Animation______________________________
-            ANIMATION::asteroid.Anim_Draw(ASSETS::backgroundAssets);
+            ANIMATION::spike.Anim_Draw(ASSETS::backgroundAssets);
             //---------------------------------------
             break;
         }
@@ -319,11 +349,13 @@ void CustomLevel_Draw() {
     sprintf_s(hp_text, "HP: %d", (*custom_player).Health());
     AEGfxPrint(ASSETS::Font(), hp_text, -0.95f, 0.85f, 0.4f, 1.0f, 0.2f, 0.2f, 1.0f);
     /******************************************************************************/
+
+    // Hot-reload flash notification
+    if (g_reload_flash)
+        AEGfxPrint(ASSETS::Font(), "LEVEL RELOADED", -0.35f, 0.0f, 0.8f, 0.2f, 1.0f, 0.3f, 1.0f);
 }
 
 void CustomLevel_Free() {
-	std::cout << "Freeing Custom Level Resources\n";
-
     if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
     
     
@@ -338,7 +370,6 @@ void CustomLevel_Free() {
 	obstacle_system.Obstacles().shrink_to_fit();
 
     if (pFuel) { delete pFuel; pFuel = nullptr; }
-    std::cout << "cust free" << std::endl;
     
     delete custom_player;
     custom_player = nullptr;

@@ -220,6 +220,23 @@ void LevelEditor_Update() {
 
     if (AEInputCheckReleased(AEVK_LBUTTON)) isDragging = false;
 
+    // --- PLAY TEST (P): export to slot 1 and immediately play ---
+    if (AEInputCheckTriggered(AEVK_P)) {
+        std::string previewFile = "MapLevel/ExportedLevel1.txt";
+        std::ofstream outPrev(previewFile);
+        if (outPrev.is_open()) {
+            int currentMaxCols = static_cast<int>(mapTiles[0].size());
+            outPrev << currentMaxCols << " " << VIEW_ROWS << "\n";
+            for (int r = 0; r < VIEW_ROWS; ++r)
+                for (int c = 0; c < currentMaxCols; ++c)
+                    if (mapTiles[r][c].type != 0) outPrev << mapTiles[r][c];
+            outPrev.close();
+        }
+        std::ofstream loadFile("MapLevel/LoadLevel.txt");
+        if (loadFile.is_open()) { loadFile << 1; loadFile.close(); }
+        next = GAME_STATE_CUSTOM_PLAY;
+    }
+
     // --- EXPORTING ---
     if (AEInputCheckTriggered(AEVK_E)) {
 		//TODO Get Max window position and set it as finish line for the level end
@@ -257,7 +274,7 @@ void LevelEditor_Update() {
                 //outFile << "\n";
             }
             outFile.close();
-            std::cout << "Level Exported dynamically with " << currentMaxCols << " columns!\n";
+            // Level exported successfully
         }
     }
 
@@ -305,10 +322,8 @@ void LevelEditor_Draw() {
                 AEGfxMeshDraw(meshGrid, AE_GFX_MDM_TRIANGLES);
             }
             else {
-                AEMtx33Scale(&scale, TILE_SIZE, TILE_SIZE);
-                AEMtx33Concat(&transform, &trans, &scale);
-                AEGfxSetTransform(transform.m);
-
+                // Set render/texture state BEFORE transform to avoid state flush ordering issues.
+                // ColorToMultiply MUST be set immediately before MeshDraw (AlphaEngine consumes it per-draw).
                 if (tile == Asteroid && ASSETS::backgroundAssets) {
                     AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
                     AEGfxTextureSet(ASSETS::backgroundAssets, UV_ASTEROID_X, UV_ASTEROID_Y);
@@ -321,6 +336,11 @@ void LevelEditor_Draw() {
                     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
                     AEGfxTextureSet(NULL, 0, 0);
                 }
+                AEMtx33Scale(&scale, TILE_SIZE, TILE_SIZE);
+                AEMtx33Concat(&transform, &trans, &scale);
+                AEGfxSetTransform(transform.m);
+                AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+                AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
                 AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
             }
         }
@@ -363,11 +383,14 @@ void LevelEditor_Draw() {
         AEGfxTextureSet(NULL, 0, 0);
         AEGfxMeshDraw(meshSlotBg, AE_GFX_MDM_TRIANGLES);
 
-        // Anim_Draw sets TEXTURE mode + resets color state, then we draw the mesh
+        // Anim_Draw sets TEXTURE mode + resets color state.
+        // ColorToMultiply MUST be re-set immediately before MeshDraw (AlphaEngine consumes it per-draw).
         anim.Anim_Draw(ASSETS::backgroundAssets);
         AEMtx33Scale(&scale, iconSize, iconSize);
         AEMtx33Concat(&transform, &trans, &scale);
         AEGfxSetTransform(transform.m);
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
         AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
         };
 
@@ -376,11 +399,6 @@ void LevelEditor_Draw() {
 
     // 4. Draw drag preview attached to mouse cursor
     if (isDragging && mouseX < -halfW + uiWidth) {
-        AEMtx33Scale(&scale, TILE_SIZE, TILE_SIZE);
-        AEMtx33Trans(&trans, mouseX, mouseY);
-        AEMtx33Concat(&transform, &trans, &scale);
-        AEGfxSetTransform(transform.m);
-
         if (currentTool == Asteroid && ASSETS::backgroundAssets) {
             AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
             AEGfxTextureSet(ASSETS::backgroundAssets, UV_ASTEROID_X, UV_ASTEROID_Y);
@@ -393,6 +411,12 @@ void LevelEditor_Draw() {
             AEGfxSetRenderMode(AE_GFX_RM_COLOR);
             AEGfxTextureSet(NULL, 0, 0);
         }
+        AEMtx33Scale(&scale, TILE_SIZE, TILE_SIZE);
+        AEMtx33Trans(&trans, mouseX, mouseY);
+        AEMtx33Concat(&transform, &trans, &scale);
+        AEGfxSetTransform(transform.m);
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
         AEGfxMeshDraw(meshIcon, AE_GFX_MDM_TRIANGLES);
     }
     

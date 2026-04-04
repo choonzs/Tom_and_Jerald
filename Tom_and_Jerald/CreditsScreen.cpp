@@ -55,16 +55,8 @@ void CreditsScreen_Draw() {
     f32 copyright_y = halfH - COPYRIGHT_H * 0.5f - 10.0f;
     if (ASSETS::copyrightText) {
         AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-        drawQuad(unit_square, 0.0f, copyright_y, COPYRIGHT_W, COPYRIGHT_H, 1.f, 1.f, 1.f, 1.f);
         AEGfxTextureSet(ASSETS::copyrightText, 0.0f, 0.0f);
-
-        AEMtx33 scale, trans, transform;
-        AEMtx33Scale(&scale, COPYRIGHT_W, COPYRIGHT_H);
-        AEMtx33Trans(&trans, 0.0f, copyright_y);
-        AEMtx33Concat(&transform, &trans, &scale);
-        AEGfxSetTransform(transform.m);
-        AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
-        AEGfxMeshDraw(unit_square, AE_GFX_MDM_TRIANGLES);
+        drawQuad(unit_square, 0.0f, copyright_y, COPYRIGHT_W, COPYRIGHT_H, 1.f, 1.f, 1.f, 1.f);
     }
 
     // ------------------------------------------------------------------

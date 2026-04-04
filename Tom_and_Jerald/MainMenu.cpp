@@ -523,11 +523,11 @@ void MainMenu_Draw() {
 					mouseY <= row_y + row_height * 0.5f);
 
 				if (isKeySelected) {
-					// Keyboard selected — blue bar
+					// Keyboard selected ï¿½ blue bar
 					drawQuad(unit_square, 0.0f, row_y, 420.0f, 30.0f, 0.2f, 0.3f, 0.6f, 1.0f);
 				}
 				else if (isHovered) {
-					// Mouse hover — lighter bar
+					// Mouse hover ï¿½ lighter bar
 					drawQuad(unit_square, 0.0f, row_y, 420.0f, 30.0f, 0.15f, 0.2f, 0.35f, 1.0f);
 					levelSelectCursor = actual_index; // sync keyboard cursor to hover
 				}
@@ -579,9 +579,9 @@ void MainMenu_Draw() {
 }
 
 void MainMenu_Free() {
-	AEGfxMeshFree(unit_square);
-	AEGfxMeshFree(gameLogo);
-	AEGfxMeshFree(background);
+    if (unit_square) { AEGfxMeshFree(unit_square);  unit_square = nullptr; }
+    if (gameLogo)    { AEGfxMeshFree(gameLogo);      gameLogo    = nullptr; }
+    if (background)  { AEGfxMeshFree(background);    background  = nullptr; }
 
 
 	// Custom Level Selector mem cleanup

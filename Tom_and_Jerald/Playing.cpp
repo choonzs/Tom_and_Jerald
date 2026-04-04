@@ -420,7 +420,7 @@ void Playing_Update() {
 
     if (pFuel) pFuel->Update(delta_time, isFlying);
 
-    // Cat Update — after player movement
+    // Cat Update ï¿½ after player movement
     enemy_cat.Update(delta_time, base_player.Position());
 
     if (enemy_cat.CheckPlayerCollision(base_player.Position(), base_player.Half_Size())
@@ -625,7 +625,6 @@ void Playing_Update() {
     // outside of if condition to update during game
     credits_this_round = gTotalScore + (Credits_GetBalance() - Credits_GetInitBalance());
     if (current != next) {
-        std::cout << "Finish Playing Credits " << credits_this_round << '\n';
         // Save current cheese score
         Credits_SaveFile("Assets/data/Cheese.txt");
     }
@@ -850,6 +849,7 @@ void Playing_Free() {
 }
 
 void Playing_Unload() {
+    if (font_id != -1) { AEGfxDestroyFont(font_id); font_id = -1; }
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
     UI::resumeBtn.UI_Free();

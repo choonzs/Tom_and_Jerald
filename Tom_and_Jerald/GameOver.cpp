@@ -34,7 +34,6 @@ void GameOver_Initialize() {
 	scoreText = "SCORE : " + std::to_string(credits_this_round);
 
 	currentboard = new Leaderboard("Assets/data/HighScores.txt");
-	std::cout << "Start GameOver Credits " << credits_this_round << '\n';
 	if (credits_this_round > currentboard->LowestScore()) {
 		new_score = true; // NEW SCORE
 	}
@@ -125,6 +124,5 @@ void GameOver_Free() {
 }
 
 void GameOver_Unload() {
-	AEGfxDestroyFont(font_id);
-
+    ASSETS::Unload_Font();
 }

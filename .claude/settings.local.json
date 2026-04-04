@@ -6,7 +6,8 @@
       "Bash(grep -r 'delete ' ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
       "Bash(grep -r \"malloc\" ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
       "Bash(grep -r \"malloc\\\\|free\\\\|new\\\\|delete\" ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
-      "Bash(wc -l ./Tom_and_Jerald/*.cpp ./Tom_and_Jerald/*.hpp)"
+      "Bash(wc -l ./Tom_and_Jerald/*.cpp ./Tom_and_Jerald/*.hpp)",
+      "Bash(find C:UsersusersourcereposchoonzsTom_and_JeraldTom_and_Jerald -name Assets -o -name MapLevel -o -name *.txt -o -name *.json)"
     ]
   }
 }

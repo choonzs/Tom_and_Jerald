@@ -140,8 +140,7 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 		for (int r = 0; r < rows; ++r) {
 			for (int c = 0; c < cols; ++c) {
 				LevelTile tile;
-				if (!(inFile >> tile)) {   // check if read failed / EOF 
-					std::cout << "End of File.\n";
+				if (!(inFile >> tile)) {   // check if read failed / EOF
 					break;
 				}
 
@@ -151,7 +150,6 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
 						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
 					};*/
-					std::cout << "Read tile from file: type=" << tile.type << ", pos=(" << tile.pos.x << ", " << tile.pos.y << "), half_size=(" << tile.half_size.x << ", " << tile.half_size.y << "), velocity=(" << tile.velocity.x << ", " << tile.velocity.y << "), scale=" << tile.scale << "\n";
 					map_tiles.push_back(tile);
 					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
 					//std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
@@ -168,7 +166,6 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 						new_obstacle.Velocity() = { 0.0f, 0.0f }; // Spikes don't move
 					}
 
-					std::cout << "Loaded obstacle of type " << new_obstacle.Type() << " at position (" << new_obstacle.Position().x << ", " << new_obstacle.Position().y << ") with velocity (" << new_obstacle.Velocity().x << ", " << new_obstacle.Velocity().y << ") and half-size (" << new_obstacle.HalfSize().x << ", " << new_obstacle.HalfSize().y << ")\n";
 					// Add it to the obstacle system's vector
 					obstacle_system.AddObstacle(new_obstacle);
 				}
