@@ -15,6 +15,7 @@ namespace ANIMATION {
     // TODO define animatedsprite
     AnimatedSprite spike;
     AnimatedSprite wall;
+    AnimatedSprite cat;
         
     //Member functions__________________________
     //Initialize spritesheet

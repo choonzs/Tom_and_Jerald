@@ -415,6 +415,9 @@ void MainMenu_Unload() {
 	UI::startBtn.UI_Free();
 	UI::shopBtn.UI_Free();
 	UI::exitBtn.UI_Free();
+	UI::lvlEditBtn.UI_Free();
+	UI::highscoreBtn.UI_Free();
+	UI::settingsBtn.UI_Free();
 
 	//AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();

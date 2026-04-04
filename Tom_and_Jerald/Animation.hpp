@@ -52,6 +52,7 @@ namespace ANIMATION {
     // TODO declare animatedsprite
     extern AnimatedSprite spike;
 	extern AnimatedSprite wall;
+	extern AnimatedSprite cat;
 
 
 }//Namespace ANIMATION

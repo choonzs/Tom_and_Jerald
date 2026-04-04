@@ -14,6 +14,7 @@
 #include "ImgFontInit.hpp"
 #include "Audio.hpp"
 #include "DifferentGamemode.hpp"
+#include "Enemy.hpp"
 
 namespace {
 
@@ -67,6 +68,7 @@ namespace {
             decltype(g_fuel_pickup) fuel_pickup{};
 
             std::vector<Obstacle> obstacles;
+            Cat saved_cat{};
         };
 
         PortalData gMazePortal;
@@ -77,6 +79,10 @@ namespace {
         const f32 kPortalRespawnDelay = 5.0f;
         bool gPortalWaitingToRespawn = false;
     }
+
+
+    // Enemy Cat
+    Cat enemy_cat;
 
     s8 font_id = -1;
     BOOL quitting_flag = FALSE;
@@ -127,6 +133,8 @@ static void SavePlayingStateForMaze()
     gSavedPlayingState.fuel_pickup = g_fuel_pickup;
 
     gSavedPlayingState.obstacles = obstacles;
+
+    gSavedPlayingState.saved_cat = enemy_cat;
 }
 
 static void RestorePlayingStateFromMaze()
@@ -151,6 +159,8 @@ static void RestorePlayingStateFromMaze()
     camera.Position().x = base_player.Position().x;
     camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
+
+    enemy_cat = gSavedPlayingState.saved_cat;
 }
 
 static void ApplyMazeOutcome()
@@ -236,6 +246,9 @@ void Playing_Initialize() {
     
     ANIMATION::wall.ImportFromFile("Assets/AnimationData.txt");       //Total rows + columns
     ANIMATION::wall.Clip_Select(1, 0, 1, 10.0f);                      //Row, start col, frames, fps (Wall)
+
+	ANIMATION::cat.ImportFromFile("Assets/AnimationData.txt");        //Total rows + columns
+	ANIMATION::cat.Clip_Select(3, 0, 4, 5.0f);                       //Row, start col, frames, fps (Cat)
     
     // TODO Anim initialize
     //---------------------------------------
@@ -246,6 +259,11 @@ void Playing_Initialize() {
     camera.Position().y = base_player.Position().y;
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
+    // Enemy
+    enemy_cat.Init(base_player.Position());
+
+
+	// Obstacles
     for (Obstacle& obstacle : obstacles) {
         obstacle.position.x = randFloat(0.0f, AEGfxGetWinMaxX() * 2.0f);
         obstacle.position.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
@@ -266,6 +284,12 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
+	// Check if window is closed
+    if (0 == AESysDoesWindowExist()) {
+        next = GAME_STATE_QUIT;
+        return;
+	}
+
     if (AEInputCheckTriggered(AEVK_P)) { isPaused = !isPaused; } // toggle pause
 
     if (isPaused) {
@@ -329,10 +353,26 @@ void Playing_Update() {
 
     if (pFuel) pFuel->Update(delta_time, isFlying);
 
+    // Cat Update — after player movement
+    enemy_cat.Update(delta_time, base_player.Position());
+
+    if (enemy_cat.CheckPlayerCollision(base_player.Position(), base_player.Half_Size())
+        && damage_timer <= 0.0f)
+    {
+        base_player.Health() -= base_player.Health(); // instant kill like Wall
+        damage_timer = k_damage_cooldown;
+        camera.Set_Shaking();
+        graphics::particleInit(base_player.Position().x,
+            base_player.Position().y, 50);
+    }
+
+
+
     //Animation______________________________
     //ANIMATION::background.Anim_Update(delta_time);
     ANIMATION::asteroid.Anim_Update(delta_time);
     ANIMATION::player.Anim_Update(delta_time);
+	ANIMATION::cat.Anim_Update(delta_time);
     // TODO Anim Update
     //---------------------------------------
 
@@ -532,6 +572,9 @@ void Playing_Draw() {
         AEGfxTextureSet(ASSETS::backgroundAssets, uv_x, 0.0f);
         drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
     }
+    // Draw Enemy Cat
+    ANIMATION::cat.Anim_Draw(ASSETS::playerAssets);   //Draws CAT
+    enemy_cat.Draw(unit_square);
 
     if (damage_timer <= 0.0f || (int)(damage_timer * 10) % 2 == 0) {
 
@@ -541,6 +584,9 @@ void Playing_Draw() {
 
         drawQuad(base_player.Mesh(), base_player.Position().x, base_player.Position().y, base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f, 1.f, 1.f, 1.f, 1.f);
     }
+
+	
+
     f32 obj_rotation{};
     for (Obstacle const& obstacle : obstacles) {
         switch (obstacle.type) {
@@ -664,6 +710,12 @@ void Playing_Free() {
     // which is too late; free here so restarts don't accumulate leaked meshes)
     if (base_player.Mesh()) { AEGfxMeshFree(base_player.Mesh()); base_player.Mesh() = nullptr; }
     if (pFuel) { delete pFuel; pFuel = nullptr; }
+
+
+    obstacles.clear();
+    obstacles.shrink_to_fit(); // actually releases the heap allocation
+    gSavedPlayingState.obstacles.clear();
+    gSavedPlayingState.obstacles.shrink_to_fit();
 }
 
 void Playing_Unload() {
