@@ -189,6 +189,18 @@ static void ApplyMazeOutcome()
         next = GAME_STATE_GAME_OVER;
 }
 
+static void SpawnPortalAhead()
+{
+    gMazePortal.active = true;
+    gPortalWaitingToRespawn = false;
+    gPortalRespawnTimer = 0.0f;
+
+    f32 screenWidth = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+
+    gMazePortal.pos.x = camera.Position().x + screenWidth + 300.0f;
+    gMazePortal.pos.y = randFloat(AEGfxGetWinMinY() + 80.0f, AEGfxGetWinMaxY() - 80.0f);
+}
+
 void Playing_Initialize() {
 	quitting_flag = FALSE;
     
@@ -275,12 +287,8 @@ void Playing_Initialize() {
     }
 
     // Portal
-    gMazePortal.active = true;
     gMazePortal.half_size = { 30.0f, 60.0f };
-    gMazePortal.pos.x = base_player.Position().x + 900.0f;
-    gMazePortal.pos.y = 0.0f;
-    gPortalWaitingToRespawn = false;
-    gPortalRespawnTimer = 0.0f;
+    SpawnPortalAhead();
 }
 
 void Playing_Update() {
@@ -333,21 +341,6 @@ void Playing_Update() {
     }
 
     f32 delta_time = (f32)AEFrameRateControllerGetFrameTime();
-    //Portal Respawn Time
-    if (gPortalWaitingToRespawn)
-    {
-        gPortalRespawnTimer -= delta_time;
-
-        if (gPortalRespawnTimer <= 0.0f)
-        {
-            gMazePortal.active = true;
-            gPortalWaitingToRespawn = false;
-
-            gMazePortal.pos.x = base_player.Position().x + 900.0f;
-            gMazePortal.pos.y = randFloat(AEGfxGetWinMinY() + 80.0f, AEGfxGetWinMaxY() - 80.0f);
-        }
-    }
-
     bool isFlying = (AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_SPACE) 
         || AEInputCheckCurr(AEVK_UP) ) && pFuel->HasFuel();
 
@@ -401,6 +394,21 @@ void Playing_Update() {
     camera.Update();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
+    //Portal Respawn Time
+    if (gPortalWaitingToRespawn)
+    {
+        gPortalRespawnTimer -= delta_time;
+
+        if (gPortalRespawnTimer <= 0.0f)
+        {
+            if (gPortalRespawnTimer <= 0.0f)
+            {
+                SpawnPortalAhead();
+            }
+        }
+    }
+
+
     f32 camX = camera.Position().x;
     // change this to based on player world pos
 	f32 offscreen_limit_left{ AEGfxGetWinMinX() - 100.0f };
@@ -418,10 +426,14 @@ void Playing_Update() {
 
     if (gMazePortal.active)
     {
-        if (gMazePortal.pos.x < camera.Position().x - AEGfxGetWinMaxX())
+        if (gMazePortal.pos.x < camera.Position().x - 1000.0f)
         {
-            gMazePortal.pos.x = camera.Position().x + 900.0f;
-            gMazePortal.pos.y = randFloat(AEGfxGetWinMinY() + 80.0f, AEGfxGetWinMaxY() - 80.0f);
+            if (gMazePortal.pos.x < camera.Position().x - 1000.0f)
+            {
+                gMazePortal.active = false;
+                gPortalWaitingToRespawn = true;
+                gPortalRespawnTimer = 1.5f;
+            }
         }
 
         if (checkOverlap(&(base_player.Position()), &(base_player.Half_Size()), &gMazePortal.pos, &gMazePortal.half_size))
@@ -545,6 +557,7 @@ void Playing_Update() {
     }
     else if (stage_timer >= k_stage_duration) next = GAME_STATE_VICTORY;
     else if (0 == AESysDoesWindowExist()) next = GAME_STATE_QUIT;
+
 }
 
 void Playing_Draw() {

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "DifferentGamemode.hpp"
-
+#include "Animation.hpp"
+#include "ImgFontInit.hpp"
 #include "GameStateManager.hpp" 
 #include "GameStateList.hpp"    
 #include "Audio.hpp"           
@@ -54,6 +55,7 @@ static constexpr float kGoalRadius = 18.0f;
 static AEGfxVertexList* gMeshQuad = nullptr;
 static AEGfxVertexList* gMeshCircle = nullptr;
 static AEGfxVertexList* unit_square = nullptr;
+static AEGfxVertexList* maze_player_mesh = nullptr;
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -296,7 +298,12 @@ static bool PlayerReachedGoal()
 void GameState_MazeLoad()
 {
     srand((unsigned int)time(nullptr));
+    ASSETS::Init_Images();
+    ASSETS::Init_Font();
     createUnitSquare(&unit_square);
+    ANIMATION::player.ImportFromFile("Assets/AnimationData.txt");
+    ANIMATION::player.Clip_Select(0, 0, 2, 10.0f);
+    createUnitSquare(&maze_player_mesh, 0.25f, 0.25f);
     AEGfxMeshStart();
     AEGfxTriAdd(-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 1.0f,
         0.5f, -0.5f, 0xFFFFFFFF, 1.0f, 1.0f,
@@ -349,6 +356,7 @@ void GameState_MazeInit()
 void GameState_MazeUpdate()
 {
     const float dt = (float)AEFrameRateControllerGetFrameTime();
+    ANIMATION::player.Anim_Update(dt);
 
     if (AEInputCheckTriggered(AEVK_ESCAPE))
     {
@@ -422,10 +430,14 @@ void GameState_MazeDraw()
         }
     }
 
-    drawQuad(unit_square,
-        gPlayerPos.x, gPlayerPos.y,
-        kPlayerRadius * 2.0f, kPlayerRadius * 2.0f,
-        1.0f, 0.2f, 0.2f, 1.0f);
+    ANIMATION::player.Anim_Draw(ASSETS::playerAssets);
+
+    drawQuad(maze_player_mesh,
+        gPlayerPos.x,
+        gPlayerPos.y,
+        kPlayerRadius * 2.5f,
+        kPlayerRadius * 2.5f,
+        1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void GameState_MazeFree()
@@ -442,6 +454,20 @@ void GameState_MazeUnload()
         AEGfxMeshFree(unit_square);
         unit_square = nullptr;
     }
+
+    ANIMATION::player.Anim_Draw(ASSETS::playerAssets);
+
+    drawQuad(maze_player_mesh,
+        gPlayerPos.x,
+        gPlayerPos.y,
+        kPlayerRadius * 2.5f,
+        kPlayerRadius * 2.5f,
+        1.0f, 1.0f, 1.0f, 1.0f);
+
+    ASSETS::Unload_Images();
+    ASSETS::Unload_Font();
+
     gLoadedMaze.clear();
     gUseLoadedMaze = false;
+
 }
