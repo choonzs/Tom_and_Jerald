@@ -343,12 +343,18 @@ void Playing_Update() {
             float camX = camera.Position().x;
             float camY = camera.Position().y;
 
-            AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
-
             f32 half = 75.0f;
 
-            f32 mouseX = static_cast<f32>(mouseX_int) - AEGfxGetWinMaxX();
-            f32 mouseY = -(static_cast<f32>(mouseY_int) - AEGfxGetWinMaxY());
+                        
+            f32 window_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+            f32 window_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
+
+            s32 mouseX_int{}, mouseY_int{};
+            AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
+
+            // Convert screen pixel coords to world space (accounting for camera)
+            f32 mouseX = (static_cast<f32>(mouseX_int) - (window_width * 0.5f)) + camX;
+            f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f)) + camY;
 
             bool hoverResume =
                 (mouseX >= UI::resumeBtn.posX && mouseX <= UI::resumeBtn.posX && mouseY >= UI::resumeBtn.posY && mouseY <= UI::resumeBtn.posY);
@@ -772,8 +778,11 @@ void Playing_Draw() {
     // Mouse world position
     s32 mouseX_int{}, mouseY_int{};
     AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
-    f32 mouseX = static_cast<f32>(mouseX_int) - AEGfxGetWinMaxX() + camX;
-    f32 mouseY = -(static_cast<f32>(mouseY_int) - AEGfxGetWinMaxY()) + camY;
+    f32 window_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+    f32 window_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
+
+    f32 mouseX = (static_cast<f32>(mouseX_int) - (window_width * 0.5f)) + camX;
+    f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f)) + camY;
 
     // draw overlay
     drawQuad(bgMesh, camX, camY, 400.f, 270.f, 0.06f, 0.07f, 0.09f, 0.8f);
@@ -811,9 +820,11 @@ void Playing_Draw() {
         AEGfxSetColorToAdd(hoverBack ? 0.3f : 0.f, hoverBack ? 0.3f : 0.f, 0.f, 0.f); UI::menuBtn.UI_Draw(ASSETS::UIAssets);
         AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f); // reset
 
-        if (hoverResume)  drawCenteredText(font_id, "RESUME [R]",
-            (UI::resumeBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::resumeBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+        if (hoverResume)  
+            drawCenteredText(font_id, "RESUME [R]",
+            (UI::resumeBtn.posY - camY + labelDropY) / AEGfxGetWinMaxY(), 0.7f,
+            (UI::resumeBtn.posX - camX) / AEGfxGetWinMaxX(),
+            0.0f, 1.f, 1.f, 1.f, 1.f);
         if (hoverRestart) drawCenteredText(font_id, "RESTART [1]",
             (UI::restartBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
             (UI::restartBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
