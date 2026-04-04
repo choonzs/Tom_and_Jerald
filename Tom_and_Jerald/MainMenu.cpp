@@ -542,6 +542,15 @@ void MainMenu_Free() {
 	AEGfxMeshFree(unit_square);
 	AEGfxMeshFree(gameLogo);
 	AEGfxMeshFree(background);
+
+
+	// Custom Level Selector mem cleanup
+	level_files.clear();
+	level_files.shrink_to_fit();
+	levelSelectOpen = false;
+	levelSelectCursor = 0;
+	levelScrollOffset = 0;
+	// ========================
 }
 void MainMenu_Unload() {
 	UI::startBtn.UI_Free();
