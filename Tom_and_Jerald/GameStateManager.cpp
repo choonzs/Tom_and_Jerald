@@ -1,28 +1,67 @@
-#include "pch.hpp"
+/*************************************************************************
+@file GameStateManager.cpp
+@Author Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors NIL
+@brief
+     Implements the Game State Manager (GSM). GSM_Update() maps the current
+     game state to its six lifecycle function pointers so the application loop
+     can call them without knowing which state is active.
 
+     RESTART and QUIT are sentinel values handled by Main.cpp; they require
+     no function pointer assignments here.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
+#include "pch.hpp"
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
 #include "MainMenu.hpp"
-#include "GameOver.hpp"
+#include "Shop.hpp"
 #include "Playing.hpp"
 #include "Victory.hpp"
-#include "Shop.hpp"
+#include "GameOver.hpp"
 #include "LevelEditor.hpp"
 #include "CustomLevel.hpp"
 #include "DifferentGamemode.hpp"
-#include "HighScores.hpp"
 #include "Settings.hpp"
+#include "HighScores.hpp"
 #include "CreditsScreen.hpp"
 #include "Tutorial.hpp"
 
-int current{}, previous{}, next{};
+// ---------------------------------------------------------------------------
+// Global state — definitions (declared extern in GameStateManager.hpp)
+// ---------------------------------------------------------------------------
 
-FP fpLoad = nullptr, fpInitialize = nullptr, fpUpdate = nullptr, fpDraw = nullptr, fpFree = nullptr, fpUnload = nullptr;
+int current{};
+int previous{};
+int next{};
+
+FP fpLoad = nullptr;
+FP fpInitialize = nullptr;
+FP fpUpdate = nullptr;
+FP fpDraw = nullptr;
+FP fpFree = nullptr;
+FP fpUnload = nullptr;
+
+// ---------------------------------------------------------------------------
+// GSM_Initialize
+// ---------------------------------------------------------------------------
+// Sets current, previous, and next to startingState so the first call to
+// GSM_Update() populates the correct function pointers before any callbacks
+// are invoked.
+// ---------------------------------------------------------------------------
 void GSM_Initialize(int startingState)
 {
-	current = previous = next = startingState;
+    current = previous = next = startingState;
 }
 
+// ---------------------------------------------------------------------------
+// GSM_Update
+// ---------------------------------------------------------------------------
+// Maps the current game state to its lifecycle function pointers.
+// Called by the application loop each frame before invoking fpUpdate/fpDraw,
+// and again after a state transition to load the incoming state's pointers.
+// ---------------------------------------------------------------------------
 void GSM_Update()
 {
 	switch (current)
@@ -116,12 +155,12 @@ void GSM_Update()
 		fpUnload = HighScore_Unload;
 		break;
 	case GAME_STATE_CREDITS:
-		fpLoad       = CreditsScreen_Load;
+		fpLoad = CreditsScreen_Load;
 		fpInitialize = CreditsScreen_Initialize;
-		fpUpdate     = CreditsScreen_Update;
-		fpDraw       = CreditsScreen_Draw;
-		fpFree       = CreditsScreen_Free;
-		fpUnload     = CreditsScreen_Unload;
+		fpUpdate = CreditsScreen_Update;
+		fpDraw = CreditsScreen_Draw;
+		fpFree = CreditsScreen_Free;
+		fpUnload = CreditsScreen_Unload;
 		break;
 	case GAME_STATE_RESTART:
 		// RESTART is handled in Main.cpp by resetting current/next

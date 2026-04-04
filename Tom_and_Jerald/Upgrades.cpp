@@ -1,15 +1,23 @@
-// Upgrades.cpp
-// Implements the upgrade system that allows players to improve their
-// character's stats using cheese earned during gameplay.
-// 
-// Each upgrade has a cap (max_level) to prevent overpowering.
-// ===========================================================================
+/*************************************************************************
+@file Upgrades.cpp
+@Author Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@brief
+    Implements the upgrade system. Players spend cheese to improve five stats,
+    each capped at a maximum level defined in Upgrades.hpp.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 
 #include "pch.hpp"
 #include "Upgrades.hpp"
 
-namespace {
-    // Current upgrade levels (0 = not upgraded)
+// ---------------------------------------------------------------------------
+// File-scope state
+// ---------------------------------------------------------------------------
+
+namespace
+{
     int size_level = 0;
     int health_level = 0;
     int fuel_cap_level = 0;
@@ -17,11 +25,10 @@ namespace {
     int fuel_restore_level = 0;
 }
 
-// Upgrades_Reset
 // ---------------------------------------------------------------------------
-// Resets all upgrade levels to 0. Used when starting a new save or
-// for testing purposes.
+// Lifecycle
 // ---------------------------------------------------------------------------
+
 void Upgrades_Reset()
 {
     size_level = 0;
@@ -31,36 +38,59 @@ void Upgrades_Reset()
     fuel_restore_level = 0;
 }
 
-// --- Level Getters (for Shop display) ---
+// ---------------------------------------------------------------------------
+// Level getters
+// ---------------------------------------------------------------------------
+
 int Upgrades_GetSizeLevel() { return size_level; }
 int Upgrades_GetHealthLevel() { return health_level; }
 int Upgrades_GetFuelCapLevel() { return fuel_cap_level; }
 int Upgrades_GetFuelSpawnLevel() { return fuel_spawn_level; }
 int Upgrades_GetFuelRestoreLevel() { return fuel_restore_level; }
 
-// --- Computed Stat Getters (for gameplay application) ---
-// These calculate the actual gameplay effect based on current level.
+// ---------------------------------------------------------------------------
+// Computed stat getters
+// ---------------------------------------------------------------------------
 
-// Returns total pixels to subtract from player half_size (0.1 per level)
-f32 Upgrades_GetSizeReduction() { return size_level * k_size_upgrade_step; }
-// Returns fractional health increase (0.05 per level, e.g., 0.25 at level 5)
-f32 Upgrades_GetHealthIncrease() { return health_level * k_health_upgrade_step; }
-// Returns fuel capacity multiplier (1.0 base + 0.10 per level)
-f32 Upgrades_GetMaxFuelMultiplier() { return 1.0f + (fuel_cap_level * k_fuel_cap_upgrade_step); }
-// Returns fuel spawn bonus percentage (0.05 per level)
-f32 Upgrades_GetFuelSpawnBonus() { return fuel_spawn_level * k_fuel_spawn_upgrade_step; }
-// Returns fuel restore percentage (base 30% + 5% per level)
-f32 Upgrades_GetFuelRestorePercentage() { return 0.30f + (fuel_restore_level * k_fuel_restore_upgrade_step); }
+f32 Upgrades_GetSizeReduction()
+{
+    return size_level * k_size_upgrade_step;
+}
 
-// --- Can Upgrade Checks (for Shop button enabling) ---
+f32 Upgrades_GetHealthIncrease()
+{
+    return health_level * k_health_upgrade_step;
+}
+
+f32 Upgrades_GetMaxFuelMultiplier()
+{
+    return 1.0f + (fuel_cap_level * k_fuel_cap_upgrade_step);
+}
+
+f32 Upgrades_GetFuelSpawnBonus()
+{
+    return fuel_spawn_level * k_fuel_spawn_upgrade_step;
+}
+
+f32 Upgrades_GetFuelRestorePercentage()
+{
+    return 0.30f + (fuel_restore_level * k_fuel_restore_upgrade_step);
+}
+
+// ---------------------------------------------------------------------------
+// Upgrade availability
+// ---------------------------------------------------------------------------
+
 bool Upgrades_CanUpgradeSize() { return size_level < k_size_upgrade_max_level; }
 bool Upgrades_CanUpgradeHealth() { return health_level < k_health_upgrade_max_level; }
 bool Upgrades_CanUpgradeFuelCap() { return fuel_cap_level < k_fuel_upgrade_max_level; }
 bool Upgrades_CanUpgradeFuelSpawn() { return fuel_spawn_level < k_fuel_upgrade_max_level; }
 bool Upgrades_CanUpgradeFuelRestore() { return fuel_restore_level < k_fuel_upgrade_max_level; }
 
-// --- Upgrade Functions (called by Shop on purchase) ---
-// Each increments the level by 1 if not at max. Returns true on success.
+// ---------------------------------------------------------------------------
+// Upgrade actions
+// ---------------------------------------------------------------------------
+
 bool Upgrades_UpgradeSize()
 {
     if (!Upgrades_CanUpgradeSize()) return false;
@@ -96,27 +126,43 @@ bool Upgrades_UpgradeFuelRestore()
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
 
-bool Upgrades_ReadFromFile(std::string filename)
+bool Upgrades_ReadFromFile(const std::string& filename)
 {
     std::ifstream inFile(filename);
-    if (!inFile) {
-        std::cerr << "Error: Unable to open : " << filename << std::endl;
-        return false;
-	}
-    inFile >> size_level >> health_level >> fuel_cap_level >> fuel_spawn_level >> fuel_restore_level;
-    inFile.close();
-	return true;
-}
-
-bool Upgrades_WriteToFile(std::string filename)
-{
-	std::ofstream outFile(filename);
-    if (!outFile) {
-        std::cerr << "Error: Unable to open : " << filename << std::endl;
+    if (!inFile)
+    {
+        std::cerr << "Upgrades: failed to open \"" << filename << "\" for reading.\n";
         return false;
     }
-    outFile << size_level << " " << health_level << " " << fuel_cap_level << " " << fuel_spawn_level << " " << fuel_restore_level;
-	outFile.close();
+
+    inFile >> size_level >> health_level
+        >> fuel_cap_level >> fuel_spawn_level >> fuel_restore_level;
+
+    // If the read fails the file is empty or corrupt; reset to a safe state.
+    if (!inFile)
+        Upgrades_Reset();
+
+    return true;
+}
+
+bool Upgrades_WriteToFile(const std::string& filename)
+{
+    std::ofstream outFile(filename);
+    if (!outFile)
+    {
+        std::cerr << "Upgrades: failed to open \"" << filename << "\" for writing.\n";
+        return false;
+    }
+
+    outFile << size_level << " "
+        << health_level << " "
+        << fuel_cap_level << " "
+        << fuel_spawn_level << " "
+        << fuel_restore_level;
+
     return true;
 }

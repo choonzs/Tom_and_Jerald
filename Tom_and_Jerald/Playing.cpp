@@ -315,8 +315,6 @@ void Playing_Initialize() {
 }
 
 void Playing_Update() {
-    s32 mouseX_int{};
-    s32 mouseY_int{};
 	// Check if window is closed
     if (0 == AESysDoesWindowExist()) {
         next = GAME_STATE_QUIT;
@@ -343,7 +341,7 @@ void Playing_Update() {
             float camX = camera.Position().x;
             float camY = camera.Position().y;
 
-            f32 half = 75.0f;
+            //f32 half = 75.0f;
 
                         
             f32 window_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
@@ -773,7 +771,7 @@ void Playing_Draw() {
 
     f32 half = 75.0f;
     f32 labelDropY = -90.0f;
-    f32 labelScale = 1.0f;
+    //f32 labelScale = 1.0f;
 
     // Mouse world position
     s32 mouseX_int{}, mouseY_int{};

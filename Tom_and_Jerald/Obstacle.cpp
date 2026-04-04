@@ -1,3 +1,14 @@
+/*************************************************************************
+@file Obstacle.cpp
+@Author Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors Tan Choon Ming choonming.tan@digipen.edu
+@brief
+    Define the Obstacle struct, ObstacleSystem manager, and supporting
+    enums for obstacle type, scale, and speed.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
+
 // Obstacle.cpp
 // ---------------------------------------------------------------------------
 // Implements obstacle behavior: spawning, movement, bouncing, and
@@ -9,232 +20,198 @@
 #include "utils.hpp"
 #include "Obstacle.hpp"
 
-const int k_obstacle_count = 100;
-
+// ---------------------------------------------------------------------------
 // Obstacle::Reset
 // ---------------------------------------------------------------------------
 // Randomizes this obstacle for reuse in endless mode. Called when an
-// obstacle goes offscreen to recycle it back into play.
+// obstacle is constructed or scrolls offscreen.
 //
-// Spawning logic:
-//   - Position X: spawns just offscreen to the right (max_x + half_size.x)
-//     so it scrolls naturally into view.
-//   - Position Y: random within screen bounds, offset by size to prevent
-//     clipping through top/bottom edges.
-//   - Size: random between 25-70 pixels (both width and height are equal,
-//     creating square obstacles).
-//   - Velocity X: random between -220 and 0 (always moves left toward player).
+// Asteroid spawn rules:
+//   - Position X: just offscreen to the right (max_x + half_size.x).
+//   - Position Y: random within screen bounds, inset by size to prevent
+//     clipping through edges.
+//   - Size: random square between 25–70 pixels.
+//   - Velocity X: random between -220 and 0 (always moves left).
 //   - Velocity Y: random between -220 and +220 (creates diagonal movement).
+//
+// Spike / Wall spawn rules:
+//   - Same random size as Asteroid.
+//   - Spawns flush against either the ceiling or floor (random).
+//   - Ceiling obstacles are rotated PI to point downward; floor ones are 0.
+//   - Velocity is always zero (static hazards).
 // ---------------------------------------------------------------------------
 void Obstacle::Reset()
 {
-    // temp
-    f32 max_x = AEGfxGetWinMaxX() + 200.0f;
-    f32 min_y = AEGfxGetWinMinY();
-    f32 max_y = AEGfxGetWinMaxY();
-    f32 size_value = randomRange(25.0f, 70.0f);
+    const f32 max_x = AEGfxGetWinMaxX() + 200.0f;
+    const f32 min_y = AEGfxGetWinMinY();
+    const f32 max_y = AEGfxGetWinMaxY();
+    const f32 size_value = randomRange(25.0f, 70.0f);
 
     type = randomRange(ObstacleType::Asteroid, ObstacleType::Wall);
-    std::cout << "Obstacle Type: " << type << std::endl;
-    
-    switch (type) {
+
+    switch (type)
+    {
     case Asteroid:
-		rotation = 0.0f; // No rotation for asteroid
         AEVec2Set(&half_size, size_value, size_value);
         AEVec2Set(
             &position,
-            // move it a little offscreen
             max_x + half_size.x,
             randomRange(min_y + size_value + 50.0f, max_y - size_value));
         AEVec2Set(
             &velocity,
             randomRange(-220.0f, 0.0f),
             randomRange(-220.0f, 220.0f));
+        rotation = 0.0f;
         break;
-    case Wall: // fall through, similar behaviour
-    case Spike: 
+
+    case Wall:  // Falls through: Wall and Spike share identical spawn logic.
+    case Spike:
         AEVec2Set(&half_size, size_value, size_value);
+        AEVec2Set(&velocity, 0.0f, 0.0f);
 
-        // Randomly place on ceiling or floor
-        int on_ceiling = rand() % 2;
-
-        if (on_ceiling) {
-            // Draw on ceiling
-            AEVec2Set(
-                &position,
-                max_x + half_size.x,
-                max_y - half_size.y);
+        if (rand() % 2)
+        {
+            // Ceiling: position flush to top edge, rotated to point down.
+            AEVec2Set(&position, max_x + half_size.x, max_y - half_size.y);
             rotation = PI;
         }
-        else {
-            // Draw on floor
-            AEVec2Set(
-                &position,
-                max_x + half_size.x,
-                min_y + half_size.y + 50.0f); 
+        else
+        {
+            // Floor: position flush to bottom edge, no rotation.
+            AEVec2Set(&position, max_x + half_size.x, min_y + half_size.y + 50.0f);
             rotation = 0.0f;
         }
-
-        AEVec2Set(&velocity, 0.0f, 0.0f); // static obstacle 
+        break;
     }
-
 }
 
+// ---------------------------------------------------------------------------
 // Obstacle::Update
 // ---------------------------------------------------------------------------
 // Per-frame update for a single obstacle. Handles:
-//   1. Position integration (position += velocity * dt)
-//   2. Vertical bouncing off screen top/bottom edges
-//   3. Offscreen detection and recycling/destruction
+//   1. Position integration: position += velocity * dt.
+//   2. Vertical bounce off screen top/bottom (20 px inset buffer).
+//   3. Offscreen detection:
+//      - Endless mode:      Reset() so the obstacle re-enters from the right.
+//      - Custom level mode: Mark as Non_Obstacle so the caller can erase it.
 //
-// Parameters:
-//   dt              - Delta time (seconds) for frame-independent movement.
-//   camX            - Current camera X position. Used as reference point
-//                     for calculating offscreen distance.
-//   offscreen_limit - Distance from camera center beyond which the
-//                     obstacle is considered offscreen.
-//   endless         - Gameplay mode flag:
-//                     true  = Endless mode: Reset() the obstacle to spawn
-//                             a new one from the right (infinite gameplay).
-//                     false = Custom level: mark as Non_Obstacle so the
-//                             caller can erase it from the vector.
-//
-// Bouncing:
-//   When the obstacle's Y position exceeds the screen top minus a 20px
-//   buffer, or falls below the screen bottom plus a 20px buffer, the
-//   Y velocity is negated (flipped) to create a bounce effect. Uses
-//   -abs() to ensure correct direction after flip.
+// Bounce direction:
+//   When the obstacle crosses the top or bottom threshold, velocity.y is
+//   forced to -abs(velocity.y), which always pushes it back toward center.
+//   This avoids sign errors that can trap an obstacle against an edge.
 // ---------------------------------------------------------------------------
-void Obstacle::Update(f32 dt, f32 camX, f32 offscreen_limit, bool endless = true)
+void Obstacle::Update(f32 dt, f32 camX, f32 offscreen_limit, bool endless)
 {
-    // checks if the obstacle exists
-    if (!this) { return; }
-    //Update Position based on velocity
+    // Integrate position.
     position.x += velocity.x * dt;
     position.y += velocity.y * dt;
 
-    // Bounce off top and bottom of the screen
-    velocity.y = ((position.y > AEGfxGetWinMaxY() - 20.0f) or (position.y < AEGfxGetWinMinY() + 20.0f + 50.0f))
-        ? -std::abs(velocity.y) : velocity.y;
+    // Bounce off top and bottom screen edges (with a 20 px inset buffer).
+    const bool past_top = position.y > AEGfxGetWinMaxY() - 20.0f;
+    const bool past_bottom = position.y < AEGfxGetWinMinY() + 20.0f + 50.0f;
+    if (past_top || past_bottom)
+        velocity.y = -std::abs(velocity.y);
 
-
-    if (position.x < camX - offscreen_limit or position.x > camX + offscreen_limit) {
-        // Gamemode is endless so reset the obstacle to come back from the right side of the screen
-        if (endless) {
-            Reset();
-        }
-        else {
-            // Gamemode not endless so destroy the obstacle 
-            type = Non_Obstacle;
-        }
+    // Check whether the obstacle has scrolled off either side of the camera.
+    const bool offscreen = (position.x < camX - offscreen_limit)
+        || (position.x > camX + offscreen_limit);
+    if (offscreen)
+    {
+        if (endless)
+            Reset();           // Endless mode: recycle and respawn.
+        else
+            type = Non_Obstacle; // Custom level: mark for deletion.
     }
 }
 
+// ---------------------------------------------------------------------------
 // ObstacleSystem::ResetObstacle
 // ---------------------------------------------------------------------------
-// Static helper that resets a single obstacle via pointer.
-// Null-checks before calling Reset() to prevent crashes.
+// Null-safe static helper that calls Reset() on the given obstacle pointer.
 // ---------------------------------------------------------------------------
 void ObstacleSystem::ResetObstacle(Obstacle* obstacle)
 {
     if (obstacle)
-    {
         obstacle->Reset();
-    }
 }
-// Not needed for now
-//void ObstacleSystem::UpdateObstacles(Obstacle* obstacles, f32 delta_time)
-//{
-//    if (!obstacles)
-//    {
-//        return;
-//    }
-//
-//    f32 min_x = AEGfxGetWinMinX();
-//    f32 max_x = AEGfxGetWinMaxX();
-//    f32 min_y = AEGfxGetWinMinY();
-//    f32 max_y = AEGfxGetWinMaxY();
-//
-//    // TODO can be replaced
-//    /*for (int i = 0; i < k_obstacle_count; ++i)
-//    {
-//        obstacles[i].Update(delta_time, min_x, max_x, min_y, max_y);
-//    }*/
-//}
 
+// ---------------------------------------------------------------------------
 // resetObstacle (free function)
 // ---------------------------------------------------------------------------
-// Legacy wrapper that delegates to ObstacleSystem::ResetObstacle.
-// Kept for backward compatibility with older code that uses free functions.
+// Legacy wrapper around ObstacleSystem::ResetObstacle, kept for backward
+// compatibility with older call sites.
 // ---------------------------------------------------------------------------
 void resetObstacle(Obstacle* obstacle)
 {
     ObstacleSystem::ResetObstacle(obstacle);
 }
 
-//Not needed for now
-//void updateObstacles(Obstacle* obstacles, f32 delta_time)
-//{
-//    ObstacleSystem::UpdateObstacles(obstacles, delta_time);
-//}
-// ==================================================================================
-// 
-// Negation of Obstacle Scale
-ObstacleScale& operator--(ObstacleScale& scale) {
-    scale = (scale == ObstacleScale::Tiny) ? ObstacleScale::Giant : ObstacleScale(static_cast<int> (scale) - 1);
+// ===========================================================================
+// ObstacleScale operators and helpers
+// ===========================================================================
+
+// Prefix -- : steps scale down, wrapping Giant back to Tiny.
+ObstacleScale& operator--(ObstacleScale& scale)
+{
+    scale = (scale == ObstacleScale::Tiny)
+        ? ObstacleScale::Giant
+        : ObstacleScale(static_cast<int>(scale) - 1);
     return scale;
 }
-// Addition of Obstacle Scale
-ObstacleScale& operator++(ObstacleScale& scale) {
-    scale = (scale == ObstacleScale::Giant) ? ObstacleScale::Tiny : ObstacleScale(static_cast<int> (scale) + 1);
+
+// Prefix ++ : steps scale up, wrapping Tiny forward to Giant.
+ObstacleScale& operator++(ObstacleScale& scale)
+{
+    scale = (scale == ObstacleScale::Giant)
+        ? ObstacleScale::Tiny
+        : ObstacleScale(static_cast<int>(scale) + 1);
     return scale;
 }
-// Obstacle Size values
-f32 GetObstacleSize(ObstacleScale const& scale) {
-    f32 result{};
-    switch (scale) {
-    case ObstacleScale::Tiny:
-        result = 2.0f;
-        break;
-    case ObstacleScale::Small:
-        result = 3.0f;
-        break;
-    case ObstacleScale::Normal:
-        result = 4.0f;
-        break;
-    case ObstacleScale::Large:
-        result = 5.0f;
-        break;
-    case ObstacleScale::Giant:
-        result = 6.0f;
-        break;
+
+// Returns the pixel size multiplier for the given scale tier.
+f32 GetObstacleSize(ObstacleScale const& scale)
+{
+    switch (scale)
+    {
+    case ObstacleScale::Tiny:   return 2.0f;
+    case ObstacleScale::Small:  return 3.0f;
+    case ObstacleScale::Normal: return 4.0f;
+    case ObstacleScale::Large:  return 5.0f;
+    case ObstacleScale::Giant:  return 6.0f;
     }
-    return result;
+    return 4.0f; // Unreachable; satisfies compiler.
 }
-// =====================================================
-// Negation of Obstacle Scale
-ObstacleSpeed& operator--(ObstacleSpeed& speed) {
-    speed = (speed == ObstacleSpeed::Slow) ? ObstacleSpeed::Fast : ObstacleSpeed(static_cast<int> (speed) - 1);
+
+// ===========================================================================
+// ObstacleSpeed operators and helpers
+// ===========================================================================
+
+// Prefix -- : steps speed down, wrapping Slow back to Fast.
+ObstacleSpeed& operator--(ObstacleSpeed& speed)
+{
+    speed = (speed == ObstacleSpeed::Slow)
+        ? ObstacleSpeed::Fast
+        : ObstacleSpeed(static_cast<int>(speed) - 1);
     return speed;
 }
-// Addition of Obstacle Scale
-ObstacleSpeed& operator++(ObstacleSpeed& speed) {
-    speed = (speed == ObstacleSpeed::Fast) ? ObstacleSpeed::Slow : ObstacleSpeed(static_cast<int> (speed) + 1);
+
+// Prefix ++ : steps speed up, wrapping Fast forward to Slow.
+ObstacleSpeed& operator++(ObstacleSpeed& speed)
+{
+    speed = (speed == ObstacleSpeed::Fast)
+        ? ObstacleSpeed::Slow
+        : ObstacleSpeed(static_cast<int>(speed) + 1);
     return speed;
 }
-f32 GetObstacleSpeed(ObstacleSpeed const& speed) {
-    f32 result{};
-    switch (speed) {
-    case ObstacleSpeed::Slow:
-        result = -20.0f;
-        break;
-    case ObstacleSpeed::Normal:
-        result = -50.0f;
-        break;
-    case ObstacleSpeed::Fast:
-        result = -100.0f;
-        break;
+
+// Returns the X velocity (always negative = leftward) for the given speed tier.
+f32 GetObstacleSpeed(ObstacleSpeed const& speed)
+{
+    switch (speed)
+    {
+    case ObstacleSpeed::Slow:   return  -20.0f;
+    case ObstacleSpeed::Normal: return  -50.0f;
+    case ObstacleSpeed::Fast:   return -100.0f;
     }
-        return result;
+    return -50.0f; // Unreachable; satisfies compiler.
 }
-// ===================================================================

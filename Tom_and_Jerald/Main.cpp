@@ -6,7 +6,7 @@
 
 // For memory leak detection
 #define _CRTDBG_MAP_ALLOC
-#define _DEBUG_MEM_LEAK // Set to debug for mem leak
+#define _DEBUG_MEM_LEAK constexpr// Set to debug for mem leak
 #include <crtdbg.h>
 // ---------------------------------------------------------------------------
 // main

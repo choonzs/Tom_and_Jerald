@@ -1,37 +1,43 @@
-// Credits.cpp
-// ===========================================================================
-// Implements the in-game currency system ("Cheese").
-// Players earn cheese passively over time during gameplay, with earnings
-// interrupted when they take damage. Cheese is spent in the Shop to
-// purchase upgrades (health, size, fuel capacity, etc.).
-//
-// Earning Mechanic:
-//   - Every k_credit_interval seconds (2.0s) of continuous play without
-//     taking damage, the player earns k_credit_reward (10) cheese.
-//   - Taking damage resets the no-damage timer, punishing reckless play.
-//   - This creates an incentive to play carefully and dodge obstacles.
-//
-// Persistence:
-//   The credit balance persists across game states within a session
-//   (static variable), but resets when the application is closed.
-// ===========================================================================
+/*************************************************************************
+@file Credits.cpp
+@Author Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors Tan Choon Ming choonming.tan@digipen.edu
+@brief
+      Implements the in-game currency system ("Cheese").
 
+     Players earn cheese passively: every k_credit_interval seconds without
+     taking damage awards k_credit_reward cheese. Taking damage resets the
+     timer, incentivising careful play. Cheese is spent in the Shop on
+     upgrades (health, size, fuel capacity, etc.).
+
+     Persistence:
+       The balance is held in a file-scope static. It survives state transitions
+       within a session but resets to 0 on a fresh launch. Use Credits_SaveFile
+       and Credits_LoadFile to persist it across runs.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Credits.hpp"
 
-namespace {
-    int credits{};// Starting cheese balance
-    int credits_init{credits};
-    f32 no_damage_timer = 0.0f;  // Time since last damage (seconds)
+// ---------------------------------------------------------------------------
+// File-scope state
+// ---------------------------------------------------------------------------
+
+namespace
+{
+    int credits = 0;    // Current cheese balance.
+    int credits_init = 0;    // Balance at last load/save (used to detect unsaved changes).
+    f32 no_damage_timer = 0.0f; // Seconds since the player last took damage.
 }
- int credits_this_round = 0;
+
+// Cheese earned in the current round. Exposed for HUD/score display.
+int credits_this_round = 0;
 
 // ---------------------------------------------------------------------------
-// Credits_ResetRound
+// Lifecycle
 // ---------------------------------------------------------------------------
-// Resets the no-damage timer at the start of each round/game session.
-// Does NOT reset the credit balance (cheese persists between rounds).
-// ---------------------------------------------------------------------------
+
 void Credits_ResetRound()
 {
     no_damage_timer = 0.0f;
@@ -40,14 +46,10 @@ void Credits_ResetRound()
 // ---------------------------------------------------------------------------
 // Credits_Update
 // ---------------------------------------------------------------------------
-// Called each frame during active gameplay to accumulate cheese.
-// Uses a "while" loop to handle edge cases where delta_time exceeds
-// the credit interval (e.g., if the game freezes briefly).
-//
-// Parameters:
-//   delta_time  - Seconds since last frame.
-//   game_active - Only accumulate when the game is actively running
-//                 (not paused, not game over, not in victory screen).
+// Accumulates the no-damage timer and awards cheese for each full interval
+// elapsed. The while loop handles frames where delta_time exceeds the
+// interval (e.g. after a hitch), awarding multiple rewards correctly
+// rather than skipping them.
 // ---------------------------------------------------------------------------
 void Credits_Update(f32 delta_time, bool game_active)
 {
@@ -55,7 +57,7 @@ void Credits_Update(f32 delta_time, bool game_active)
         return;
 
     no_damage_timer += delta_time;
-    // Award credits for each full interval elapsed
+
     while (no_damage_timer >= k_credit_interval)
     {
         credits += k_credit_reward;
@@ -63,28 +65,29 @@ void Credits_Update(f32 delta_time, bool game_active)
     }
 }
 
-// ---------------------------------------------------------------------------
-// Credits_OnDamage
-// ---------------------------------------------------------------------------
-// Called when the player takes damage. Resets the no-damage timer,
-// effectively punishing the player by delaying their next cheese reward.
-// ---------------------------------------------------------------------------
 void Credits_OnDamage()
 {
     no_damage_timer = 0.0f;
 }
 
 // ---------------------------------------------------------------------------
-// Credits_GetBalance / Credits_CanAfford / Credits_Spend / Credits_Add
+// Balance queries and mutations
 // ---------------------------------------------------------------------------
-// Standard currency operations used by the Shop:
-//   GetBalance  - Returns current cheese count (for display).
-//   CanAfford   - Checks if player has enough cheese for a purchase.
-//   Spend       - Deducts cheese if affordable (returns false if not).
-//   Add         - Adds cheese (e.g., from maze mini-game rewards).
-// ---------------------------------------------------------------------------
-int Credits_GetBalance() { return credits; }
-bool Credits_CanAfford(int cost) { return credits >= cost; }
+
+int Credits_GetBalance()
+{
+    return credits;
+}
+
+int Credits_GetInitBalance()
+{
+    return credits_init;
+}
+
+bool Credits_CanAfford(int cost)
+{
+    return credits >= cost;
+}
 
 bool Credits_Spend(int cost)
 {
@@ -101,34 +104,28 @@ void Credits_Add(int amount)
 }
 
 // ---------------------------------------------------------------------------
-// Credits Loading from File and Saving to File
+// Persistence
 // ---------------------------------------------------------------------------
-void Credits_LoadFile(const std::string& filename) {
-    std::ifstream ifs(filename);
-    if (ifs.is_open())
-    {
-        ifs >> credits;
-        // if file empty/corrupt
-        if (!ifs) credits = 0; // set back to 0 prevent loading of anything weird
-        ifs.close();
 
-        credits_init = credits; // set init credit amt to credits
-    }
-    else
-    {
-        // file doesn't exist credits remain at 0
-    }
+void Credits_LoadFile(const std::string& filename)
+{
+    std::ifstream ifs(filename);
+    if (!ifs.is_open())
+        return; // File absent: balance stays at 0.
+
+    ifs >> credits;
+    if (!ifs)
+        credits = 0; // File empty or corrupt: fall back to 0.
+
+    credits_init = credits;
 }
-void Credits_SaveFile(const std::string& filename) {
+
+void Credits_SaveFile(const std::string& filename)
+{
     std::ofstream ofs(filename);
-    if (ofs.is_open()) {
-        ofs << credits; // append to file the new credits
-    }
-    ofs.close();
-    credits_init = credits; // set init credit to amt credits
-}
-// Before any saving or loading to txtfile
-// Normally should be different to credit value while inside a round of gameloop
-int Credits_GetInitBalance() {
-    return credits_init;
+    if (!ofs.is_open())
+        return;
+
+    ofs << credits;
+    credits_init = credits; // Mark session as clean.
 }
