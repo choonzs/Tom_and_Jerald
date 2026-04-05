@@ -442,7 +442,7 @@ void GameState_MazeDraw()
 
 void GameState_MazeFree()
 {
-
+    if (maze_player_mesh) { AEGfxMeshFree(maze_player_mesh); maze_player_mesh = nullptr; }
 }
 
 void GameState_MazeUnload()
@@ -454,15 +454,6 @@ void GameState_MazeUnload()
         AEGfxMeshFree(unit_square);
         unit_square = nullptr;
     }
-
-    ANIMATION::player.Anim_Draw(ASSETS::playerAssets);
-
-    drawQuad(maze_player_mesh,
-        gPlayerPos.x,
-        gPlayerPos.y,
-        kPlayerRadius * 2.5f,
-        kPlayerRadius * 2.5f,
-        1.0f, 1.0f, 1.0f, 1.0f);
 
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();

@@ -1,0 +1,22 @@
+# Tom and Jerald - Game Configuration
+# Edit these values to tune gameplay without recompiling.
+# Format: key  value   (lines starting with # are comments)
+
+# --- Endless Mode (Playing) ---
+stage_duration          120.0
+damage_cooldown         1.0
+obstacle_count          10
+obstacle_spawn_cooldown 3.0
+player_base_half_size   50.0
+player_min_half_size    10.0
+fuel_base_capacity      100.0
+fuel_burn_time          30.0
+fuel_passive_drain      1.0
+fuel_spawn_min          10.0
+fuel_spawn_max          20.0
+camera_magnitude        20.0
+portal_respawn_delay    5.0
+
+# --- Custom Level Mode ---
+custom_player_base_half_size 20.0
+custom_player_min_half_size  10.0

@@ -1,0 +1,31 @@
+# Credits Screen Content
+# Edit names, sections, and scroll speed freely. No recompile needed!
+#
+# Parameters (key  value):
+scroll_speed 60.0
+line_gap 45.0
+#
+# Content lines:
+#   TYPE|text   for TITLE, SECTION, NAME, FOOTER
+#   SPACER      for half-line extra gap (no text needed)
+
+TITLE|C R E D I T S
+SPACER
+SECTION|President
+NAME|  Claude Comair
+SPACER
+SECTION|Instructors
+NAME|  Gerald Wong
+NAME|  Tommy Tan
+NAME|  Soroor
+NAME|  Prasanna Ghali
+SPACER
+SECTION|Team Members
+NAME|  Tan Choon Ming
+NAME|  Dan Ng Cher Kai
+NAME|  Peng Rong Jun Jerald
+NAME|  Loh Kai Xin
+NAME|  Ong Jin Ting
+SPACER
+SPACER
+FOOTER|Press ESC to return

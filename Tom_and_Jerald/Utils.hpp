@@ -169,4 +169,26 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health);
 *******************************************************************************/
 void LoadLevelDataFromFile(std::string filename, f32& level_end_x, std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
 
+/*!*****************************************************************************
+\brief
+    Loads a key/value config file into a map.
+    Lines beginning with '#' are treated as comments and skipped.
+    Supports "key value" format (whitespace-separated).
+
+\param[in] filename
+    Path to the config file.
+
+\return
+    Map of key -> value strings. Empty if file cannot be opened.
+*******************************************************************************/
+std::map<std::string, std::string> LoadConfig(const std::string& filename);
+
+/// Read a float from a loaded config map, returning default_val if key absent.
+f32 ConfigFloat(const std::map<std::string, std::string>& cfg,
+                const std::string& key, f32 default_val);
+
+/// Read an int from a loaded config map, returning default_val if key absent.
+int ConfigInt  (const std::map<std::string, std::string>& cfg,
+                const std::string& key, int default_val);
+
 #endif // !UTILS_H

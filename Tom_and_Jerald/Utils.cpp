@@ -174,7 +174,44 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 		inFile.close();
 	}
 	level_end_x = 1000.0f; // Adding some buffer to the end of the level
-	//std::cout << "Level data loaded from file: " << filename << " with " << map_tiles.size() << " tiles and " << obstacle_system.Obstacles().size() << " obstacles.\n";
+}
+
+// ---------------------------------------------------------------------------
+// Config file utilities
+// ---------------------------------------------------------------------------
+
+std::map<std::string, std::string> LoadConfig(const std::string& filename)
+{
+    std::map<std::string, std::string> result;
+    std::ifstream f(filename);
+    if (!f.is_open()) return result;
+
+    std::string line;
+    while (std::getline(f, line)) {
+        if (line.empty() || line[0] == '#') continue;
+        std::istringstream ss(line);
+        std::string key, value;
+        if (ss >> key >> value) result[key] = value;
+    }
+    return result;
+}
+
+f32 ConfigFloat(const std::map<std::string, std::string>& cfg,
+                const std::string& key, f32 default_val)
+{
+    auto it = cfg.find(key);
+    if (it == cfg.end()) return default_val;
+    try { return std::stof(it->second); }
+    catch (...) { return default_val; }
+}
+
+int ConfigInt(const std::map<std::string, std::string>& cfg,
+              const std::string& key, int default_val)
+{
+    auto it = cfg.find(key);
+    if (it == cfg.end()) return default_val;
+    try { return std::stoi(it->second); }
+    catch (...) { return default_val; }
 }
 
 
