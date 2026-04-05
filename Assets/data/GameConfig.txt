@@ -3,7 +3,7 @@
 # Format: key  value   (lines starting with # are comments)
 
 # --- Endless Mode (Playing) ---
-stage_duration          120.0
+stage_duration          9999999.9
 damage_cooldown         1.0
 obstacle_count          10
 obstacle_spawn_cooldown 3.0
