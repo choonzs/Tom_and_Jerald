@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    JetpackFuel.hpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the JetpackFuel class: fuel capacity, burn rate, passive
+     drain, refuelling, and HUD percentage accessor.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef JETPACK_FUEL_HPP
 #define JETPACK_FUEL_HPP
 

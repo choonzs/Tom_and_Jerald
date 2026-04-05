@@ -1,3 +1,12 @@
+/*************************************************************************
+@file    Victory.hpp
+@Author  Ong Jinting
+@Co-authors  NIL
+@brief
+     Declares the Victory game-state lifecycle functions.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef VICTORY_HPP
 #define VICTORY_HPP
 

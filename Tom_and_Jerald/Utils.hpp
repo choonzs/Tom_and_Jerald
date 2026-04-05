@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    Utils.hpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Declares utility functions: random float generation, mesh-quad and
+     circle creation, centered-text helpers, coordinate transforms, and
+     config-file parsing (LoadConfig, ConfigFloat, ConfigInt).
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Player.hpp"
 #include "playing.hpp"

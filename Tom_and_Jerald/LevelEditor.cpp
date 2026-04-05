@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    LevelEditor.cpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements the tile-based level editor: palette selection, tile
+     placement and removal, map serialization to file, and preview
+     rendering.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "LevelEditor.hpp"
 #include "GameStateManager.hpp"
@@ -106,7 +117,7 @@ void LevelEditor_Initialize() {
 
 void LevelEditor_Update() {
 
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; }
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { gSkipSplash = true; next = GAME_STATE_MENU; }
 
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     s32 mx, my;

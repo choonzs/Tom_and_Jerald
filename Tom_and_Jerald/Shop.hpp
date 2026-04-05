@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Shop.hpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Declares the Shop game-state lifecycle functions and the ShopState
+     class.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #pragma once
 #ifndef SHOP_HPP
 #define SHOP_HPP

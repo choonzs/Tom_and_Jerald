@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Animation.hpp
+@Author  Jerald
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@brief
+     Declares the AnimatedSprite class for spritesheet-based frame
+     animation: clip selection, update, and draw.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #pragma once //Header guard
 #include "pch.hpp"
 

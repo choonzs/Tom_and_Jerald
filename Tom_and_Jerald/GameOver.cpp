@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    GameOver.cpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements the Game Over state: final score display, high-score
+     name entry via keyboard, and navigation back to menu, shop, or
+     to retry the current stage.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 
 // For testing
@@ -78,6 +89,7 @@ void GameOver_Update() {
 		}
 		else if (AEInputCheckTriggered(AEVK_2))
 		{
+			gSkipSplash = true;
 			next = GAME_STATE_MENU;
 		}
 		else if (AEInputCheckTriggered(AEVK_S))

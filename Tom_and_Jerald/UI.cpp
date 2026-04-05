@@ -1,12 +1,13 @@
-//---------------------------------------------------------
-// file:	UI.cpp
-// author:	Loh Kai Xin
-// email:	kaixin.l@digipen.edu
-//
-// brief:	Class function definitions for UI icons' manipulation.
-//
-// Copyright 2026 DigiPen, All rights reserved.
-//---------------------------------------------------------
+/*************************************************************************
+@file    UI.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  NIL
+@brief
+     Class function definitions for UI button icons: initialization,
+     hover detection, selection, and free.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 
 //Header files
 #include "pch.hpp"

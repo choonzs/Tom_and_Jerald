@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Shop.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Implements the upgrade Shop: displays purchasable upgrades, handles
+     currency spending, and persists upgrade state to file.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Shop.hpp"
 #include "Credits.hpp"
@@ -79,6 +89,7 @@ void ShopState::Initialize() {
 void ShopState::Update() {
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+		gSkipSplash = true;
 		next = previous;
 		Credits_SaveFile("Assets/data/Cheese.txt");
 		return;

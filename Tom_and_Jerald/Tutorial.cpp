@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Tutorial.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Jerald
+@brief
+     Implements the Tutorial state: step-by-step introduction to
+     jetpack movement, fuel management, and obstacle avoidance.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Tutorial.hpp"
 
@@ -223,8 +233,10 @@ void Tutorial_Update()
         break;
     }
 
-    if (AEInputCheckTriggered(AEVK_ESCAPE))
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+        gSkipSplash = true;
         next = GAME_STATE_MENU;
+    }
 }
 
 void Tutorial_Draw()
@@ -320,4 +332,6 @@ void Tutorial_Free()
 
 void Tutorial_Unload()
 {
+    ASSETS::Unload_Images();
+    ASSETS::Unload_Font();
 }

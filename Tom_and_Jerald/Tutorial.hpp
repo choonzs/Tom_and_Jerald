@@ -1,3 +1,12 @@
+/*************************************************************************
+@file    Tutorial.hpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Jerald
+@brief
+     Declares the Tutorial game-state lifecycle functions.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef TUTORIAL_HPP
 #define TUTORIAL_HPP
 

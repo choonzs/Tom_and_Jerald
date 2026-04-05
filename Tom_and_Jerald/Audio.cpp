@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Audio.cpp
+@Author  Ong Jinting
+@Co-authors  NIL
+@brief
+     Implements FMOD-based audio: initialization, background music
+     streaming, and sound-effect playback.
+
+Copyright Â© 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "Audio.hpp"
 #include "pch.hpp"
 
@@ -34,7 +44,7 @@ bool AudioLoadConfig(const char* filename) {
     std::string label;  
     std::string path;
 
-    // reads each line — label first, then path
+    // reads each line ï¿½ label first, then path
     ifs >> label >> path;  // reads "Background_Audio Assets/background_audio.mp3"
     backgroundAudio.LoadMusic(path.c_str());
 

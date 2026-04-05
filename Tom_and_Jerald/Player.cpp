@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    Player.cpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Implements the Player class: movement physics, collision response,
+     health/damage system, upgrade-based size/fuel scaling, and mesh
+     management.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Player.hpp"
 

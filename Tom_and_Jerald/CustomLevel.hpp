@@ -1,3 +1,12 @@
+/*************************************************************************
+@file    CustomLevel.hpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the Custom Level game-state lifecycle functions.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #pragma once
 #ifndef CUSTOM_LEVEL_HPP
 #define CUSTOM_LEVEL_HPP

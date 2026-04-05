@@ -8,7 +8,11 @@
       "Bash(grep -r \"malloc\\\\|free\\\\|new\\\\|delete\" ./Tom_and_Jerald/Tom_and_Jerald/*.cpp)",
       "Bash(wc -l ./Tom_and_Jerald/*.cpp ./Tom_and_Jerald/*.hpp)",
       "Bash(find C:UsersusersourcereposchoonzsTom_and_JeraldTom_and_Jerald -name Assets -o -name MapLevel -o -name *.txt -o -name *.json)",
-      "Bash(dir \"C:\\\\Users\\\\user\\\\source\\\\repos\\\\choonzs\\\\Tom_and_Jerald\\\\Tom_and_Jerald\\\\Assets\" /b)"
+      "Bash(dir \"C:\\\\Users\\\\user\\\\source\\\\repos\\\\choonzs\\\\Tom_and_Jerald\\\\Tom_and_Jerald\\\\Assets\" /b)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/user/source/repos/choonzs/Tom_and_Jerald/Tom_and_Jerald/**)",
+      "Bash(done)"
     ]
   }
 }

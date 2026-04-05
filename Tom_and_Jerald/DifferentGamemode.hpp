@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    DifferentGamemode.hpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the Maze gamemode game-state lifecycle functions and
+     maze configuration constants.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef GAMESTATE_MAZE_H
 #define GAMESTATE_MAZE_H
 

@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Animation.cpp
+@Author  Jerald
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@brief
+     Implements the AnimatedSprite class: imports spritesheet metadata,
+     selects animation clips, and advances/draws frames each update.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Utils.hpp"
 #include "Animation.hpp"

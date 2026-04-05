@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Player.hpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Declares the Player class: position, velocity, health, size,
+     mesh handle, and integration with JetpackFuel and upgrades.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 

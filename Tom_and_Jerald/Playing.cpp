@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    Playing.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Jerald, Ong Jinting
+@brief
+     Implements the main gameplay state: player control, obstacle
+     spawning and collision, fuel pickups, camera shake, pause menu,
+     config-driven constants, and optional debug bounding-box overlay.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "utils.hpp"
 #include "Playing.hpp"

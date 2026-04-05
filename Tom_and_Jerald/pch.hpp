@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    pch.hpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Precompiled header – aggregates frequently used engine and
+     standard-library headers to accelerate compilation.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 // pch.h: This is a precompiled header file.
 // Files listed below are compiled only once, improving build performance for future builds.
 // This also affects IntelliSense performance, including code completion and many code browsing features.

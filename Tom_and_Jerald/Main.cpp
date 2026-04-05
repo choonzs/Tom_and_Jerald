@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Main.cpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Entry point. Initializes AlphaEngine, manages the outer GSM loop,
+     handles audio init/free, and configures CRT memory-leak detection.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 // main
 #include "pch.hpp"
 #include "GameStateList.hpp"

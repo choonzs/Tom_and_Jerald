@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Settings.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements the Settings screen: interactive volume sliders for
+     background music and sound effects, persisted across sessions.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "GameStateManager.hpp"
 #include "GameStateList.hpp"
@@ -231,6 +241,7 @@ void Settings_Update() {
 
     // go back to main menu on ESC
     if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+        gSkipSplash = true;
         next = GAME_STATE_MENU;
     }
 }

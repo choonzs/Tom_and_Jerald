@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    ImgFontInit.hpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the ASSETS namespace: shared texture pointers, font
+     handle accessor, and Init/Unload functions for images and font.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #ifndef IMGFONTINIT_HPP
 #define IMGFONTINIT_HPP

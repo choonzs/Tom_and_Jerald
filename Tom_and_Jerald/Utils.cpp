@@ -1,3 +1,15 @@
+/*************************************************************************
+@file    Utils.cpp
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Utility functions shared across game states: random float generation,
+     quad/circle mesh creation, centered-text helpers, coordinate
+     transforms, and config-file parsing (LoadConfig, ConfigFloat,
+     ConfigInt).
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Player.hpp"
 #include "Playing.hpp"

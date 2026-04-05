@@ -1,4 +1,14 @@
-﻿#pragma once
+﻿/*************************************************************************
+@file    Settings.hpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the Settings game-state lifecycle functions and the
+     VolumeSlider helper class.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
+#pragma once
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 

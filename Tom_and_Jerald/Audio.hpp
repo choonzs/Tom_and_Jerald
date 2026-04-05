@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Audio.hpp
+@Author  Ong Jinting
+@Co-authors  NIL
+@brief
+     Declares the AudioClip wrapper and AudioInit/AudioFree functions
+     for FMOD-based background music and sound-effect playback.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #pragma once
 #include "pch.hpp"
 

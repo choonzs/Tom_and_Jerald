@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    CreditsScreen.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Implements the scrolling Credits screen: parses entries from
+     CreditsContent.txt and renders them with auto-scroll animation.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "CreditsScreen.hpp"
 #include "GameStateManager.hpp"
@@ -114,6 +124,7 @@ void CreditsScreen_Initialize() {
 
 void CreditsScreen_Update() {
     if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist()) {
+        gSkipSplash = true;
         next = GAME_STATE_MENU;
     }
 

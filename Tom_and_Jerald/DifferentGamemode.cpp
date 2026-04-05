@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    DifferentGamemode.cpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements the Maze gamemode: procedural DFS maze generation,
+     wall rendering, player navigation to a goal tile, and win/lose
+     detection.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "DifferentGamemode.hpp"
 #include "Animation.hpp"

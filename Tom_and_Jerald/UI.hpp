@@ -1,12 +1,13 @@
-//---------------------------------------------------------
-// file:	UI.cpp
-// author:	Loh Kai Xin
-// email:	kaixin.l@digipen.edu
-//
-// brief:	Class function declarations for UI icons' manipulation.
-//
-// Copyright 2026 DigiPen, All rights reserved.
-//---------------------------------------------------------
+/*************************************************************************
+@file    UI.hpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  NIL
+@brief
+     Declares the UIButtons class and helper functions for UI button
+     icons: initialization, hover detection, selection, and free.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #pragma once //Header guard
 
 //Header files

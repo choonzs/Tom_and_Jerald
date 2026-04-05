@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Victory.cpp
+@Author  Ong Jinting
+@Co-authors  NIL
+@brief
+     Implements the Victory screen shown on stage completion: navigation
+     to the next stage, shop, or main menu, and save-game integration.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Victory.hpp"
 #include "GameStateList.hpp"
@@ -33,6 +43,7 @@ void VictoryState::Update() {
         next = GAME_STATE_PLAYING;
     }
     else if (AEInputCheckTriggered(AEVK_M)) {
+        gSkipSplash = true;
         next = GAME_STATE_MENU;
     }
     else if (AEInputCheckTriggered(AEVK_S)) {

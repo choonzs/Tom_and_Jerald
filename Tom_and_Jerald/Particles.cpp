@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    Particles.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements a fixed-array particle system for jetpack thrust and
+     explosion visual effects.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "Playing.hpp"
 #include "utils.hpp"

@@ -1,3 +1,13 @@
+/*************************************************************************
+@file    MainMenu.hpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Declares the main menu game-state lifecycle functions and the
+     gSkipSplash extern flag.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #ifndef MAINMENU_HPP
 #define MAINMENU_HPP
 void MainMenu_Load();

@@ -1,4 +1,13 @@
+/*************************************************************************
+@file    MainMenu.cpp
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@brief
+     Implements the main menu: DigiPen/team splash screens, navigation
+     buttons, custom-level select panel, and tutorial launch prompt.
 
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 
 #include "pch.hpp"
 #include "GameStateList.hpp"

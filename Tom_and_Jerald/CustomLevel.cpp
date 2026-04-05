@@ -1,3 +1,14 @@
+/*************************************************************************
+@file    CustomLevel.cpp
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  NIL
+@brief
+     Implements the Custom Level gameplay state: tile-based level
+     playthrough loaded from file, obstacle/fuel mechanics, camera,
+     and optional debug bounding-box overlay.
+
+Copyright © 2026 DigiPen, All rights reserved.
+*************************************************************************/
 #include "pch.hpp"
 #include "CustomLevel.hpp"
 #include "Player.hpp"
@@ -138,7 +149,7 @@ void CustomLevel_Initialize() {
 
 void CustomLevel_Update() {
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
-    if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+    if (AEInputCheckTriggered(AEVK_ESCAPE)) { gSkipSplash = true; next = GAME_STATE_MENU; return; }
     if (AEInputCheckTriggered(AEVK_6)) g_debug_mode = !g_debug_mode;  // toggle debug overlay
     if (damage_timer > 0.0f) damage_timer -= dt;
 
@@ -444,13 +455,13 @@ void CustomLevel_Free() {
 
     if (pFuel) { delete pFuel; pFuel = nullptr; }
     
+    if (custom_player && custom_player->Mesh()) { AEGfxMeshFree(custom_player->Mesh()); custom_player->Mesh() = nullptr; }
     delete custom_player;
     custom_player = nullptr;
 
 }
 
 void CustomLevel_Unload() {
-	AEGfxDestroyFont(font_id);
     ASSETS::Unload_Images();
-	/*ASSETS::Unload_Font();*/
+    ASSETS::Unload_Font();
 }

@@ -4,7 +4,7 @@
 @Co-authors NIL
 @brief  Implements the Leaderboard class and the HighScore scene.
 
-Copyright © 2026 DigiPen, All rights reserved.
+Copyright ï¿½ 2026 DigiPen, All rights reserved.
 *************************************************************************/
 
 #include "pch.hpp"
@@ -78,7 +78,7 @@ int Leaderboard::LowestScore() const
 }
 
 // ===========================================================================
-// HighScore scene — file-scope state
+// HighScore scene ï¿½ file-scope state
 // ===========================================================================
 
 namespace
@@ -104,8 +104,10 @@ void HighScore_Initialize()
 
 void HighScore_Update()
 {
-    if (AEInputCheckTriggered(AEVK_ESCAPE) || !AESysDoesWindowExist())
+    if (AEInputCheckTriggered(AEVK_ESCAPE) || !AESysDoesWindowExist()) {
+        gSkipSplash = true;
         next = GAME_STATE_MENU;
+    }
 }
 
 // ---------------------------------------------------------------------------
