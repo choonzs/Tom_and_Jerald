@@ -34,6 +34,7 @@ typedef void(*FP)(void);
 extern int current;
 extern int previous;
 extern int next;
+extern bool gSkipSplash;
 
 // Lifecycle callbacks for the active state. Assigned by GSM_Update()
 // via the state table; do not assign directly.

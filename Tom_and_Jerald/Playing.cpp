@@ -242,6 +242,22 @@ void Playing_Initialize() {
 
     createUnitSquare(&bgMesh, 0.25f, 0.25f, 1.0);
 
+    //UI BUTTONS-----------------------------
+    UI::resumeBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::resumeBtn.UI_Select(UI::UIButtons::buttonKey::pause);
+
+    UI::restartBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::restartBtn.UI_Select(UI::UIButtons::buttonKey::restart);
+
+    UI::menuBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::menuBtn.UI_Select(UI::UIButtons::buttonKey::back);
+
+    UI::yesBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::yesBtn.UI_Select(UI::UIButtons::buttonKey::yes);
+
+    UI::noBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
+    UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
+
     // Changing Player size
     f32 size_reduction = Upgrades_GetSizeReduction();
     f32 upgraded_half_size = k_player_base_half_size - size_reduction;
@@ -297,23 +313,6 @@ void Playing_Initialize() {
     // TODO Anim initialize
     //---------------------------------------
 
-
-    //UI BUTTONS-----------------------------
-    UI::resumeBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
-    UI::resumeBtn.UI_Select(UI::UIButtons::buttonKey::pause);
-
-    UI::restartBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
-    UI::restartBtn.UI_Select(UI::UIButtons::buttonKey::restart);
-
-    UI::menuBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
-    UI::menuBtn.UI_Select(UI::UIButtons::buttonKey::back);
-
-    UI::yesBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
-    UI::yesBtn.UI_Select(UI::UIButtons::buttonKey::yes);
-
-    UI::noBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
-    UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
-
     camera.Magnitude() = k_camera_magnitude;
 
     camera.Position().x = base_player.Position().x;
@@ -357,6 +356,7 @@ void Playing_Update() {
             if (AEInputCheckTriggered(AEVK_Y)) {
                 // Quitting the game
                 next = GAME_STATE_MENU;
+                gSkipSplash = true;
             }
             else if (AEInputCheckTriggered(AEVK_N)) {
                 quitting_flag = FALSE;
@@ -393,6 +393,7 @@ void Playing_Update() {
                 if (UI::yesBtn.UI_IsHovered(mouseX, mouseY)) {
                     next = GAME_STATE_MENU;
                     confirm_flag = false;
+                    gSkipSplash = true;
                 }
                 if (UI::noBtn.UI_IsHovered(mouseX, mouseY)) {
                     quitting_flag = false;

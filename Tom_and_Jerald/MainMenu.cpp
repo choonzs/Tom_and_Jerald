@@ -92,10 +92,21 @@ void MainMenu_Initialize() {
 	window_height = (AEGfxGetWinMaxY() - AEGfxGetWinMinY());
 
 	//Initialize flags
-	mainMenu_flag = FALSE;							//False on default, triggers main menu after teamname
-	teamName_flag = FALSE;							//False on defualt, triggers after splashscreen
+	if (gSkipSplash) {
+		local_time = 6.0f;
+		mainMenu_flag = TRUE;
+		teamName_flag = FALSE;
+		gSkipSplash = false;
+	}
+	else {
+		mainMenu_flag = FALSE;						//False on default, triggers main menu after teamname
+		teamName_flag = FALSE;						//False on defualt, triggers after splashscreen
+	}
+	//mainMenu_flag = FALSE;							//False on default, triggers main menu after teamname
+	//teamName_flag = FALSE;							//False on defualt, triggers after splashscreen
 	quitting_flag = FALSE;							//False on default, triggers when player clicks escape or closes window
 	tutorialPromptOpen = FALSE;						//False on default, triggers when player clicks on play
+
 
 	//Initialize animation
 	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt");			//Total rows + columns file
