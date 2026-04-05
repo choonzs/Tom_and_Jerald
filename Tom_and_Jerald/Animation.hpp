@@ -53,6 +53,6 @@ namespace ANIMATION {
     extern AnimatedSprite spike;
 	extern AnimatedSprite wall;
 	extern AnimatedSprite cat;
-
+    extern AnimatedSprite portal;
 
 }//Namespace ANIMATION

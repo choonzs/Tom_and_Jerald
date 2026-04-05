@@ -16,6 +16,7 @@ namespace ANIMATION {
     AnimatedSprite spike;
     AnimatedSprite wall;
     AnimatedSprite cat;
+    AnimatedSprite portal;
         
     //Member functions__________________________
     //Initialize spritesheet

@@ -293,6 +293,9 @@ void Playing_Initialize() {
 
 	ANIMATION::cat.ImportFromFile("Assets/AnimationData.txt");        //Total rows + columns
 	ANIMATION::cat.Clip_Select(3, 0, 4, 5.0f);                        //Row, start col, frames, fps (Cat)
+
+    ANIMATION::portal.Anim_Init(4, 4);
+    ANIMATION::portal.Clip_Select(1, 3, 1, 1.0f);
     
     // TODO Anim initialize
     //---------------------------------------
@@ -447,6 +450,7 @@ void Playing_Update() {
     ANIMATION::asteroid.Anim_Update(delta_time);
     ANIMATION::player.Anim_Update(delta_time);
 	ANIMATION::cat.Anim_Update(delta_time);
+    ANIMATION::portal.Anim_Update(delta_time);
     // TODO Anim Update
     //---------------------------------------
 
@@ -729,14 +733,22 @@ void Playing_Draw() {
 
     if (gMazePortal.active)
     {
-        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-        AEGfxTextureSet(NULL, 0.0f, 0.0f);
+        AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+        AEGfxSetTransparency(1.0f);
+        AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+        AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+
+        ANIMATION::portal.Anim_Draw(ASSETS::otherAssets);
+
         drawQuad(unit_square,
             gMazePortal.pos.x,
             gMazePortal.pos.y,
-            gMazePortal.half_size.x * 2.0f,
-            gMazePortal.half_size.y * 2.0f,
-            0.4f, 0.0f, 1.0f, 1.0f);
+            120.0f,
+            120.0f,
+            1.0f, 1.0f, 1.0f, 1.0f);
+
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxTextureSet(NULL, 0.0f, 0.0f);
     }
 
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
