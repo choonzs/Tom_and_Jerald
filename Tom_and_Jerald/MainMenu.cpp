@@ -307,12 +307,18 @@ void MainMenu_Update() {
 					if (mouseX >= -panel_half_w && mouseX <= panel_half_w &&
 						mouseY >= row_y - row_height * 0.5f && mouseY <= row_y + row_height * 0.5f)
 					{
-						levelSelectCursor = i;
-						// Double click / single click to confirm
+						int actual_index = i + levelScrollOffset;
+						levelSelectCursor = actual_index;
+
 						namespace fs = std::filesystem;
 						fs::create_directory("MapLevel");
+
 						std::ofstream outFile("MapLevel/LoadLevel.txt", std::ios::trunc);
-						if (outFile.is_open()) { outFile << (levelSelectCursor + 1); outFile.close(); }
+						if (outFile.is_open()) {
+							outFile << (actual_index + 1);
+							outFile.close();
+						}
+
 						next = GAME_STATE_CUSTOM_PLAY;
 						levelSelectOpen = false;
 						break;

@@ -215,3 +215,14 @@ int ConfigInt(const std::map<std::string, std::string>& cfg,
 }
 
 
+float ToScreenX(float worldX, float camX)
+{
+	float halfW = (AEGfxGetWinMaxX() - AEGfxGetWinMinX()) * 0.5f;
+	return (worldX - camX) / halfW;
+}
+
+float ToScreenY(float worldY, float camY)
+{
+	float halfH = (AEGfxGetWinMaxY() - AEGfxGetWinMinY()) * 0.5f;
+	return (worldY - camY) / halfH;
+}
