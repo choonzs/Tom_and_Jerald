@@ -6,11 +6,12 @@
 #include "GameStateList.hpp"
 #include "GameStateManager.hpp"
 #include "Audio.hpp"
+#include "ImgFontInit.hpp"
 
 namespace {
 	const f32 k_title_y = 0.75f;
 	const f32 k_credits_y = 0.60f;
-	const f32 k_button_scale = 0.45f;
+	const f32 k_button_scale = 0.65f;
 	const f32 k_footer_y = -0.75f;
 	const int k_upgrade_cost = 10;
 
@@ -61,7 +62,8 @@ void ShopState::drawButtonBackground(const char* text, f32 center_y, f32 scale, 
 }
 
 void ShopState::Load() {
-	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
+	ASSETS::Init_Font();
+	font_id = ASSETS::Font();
 }
 
 void ShopState::Initialize() {
@@ -127,11 +129,11 @@ void ShopState::Draw() {
 	AEGfxTextureSet(nullptr, 0, 0);
 	/******************************************************************************/
 
-	drawCenteredText(font_id, "SHOP", k_title_y, 1.0f);
+	drawCenteredText(font_id, "SHOP", k_title_y, 1.5f);
 
 	char credits_text[64];
 	sprintf_s(credits_text, "CHEESE: %d", Credits_GetBalance());
-	drawCenteredText(font_id, credits_text, k_credits_y, 0.7f);
+	drawCenteredText(font_id, credits_text, k_credits_y, 1.0f);
 
 	char hp_text[128], size_text[128], cap_text[128], spawn_text[128], restore_text[128];
 	sprintf_s(hp_text, "UPGRADE HEALTH (+5%%) [LEVEL %d/%d]", Upgrades_GetHealthLevel(), k_health_upgrade_max_level);
@@ -153,10 +155,10 @@ void ShopState::Draw() {
 
 	char cost_text[64];
 	sprintf_s(cost_text, "COST: %d CHEESE", k_upgrade_cost);
-	drawCenteredText(font_id, cost_text, k_fuel_restore_button_y - 0.12f, 0.5f);
+	drawCenteredText(font_id, cost_text, k_fuel_restore_button_y - 0.12f, 0.8f);
 
-	drawCenteredText(font_id, "CLICK AN UPGRADE TO BUY", k_footer_y, 0.5f);
-	drawCenteredText(font_id, "RETURN (ESC)", k_footer_y - 0.1f, 0.5f);
+	drawCenteredText(font_id, "CLICK AN UPGRADE TO BUY", k_footer_y, 0.8f);
+	drawCenteredText(font_id, "RETURN (ESC)", k_footer_y - 0.1f, 0.f);
 }
 
 void ShopState::Free() {
@@ -166,7 +168,7 @@ void ShopState::Free() {
 }
 
 void ShopState::Unload() {
-	AEGfxDestroyFont(font_id);
+	ASSETS::Unload_Font();
 	font_id = -1;
 }
 

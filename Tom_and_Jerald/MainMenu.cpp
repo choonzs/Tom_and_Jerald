@@ -102,8 +102,7 @@ void MainMenu_Initialize() {
 		mainMenu_flag = FALSE;						//False on default, triggers main menu after teamname
 		teamName_flag = FALSE;						//False on defualt, triggers after splashscreen
 	}
-	//mainMenu_flag = FALSE;							//False on default, triggers main menu after teamname
-	//teamName_flag = FALSE;							//False on defualt, triggers after splashscreen
+
 	quitting_flag = FALSE;							//False on default, triggers when player clicks escape or closes window
 	tutorialPromptOpen = FALSE;						//False on default, triggers when player clicks on play
 
@@ -137,12 +136,10 @@ void MainMenu_Initialize() {
 	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
 
 	//Yes and No buttons for tutorial prompt
-	UI::yesBtn.UI_Init(-150.0f, -90.0f, btnSize	, btnSize);					//For yes button
+	UI::yesBtn.UI_Init(-150.0f, -70.0f, btnSize	, btnSize);					//For yes button
 	UI::yesBtn.UI_Select(UI::UIButtons::buttonKey::yes);
-	UI::noBtn.UI_Init(150.0f, -90.0f, btnSize, btnSize);					//For no button
+	UI::noBtn.UI_Init(150.0f, -70.0f, btnSize, btnSize);					//For no button
 	UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
-	UI::blankBtn.UI_Init(0.0f, -20.0f, 700.0f, 700.0f);                    //For pop-up window
-	UI::blankBtn.UI_Select(UI::UIButtons::buttonKey::blank);
 
 	//Initialize audio
 	backgroundAudio.Play();
@@ -166,7 +163,7 @@ void MainMenu_Update() {
 	//Update cursor positon
 	AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
-	//TODO: figure this out and comment____________________________________
+	//Camera parallax
 	f32 nx = (static_cast<f32>(mouseX_int) / window_width) * 2.0f - 1.0f;
 	f32 ny = (static_cast<f32>(mouseY_int) / window_height) * 2.0f - 1.0f;
 
@@ -177,7 +174,6 @@ void MainMenu_Update() {
 
 	parallax_x += (target_x - parallax_x) * 0.1f;
 	parallax_y += (target_y - parallax_y) * 0.1f;
-	//______________________________________________________________________
 
 	//Play audio on click
 	if (AEInputCheckTriggered(AEVK_LBUTTON)) {
@@ -573,10 +569,9 @@ void MainMenu_Draw() {
 			// Dark overlay
 			drawQuad(unit_square, 0.0f, 0.0f, window_width, window_height, 0.0f, 0.0f, 0.0f, 0.55f);
 
-			// Panel and buttons from UI class
-			AEGfxSetColorToMultiply(0.3f, 0.3f, 0.3f, 1.0f);
-			UI::blankBtn.UI_Draw(ASSETS::UIAssets);
-			AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+			// Panel as plain dark quad
+			drawQuad(unit_square, 0.0f, -20.0f, 520.0f, 300.0f, 0.08f, 0.09f, 0.12f, 0.95f);
+
 			UI::yesBtn.UI_Draw(ASSETS::UIAssets);
 			UI::noBtn.UI_Draw(ASSETS::UIAssets);
 
@@ -587,24 +582,24 @@ void MainMenu_Draw() {
 			AEGfxSetTransparency(1.0f);
 
 			drawCenteredText(font_id, "Do you need a tutorial?",
-				20.0f / (window_height * 0.5f),
+				40.0f / (window_height * 0.5f),
 				1.3f,
 				0.0f, 0.0f,
-				0.f, 0.f, 0.f, 1.f);
+				1.f, 1.f, 1.f, 1.f);
 
 			drawCenteredText(font_id, "YES",
-				-180.0f / (window_height * 0.5f),   // yesBtn posY normalized
+				-160.0f / (window_height * 0.5f),   // yesBtn posY normalized
 				1.2f,
 				-150.0f / (window_width * 0.5f),   // yesBtn posX normalized
 				0.0f,
-				0.f, 0.f, 0.f, 1.f);
+				1.f, 1.f, 1.f, 1.f);
 
 			drawCenteredText(font_id, "NO",
-				-180.0f / (window_height * 0.5f),   // noBtn posY normalized
+				-160.0f / (window_height * 0.5f),   // noBtn posY normalized
 				1.2f,
 				150.0f / (window_width * 0.5f),    // noBtn posX normalized
 				0.0f,
-				0.f, 0.f, 0.f, 1.f);
+				1.f, 1.f, 1.f, 1.f);
 		}
 	}
 }
@@ -637,7 +632,6 @@ void MainMenu_Unload() {
 	UI::lvlSelectorBtn.UI_Free();
 	UI::yesBtn.UI_Free();
 	UI::noBtn.UI_Free();
-	UI::blankBtn.UI_Free();
 
 	ASSETS::Unload_Images();
 	ASSETS::Unload_Font();

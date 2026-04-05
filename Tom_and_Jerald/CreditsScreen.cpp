@@ -4,10 +4,13 @@
 #include "GameStateList.hpp"
 #include "Utils.hpp"
 #include "ImgFontInit.hpp"
+#include "Animation.hpp"
+#include "UI.hpp"
 
 namespace {
     s8 font_id = -1;
     AEGfxVertexList* unit_square = nullptr;
+    AEGfxVertexList* background = nullptr;			//For background
 
     // Scroll state — loaded from CreditsContent.txt
     f32 scroll_y     = 0.0f;
@@ -17,6 +20,11 @@ namespace {
     // Copyright logo dimensions
     const f32 COPYRIGHT_W = 420.0f;
     const f32 COPYRIGHT_H = 80.0f;
+
+    f32 dt;
+
+    f32 window_width;
+    f32 window_height;
 
     // ---------------------------------------------------------------------------
     // Credits content — loaded from Assets/data/CreditsContent.txt
@@ -93,8 +101,15 @@ void CreditsScreen_Load() {
 
 void CreditsScreen_Initialize() {
     createUnitSquare(&unit_square);
+    createUnitSquare(&background, 0.25f, 0.25f);
     scroll_y = 0.0f;
     LoadCreditsFromFile("Assets/data/CreditsContent.txt");
+
+    window_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
+    window_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
+
+    ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");
+    ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//For background
 }
 
 void CreditsScreen_Update() {
@@ -102,8 +117,10 @@ void CreditsScreen_Update() {
         next = GAME_STATE_MENU;
     }
 
-    f32 dt = (f32)AEFrameRateControllerGetFrameTime();
-    scroll_y += scroll_speed * dt;
+    dt = (f32)AEFrameRateControllerGetFrameTime();
+    scroll_y -= scroll_speed * dt;
+
+    ANIMATION::background.Anim_Update(dt);
 }
 
 void CreditsScreen_Draw() {
@@ -113,6 +130,14 @@ void CreditsScreen_Draw() {
     AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
     AEGfxSetTransparency(1.f);
+
+    ANIMATION::background.Anim_Draw(ASSETS::backgroundAssets); //Draws BACKGROUND
+    drawQuad(background,
+        0.0f,
+        0.0f,
+        window_width,
+        window_height,
+        1.f, 1.f, 1.f, 0.5f);
 
     f32 halfH = AEGfxGetWinMaxY();
 
@@ -132,9 +157,9 @@ void CreditsScreen_Draw() {
     f32 base_y   = halfH - COPYRIGHT_H - 30.0f - scroll_y;
     f32 line_gap = g_line_gap;
     f32 col1     = -0.95f;
-    f32 title_s  = 0.8f;
-    f32 name_s   = 0.6f;
-    f32 header_s = 0.7f;
+    f32 title_s  = 1.2f;
+    f32 name_s   = 0.9f;
+    f32 header_s = 1.0f;
     f32 halfH_f  = halfH;
     auto worldToNorm = [&](f32 wy) -> f32 { return wy / halfH_f; };
 
@@ -165,7 +190,7 @@ void CreditsScreen_Draw() {
 
         case CreditsEntry::Type::Footer:
             drawCenteredText(font_id, entry.text.c_str(),
-                             worldToNorm(base_y), 0.5f,
+                             worldToNorm(base_y), 0.8f,
                              0.0f, 0.0f, 0.6f, 0.6f, 0.6f, 1.0f);
             // No decrement — footer is the last entry
             break;
@@ -183,6 +208,7 @@ void CreditsScreen_Draw() {
 
 void CreditsScreen_Free() {
     if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
+    if (background) { AEGfxMeshFree(background);  background = nullptr; }
     g_credits_entries.clear();
 }
 
