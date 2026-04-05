@@ -3,7 +3,7 @@
 @Author  Tan Choon Ming choonming.tan@digipen.edu
 @Co-authors Ng Cher Kai Dan cherkaidan.ng@digipen.edu
             Loh Kai Xin kaixin.l@digipen.edu,
-            Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
+            Peng Rong Jun Jerald p.rongjunjerald@digipen.edu,
             Ong Jin Ting o.jinting@digipen.edu
 
 @brief

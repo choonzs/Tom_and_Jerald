@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Jetpack Fuel.cpp
-@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Author  Peng Rong Jun Jerald p.rongjunjerald@digipen.edu
 @Co-authors  Tan Choon Ming choonming.tan@digipen.eduL
 @brief
      Implements JetpackFuel: tracks current/max fuel, burn rate on

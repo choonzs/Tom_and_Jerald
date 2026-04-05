@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    JetpackFuel.hpp
-@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Author  Peng Rong Jun Jerald p.rongjunjerald@digipen.edu
 @Co-authors  Tan Choon Ming choonming.tan@digipen.edu
 @brief
      Declares the JetpackFuel class: fuel capacity, burn rate, passive
