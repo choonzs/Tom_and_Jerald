@@ -251,40 +251,6 @@ void CustomLevel_Update() {
         }
     }
 
-    // removed for now
-    /*f32 pX = custom_player.Position().x, pY = custom_player.Position().y;
-    f32 pW = custom_player.Half_Size().x * 2.0f, pH = custom_player.Half_Size().y * 2.0f;
-
-    for (auto& tile : map_tiles) {
-        f32 oX = tile.pos.x, oY = tile.pos.y;
-        f32 oW = tile.half_size.x * 2.0f, oH = tile.half_size.y * 2.0f;
-
-        if (pX - pW / 2 < oX + oW / 2 && pX + pW / 2 > oX - oW / 2 && pY - pH / 2 < oY + oH / 2 && pY + pH / 2 > oY - oH / 2) {
-            if (tile.type == 2) {
-                if (damage_timer <= 0.0f) {
-                    custom_player.Health() -= 1;
-                    damage_timer = 1.0f;
-                    took_damage = true;
-                    custom_player.Position().x -= 30.0f;
-                    custom_player.Position().y += 20.0f;
-                }
-            }
-            else if (tile.type == 1) {
-                f32 penX = (pW / 2 + oW / 2) - std::abs(pX - oX);
-                f32 penY = (pH / 2 + oH / 2) - std::abs(pY - oY);
-                if (penX < penY) {
-                    if (pX < oX) custom_player.Position().x -= penX;
-                    else custom_player.Position().x += penX;
-                }
-                else {
-                    if (pY < oY) custom_player.Position().y -= penY;
-                    else custom_player.Position().y += penY;
-                }
-                pX = custom_player.Position().x; pY = custom_player.Position().y;
-            }
-        }
-    }*/
-
     if ((*custom_player).Health() <= 0) {
         next = GAME_STATE_GAME_OVER;
     }
