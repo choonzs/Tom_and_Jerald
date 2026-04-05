@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Settings.cpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Author  Ong Jin Ting o.jinting@digipen.edu
 @Co-authors  NIL
 @brief
      Implements the Settings screen: interactive volume sliders for

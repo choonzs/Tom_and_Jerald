@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    CustomLevel.cpp
 @Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the Custom Level gameplay state: tile-based level
      playthrough loaded from file, obstacle/fuel mechanics, camera,

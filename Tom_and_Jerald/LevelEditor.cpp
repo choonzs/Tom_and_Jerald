@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    LevelEditor.cpp
 @Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the tile-based level editor: palette selection, tile
      placement and removal, map serialization to file, and preview

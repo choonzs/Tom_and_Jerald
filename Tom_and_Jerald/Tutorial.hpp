@@ -1,7 +1,8 @@
 /*************************************************************************
 @file    Tutorial.hpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Jerald
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Co-authors  Loh Kai Xin kaixin.l@digipen.edu
+
 @brief
      Declares the Tutorial game-state lifecycle functions.
 

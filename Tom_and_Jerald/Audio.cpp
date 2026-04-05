@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Audio.cpp
-@Author  Ong Jinting
+@Author  Ong Jin Ting o.jinting@digipen.edu
 @Co-authors  NIL
 @brief
      Implements FMOD-based audio: initialization, background music

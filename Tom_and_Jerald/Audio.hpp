@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Audio.hpp
-@Author  Ong Jinting
+@Author  Ong Jin Ting o.jinting@digipen.edu
 @Co-authors  NIL
 @brief
      Declares the AudioClip wrapper and AudioInit/AudioFree functions

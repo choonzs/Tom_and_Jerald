@@ -1,7 +1,10 @@
 /*************************************************************************
 @file    pch.hpp
-@Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+@Co-authors Tan Choon Ming choonming.tan@digipen.edu,
+            Loh Kai Xin kaixin.l@digipen.edu,
+            Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
+            Ong Jin Ting o.jinting@digipen.edu
 @brief
      Precompiled header – aggregates frequently used engine and
      standard-library headers to accelerate compilation.

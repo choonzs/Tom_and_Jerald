@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Jetpack Fuel.cpp
-@Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.eduL
 @brief
      Implements JetpackFuel: tracks current/max fuel, burn rate on
      thrust, passive drain over time, and refuelling from pickups.

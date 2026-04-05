@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Victory.cpp
-@Author  Ong Jinting
-@Co-authors  NIL
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the Victory screen shown on stage completion: navigation
      to the next stage, shop, or main menu, and save-game integration.

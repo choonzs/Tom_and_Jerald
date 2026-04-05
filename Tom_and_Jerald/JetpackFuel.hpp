@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    JetpackFuel.hpp
-@Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
 @brief
      Declares the JetpackFuel class: fuel capacity, burn rate, passive
      drain, refuelling, and HUD percentage accessor.

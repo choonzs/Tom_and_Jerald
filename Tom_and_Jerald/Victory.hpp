@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Victory.hpp
-@Author  Ong Jinting
-@Co-authors  NIL
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Declares the Victory game-state lifecycle functions.
 

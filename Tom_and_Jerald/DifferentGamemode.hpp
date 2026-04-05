@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    DifferentGamemode.hpp
-@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
 @Co-authors  NIL
 @brief
      Declares the Maze gamemode game-state lifecycle functions and

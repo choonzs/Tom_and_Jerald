@@ -1,7 +1,11 @@
 /*************************************************************************
 @file    Playing.cpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Jerald, Ong Jinting
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors Ng Cher Kai Dan cherkaidan.ng@digipen.edu
+            Loh Kai Xin kaixin.l@digipen.edu,
+            Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
+            Ong Jin Ting o.jinting@digipen.edu
+
 @brief
      Implements the main gameplay state: player control, obstacle
      spawning and collision, fuel pickups, camera shake, pause menu,

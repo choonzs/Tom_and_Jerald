@@ -1,7 +1,10 @@
 /*************************************************************************
 @file GameStateList.hpp
 @Author Ng Cher Kai Dan cherkaidan.ng@digipen.edu
-@Co-authors NIL
+@Co-authors Tan Choon Ming choonming.tan@digipen.edu,
+			Loh Kai Xin kaixin.l@digipen.edu,
+			Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
+			Ong Jin Ting o.jinting@digipen.edu
 @brief
     Defines the GameState enum used by the game state manager to identify
     every screen and mode in the application.

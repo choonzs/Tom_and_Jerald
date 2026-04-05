@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    ImgFontInit.cpp
-@Author  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
-@Co-authors  NIL
+@Author  Loh Kai Xin kaixin.l@digipen.edu
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the ASSETS namespace: loads and unloads all shared
      texture assets and the shared font handle used across game states.

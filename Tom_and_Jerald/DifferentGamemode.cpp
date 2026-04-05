@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    DifferentGamemode.cpp
-@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu,
 @Co-authors  NIL
 @brief
      Implements the Maze gamemode: procedural DFS maze generation,

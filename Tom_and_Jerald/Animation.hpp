@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Animation.hpp
-@Author  Jerald
+@Author  Loh Kai Xin kaixin.l@digipen.edu
 @Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Declares the AnimatedSprite class for spritesheet-based frame

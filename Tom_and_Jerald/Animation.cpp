@@ -1,6 +1,6 @@
 /*************************************************************************
 @file    Animation.cpp
-@Author  Jerald
+@Author  Loh Kai Xin kaixin.l@digipen.edu
 @Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the AnimatedSprite class: imports spritesheet metadata,

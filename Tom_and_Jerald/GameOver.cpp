@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    GameOver.cpp
 @Author  Tan Choon Ming choonming.tan@digipen.edu
-@Co-authors  NIL
+@Co-authors  Ng Cher Kai Dan cherkaidan.ng@digipen.edu
 @brief
      Implements the Game Over state: final score display, high-score
      name entry via keyboard, and navigation back to menu, shop, or

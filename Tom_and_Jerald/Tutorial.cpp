@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Tutorial.cpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Jerald
+@Author  Peng Jun Rong Jerald p.rongjunjerald@digipen.edu
+@Co-authors  Loh Kai Xin kaixin.l@digipen.edu
 @brief
      Implements the Tutorial state: step-by-step introduction to
      jetpack movement, fuel management, and obstacle avoidance.
