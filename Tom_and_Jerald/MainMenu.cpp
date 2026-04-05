@@ -16,8 +16,6 @@ namespace {
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
 	AEGfxVertexList* background = nullptr;			//For background
 
-	int counter{};
-	f32 cam_pos_x, cam_pos_y, cam_pos_angle{};
 	Camera camera;
 
 	f32 delta_time;
@@ -53,7 +51,6 @@ static void ScanLevelFiles(std::vector<std::string>& level_files);
 
 //LOAD
 void MainMenu_Load() {
-	//font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	ASSETS::Init_Images();
 	ASSETS::Init_Font();
 	font_id = ASSETS::Font();
@@ -146,11 +143,7 @@ void MainMenu_Update() {
 
 	parallax_x += (target_x - parallax_x) * 0.1f;
 	parallax_y += (target_y - parallax_y) * 0.1f;
-	// ==========================================
 
-	/*if (IsMenuKeyTriggered()) {
-		clickAudio.Play();
-	}*/
 
 	if (AEInputCheckTriggered(AEVK_LBUTTON)) { //Player clicks a button
 		clickAudio.Play();
@@ -212,7 +205,6 @@ void MainMenu_Update() {
 
 			if (AEInputCheckTriggered(AEVK_LBUTTON))
 			{
-				s32 mouseX_int{}, mouseY_int{};
 				AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
 				f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
@@ -245,8 +237,6 @@ void MainMenu_Update() {
 
 			f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
 			f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
-
-			f32 half = 100.0f;
 
 			if (UI::startBtn.UI_IsHovered(mouseX, mouseY))      tutorialPromptOpen = TRUE;
 			if (UI::shopBtn.UI_IsHovered(mouseX, mouseY))       next = GAME_STATE_SHOP;
@@ -346,8 +336,7 @@ void MainMenu_Update() {
 		else if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist())
 		{
 			quitting_flag = true;
-			// Quitting the game
-			//next = GAME_STATE_QUIT;
+
 		}
 		else if (AEInputCheckTriggered(AEVK_I))
 		{
@@ -374,9 +363,7 @@ void MainMenu_Update() {
 		}
 		
 		else {
-			current = GAME_STATE_MENU;
-			// Refreshing the next state to stay in menu
-			//next = GAME_STATE_RESTART;
+				//DO nothing 
 		}
 	}
 
@@ -425,10 +412,6 @@ void MainMenu_Update() {
 }
 
 void MainMenu_Draw() {
-	char buffer[128];
-
-	// Example: show current select level
-	sprintf_s(buffer, "PLAY CUSTOM LEVEL %d (C)", select_level);
 
 	if (mainMenu_flag == TRUE) {
 		AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f); //TEST DRAW BACKGRUNG HERE
@@ -441,7 +424,6 @@ void MainMenu_Draw() {
 			window_width,
 			window_height,
 			1.f, 1.f, 1.f, 0.7f);
-		//drawQuad(background, 0, 0, window_width, window_height, 1.f, 1.f, 1.f, 0.7f);
 		ANIMATION::gameLogo.Anim_Draw(ASSETS::brandAssets); //Draws GAMELOGO
 
 		drawQuad(gameLogo,
@@ -450,7 +432,6 @@ void MainMenu_Draw() {
 			350.0f,
 			350.0f,
 			1.f, 1.f, 1.f, 1.f);
-		//drawQuad(gameLogo, 0, 250.0, 350.0f, 350.0f, 1.f, 1.f, 1.f, 1.f);
 		//UI BUTTONS_____________________________
 		UI::startBtn.UI_Draw(ASSETS::UIAssets);
 		UI::shopBtn.UI_Draw(ASSETS::UIAssets);
@@ -585,6 +566,9 @@ void MainMenu_Draw() {
 }
 
 void MainMenu_Free() {
+	local_time = 0.0f; //Reset timer
+	tutorialPromptOpen = FALSE;
+
     if (unit_square) { AEGfxMeshFree(unit_square);  unit_square = nullptr; }
     if (gameLogo)    { AEGfxMeshFree(gameLogo);      gameLogo    = nullptr; }
     if (background)  { AEGfxMeshFree(background);    background  = nullptr; }
@@ -608,7 +592,6 @@ void MainMenu_Unload() {
 	UI::creditsBtn.UI_Free();
 	UI::lvlSelectorBtn.UI_Free();
 
-	//AEGfxDestroyFont(font_id);
 	ASSETS::Unload_Images();
 	ASSETS::Unload_Font();
 }

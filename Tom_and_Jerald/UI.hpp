@@ -1,4 +1,15 @@
+//---------------------------------------------------------
+// file:	UI.cpp
+// author:	Loh Kai Xin
+// email:	kaixin.l@digipen.edu
+//
+// brief:	Class function declarations for UI icons' manipulation.
+//
+// Copyright 2026 DigiPen, All rights reserved.
+//---------------------------------------------------------
 #pragma once //Header guard
+
+//Header files
 #include"pch.hpp"
 #include "Animation.hpp"
 
@@ -40,18 +51,16 @@ namespace UI {
 		//Initialize buttons
 		void UI_Init(f32 posX, f32 posY, f32 width, f32 height);
 
-
 		//Set up specific button
 		void UI_Select(buttonKey button_type);//Takes in enum to choose button type
-
 
 		//Renders the button
 		void UI_Draw(AEGfxTexture* texture) const;
 		//Renders the text on hover
-		void UI_DrawHoverText(s8 font, const char* text, f32 dropY = 100.0f, f32 scale = 1.0f) const;
+		void UI_DrawHoverText(s8 font, const char* text) const;
 
 		//Checks for hover
-		bool UI_IsHovered(f32 mouseX, f32 mouseY, f32 half = 100.0f) const;
+		bool UI_IsHovered(f32 mouseX, f32 mouseY) const;
 
 		// Explicitly free mesh (required when changing screens, otherwise memory leak)
 		void UI_Free();
@@ -75,6 +84,5 @@ namespace UI {
 	extern UIButtons settingsBtn;
 	extern UIButtons creditsBtn;
 	extern UIButtons lvlSelectorBtn;
-
 
 }//End namespace UI

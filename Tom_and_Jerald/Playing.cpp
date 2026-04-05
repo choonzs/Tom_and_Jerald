@@ -374,13 +374,18 @@ void Playing_Update() {
             // Convert screen pixel coords to world space (accounting for camera)
             f32 mouseX = (mouseX_int - window_width * 0.5f) + camera.Position().x;
             f32 mouseY = -(mouseY_int - window_height * 0.5f) + camera.Position().y;
-			if (UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+            UI::resumeBtn.half = 75.0f;
+            UI::restartBtn.half = 75.0f;
+            UI::menuBtn.half = 75.0f;
+
+
+			if (UI::resumeBtn.UI_IsHovered(mouseX, mouseY)) {
                 quitting_flag = FALSE; isPaused = false;
             }
-            if (UI::restartBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+            if (UI::restartBtn.UI_IsHovered(mouseX, mouseY)) {
                 next = GAME_STATE_RESTART; isPaused = false;
             }
-            if (UI::menuBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+            if (UI::menuBtn.UI_IsHovered(mouseX, mouseY)) {
                 quitting_flag = TRUE;
 				confirm_flag = TRUE;
             }
