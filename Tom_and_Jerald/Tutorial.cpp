@@ -97,7 +97,7 @@ void Tutorial_Initialize()
     tutorial_player.Health() = 3;
 
     if (pFuel) delete pFuel;
-    pFuel = new JetpackFuel(100.0f, (100.0f / 30.0f) - 1.0f, 1.0f);
+    pFuel = new JetpackFuel(100.0f, 15.0f, 1.0f); //Drains faster for tutorial ONLY
 
     step = TUT_MOVE;
     moved_with_wasd = false;
@@ -207,7 +207,7 @@ void Tutorial_Update()
             tutorial_player.Velocity().y = 0.0f;
 
             if (pFuel) delete pFuel;
-            pFuel = new JetpackFuel(100.0f, (100.0f / 30.0f) - 1.0f, 1.0f);
+            pFuel = new JetpackFuel(100.0f, 15.0f, 1.0f);
 
             fuel_drained = false;
             asteroid_spawned = false;
@@ -248,7 +248,7 @@ void Tutorial_Draw()
         f32 uv_x = frame * frame_width;
 
         AEGfxTextureSet(ASSETS::backgroundAssets, uv_x, 0.0f);
-        drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+        drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 0.7f);
     }
 
     ANIMATION::player.Anim_Draw(ASSETS::playerAssets);
@@ -285,26 +285,26 @@ void Tutorial_Draw()
     switch (step)
     {
     case TUT_MOVE:
-        drawCenteredText(font_id, "PRESS WASD TO MOVE", 0.7f, 0.8f);
+        drawCenteredText(font_id, "PRESS WASD TO MOVE", 0.7f, 1.2f);
         break;
     case TUT_FLY:
-        drawCenteredText(font_id, "PRESS W TO FLY", 0.7f, 0.8f);
-        drawCenteredText(font_id, "FLYING DRAINS FUEL", 0.6f, 0.7f);
+        drawCenteredText(font_id, "PRESS W TO FLY", 0.7f, 1.2f);
+        drawCenteredText(font_id, "FLYING DRAINS FUEL", 0.6f, 1.1f);
         break;
     case TUT_OUT_OF_FUEL:
-        drawCenteredText(font_id, "KEEP FLYING UNTIL FUEL RUNS OUT", 0.7f, 0.65f);
-        drawCenteredText(font_id, "WHEN FUEL IS 0, YOU CANNOT FLY", 0.6f, 0.65f);
+        drawCenteredText(font_id, "KEEP FLYING UNTIL FUEL RUNS OUT", 0.7f, 1.0f);
+        drawCenteredText(font_id, "WHEN FUEL IS 0, YOU CANNOT FLY", 0.6f, 1.0f);
         break;
     case TUT_SPAWN_ASTEROID:
     case TUT_AVOID_ASTEROID:
-        drawCenteredText(font_id, "AN ASTEROID IS COMING!", 0.7f, 0.8f);
-        drawCenteredText(font_id, "TRY TO AVOID IT", 0.6f, 0.8f);
+        drawCenteredText(font_id, "AN ASTEROID IS COMING!", 0.7f, 1.2f);
+        drawCenteredText(font_id, "TRY TO AVOID IT", 0.6f, 1.2f);
         break;
     case TUT_SUCCESS:
-        drawCenteredText(font_id, "GOOD JOB!", 0.7f, 0.9f);
+        drawCenteredText(font_id, "GOOD JOB!", 0.7f, 1.4f);
         break;
     case TUT_RETRY:
-        drawCenteredText(font_id, "OOPS... LET'S TRY THAT AGAIN", 0.7f, 0.75f);
+        drawCenteredText(font_id, "OOPS... LET'S TRY THAT AGAIN", 0.7f, 1.1f);
         break;
     }
 }

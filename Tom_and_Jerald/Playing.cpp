@@ -668,7 +668,7 @@ void Playing_Draw() {
         f32 uv_x = frame * frame_width;
 
         AEGfxTextureSet(ASSETS::backgroundAssets, uv_x, 0.0f);
-        drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 1.f);
+        drawQuad(unit_square, tile_x, camera.Position().y, bg_width, bg_height, 1.f, 1.f, 1.f, 0.8f);
     }
     // Draw Enemy Cat
     ANIMATION::cat.Anim_Draw(ASSETS::playerAssets);   //Draws CAT
@@ -744,8 +744,8 @@ void Playing_Draw() {
         drawQuad(unit_square,
             gMazePortal.pos.x,
             gMazePortal.pos.y,
-            120.0f,
-            120.0f,
+            150.0f,
+            150.0f,
             1.0f, 1.0f, 1.0f, 1.0f);
 
         AEGfxSetRenderMode(AE_GFX_RM_COLOR);
