@@ -9,13 +9,80 @@ namespace {
     s8 font_id = -1;
     AEGfxVertexList* unit_square = nullptr;
 
-    // Scroll state
+    // Scroll state — loaded from CreditsContent.txt
     f32 scroll_y     = 0.0f;
-    f32 scroll_speed = 60.0f;  // pixels per second
+    f32 scroll_speed = 60.0f;
+    f32 g_line_gap   = 45.0f;
 
     // Copyright logo dimensions
     const f32 COPYRIGHT_W = 420.0f;
     const f32 COPYRIGHT_H = 80.0f;
+
+    // ---------------------------------------------------------------------------
+    // Credits content — loaded from Assets/data/CreditsContent.txt
+    // ---------------------------------------------------------------------------
+    struct CreditsEntry {
+        enum class Type { Title, Section, Name, Footer, Spacer } type;
+        std::string text;
+    };
+    std::vector<CreditsEntry> g_credits_entries;
+
+    void LoadCreditsFromFile(const std::string& filename)
+    {
+        g_credits_entries.clear();
+        scroll_speed = 60.0f;   // reset to safe defaults before reading
+        g_line_gap   = 45.0f;
+
+        std::ifstream f(filename);
+        if (!f.is_open()) {
+            // File missing — use minimal hardcoded fallback so screen still works
+            CreditsEntry e;
+            e.type = CreditsEntry::Type::Title;  e.text = "C R E D I T S";
+            g_credits_entries.push_back(e);
+            e.type = CreditsEntry::Type::Spacer; e.text = "";
+            g_credits_entries.push_back(e);
+            e.type = CreditsEntry::Type::Footer; e.text = "Press ESC to return";
+            g_credits_entries.push_back(e);
+            return;
+        }
+
+        std::string line;
+        while (std::getline(f, line)) {
+            if (line.empty() || line[0] == '#') continue;
+
+            // Parse key-value parameters first
+            std::istringstream ss(line);
+            std::string first;
+            ss >> first;
+            if (first == "scroll_speed") { ss >> scroll_speed; continue; }
+            if (first == "line_gap")     { ss >> g_line_gap;   continue; }
+
+            // SPACER needs no text
+            if (first == "SPACER") {
+                CreditsEntry entry;
+                entry.type = CreditsEntry::Type::Spacer;
+                entry.text = "";
+                g_credits_entries.push_back(entry);
+                continue;
+            }
+
+            // All other content uses TYPE|text format
+            auto sep = line.find('|');
+            if (sep == std::string::npos) continue;
+            std::string type_str = line.substr(0, sep);
+            std::string text     = line.substr(sep + 1);
+
+            CreditsEntry entry;
+            if      (type_str == "TITLE")   entry.type = CreditsEntry::Type::Title;
+            else if (type_str == "SECTION") entry.type = CreditsEntry::Type::Section;
+            else if (type_str == "NAME")    entry.type = CreditsEntry::Type::Name;
+            else if (type_str == "FOOTER")  entry.type = CreditsEntry::Type::Footer;
+            else continue;  // unknown type — skip
+
+            entry.text = text;
+            g_credits_entries.push_back(entry);
+        }
+    }
 }
 
 void CreditsScreen_Load() {
@@ -27,6 +94,7 @@ void CreditsScreen_Load() {
 void CreditsScreen_Initialize() {
     createUnitSquare(&unit_square);
     scroll_y = 0.0f;
+    LoadCreditsFromFile("Assets/data/CreditsContent.txt");
 }
 
 void CreditsScreen_Update() {
@@ -49,8 +117,7 @@ void CreditsScreen_Draw() {
     f32 halfH = AEGfxGetWinMaxY();
 
     // ------------------------------------------------------------------
-    // 1. DigiPen copyright – always pinned at the very top of the screen
-    //    (requirement: must appear at top/beginning, NOT end of scroll)
+    // 1. DigiPen copyright — always pinned at the very top of the screen
     // ------------------------------------------------------------------
     f32 copyright_y = halfH - COPYRIGHT_H * 0.5f - 10.0f;
     if (ASSETS::copyrightText) {
@@ -60,62 +127,54 @@ void CreditsScreen_Draw() {
     }
 
     // ------------------------------------------------------------------
-    // 2. Scrolling credits text (starts below the copyright bar)
+    // 2. Scrolling credits text — driven by Assets/data/CreditsContent.txt
     // ------------------------------------------------------------------
-    // Each line is placed relative to a base Y that moves upward over time.
-    // scroll_y increases → credits scroll upward.
-    f32 base_y    = halfH - COPYRIGHT_H - 30.0f - scroll_y;
-    f32 line_gap  = 45.0f;
-    f32 col1      = -0.95f;   // left-aligned normalised X for section headers
-    f32 title_s   = 0.8f;
-    f32 name_s    = 0.6f;
-    f32 header_s  = 0.7f;
-
-    // Helper: convert world-space Y to the normalised [-1,1] range AEGfxPrint expects
-    f32 halfH_f   = halfH;
+    f32 base_y   = halfH - COPYRIGHT_H - 30.0f - scroll_y;
+    f32 line_gap = g_line_gap;
+    f32 col1     = -0.95f;
+    f32 title_s  = 0.8f;
+    f32 name_s   = 0.6f;
+    f32 header_s = 0.7f;
+    f32 halfH_f  = halfH;
     auto worldToNorm = [&](f32 wy) -> f32 { return wy / halfH_f; };
 
-    // ---- TITLE ----
-    drawCenteredText(font_id, "C R E D I T S", worldToNorm(base_y), title_s,
-                     0.0f, 0.0f, 1.0f, 0.85f, 0.2f, 1.0f);
+    for (auto& entry : g_credits_entries) {
+        switch (entry.type) {
+        case CreditsEntry::Type::Title:
+            drawCenteredText(font_id, entry.text.c_str(),
+                             worldToNorm(base_y), title_s,
+                             0.0f, 0.0f, 1.0f, 0.85f, 0.2f, 1.0f);
+            base_y -= line_gap;
+            break;
 
-    base_y -= line_gap * 1.5f;
+        case CreditsEntry::Type::Section:
+            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            AEGfxPrint(font_id, entry.text.c_str(),
+                       col1, worldToNorm(base_y), header_s,
+                       0.9f, 0.6f, 0.1f, 1.0f);
+            base_y -= line_gap;
+            break;
 
-    // ---- PRESIDENT ----
-    AEGfxPrint(font_id, "President", col1, worldToNorm(base_y), header_s,
-               0.9f, 0.6f, 0.1f, 1.0f);
-    base_y -= line_gap;
-    AEGfxPrint(font_id, "  Claude Comair", col1, worldToNorm(base_y), name_s,
-               1.0f, 1.0f, 1.0f, 1.0f);
+        case CreditsEntry::Type::Name:
+            AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+            AEGfxPrint(font_id, entry.text.c_str(),
+                       col1, worldToNorm(base_y), name_s,
+                       1.0f, 1.0f, 1.0f, 1.0f);
+            base_y -= line_gap;
+            break;
 
-    base_y -= line_gap * 1.5f;
+        case CreditsEntry::Type::Footer:
+            drawCenteredText(font_id, entry.text.c_str(),
+                             worldToNorm(base_y), 0.5f,
+                             0.0f, 0.0f, 0.6f, 0.6f, 0.6f, 1.0f);
+            // No decrement — footer is the last entry
+            break;
 
-    // ---- INSTRUCTORS ----
-    AEGfxPrint(font_id, "Instructors", col1, worldToNorm(base_y), header_s,
-               0.9f, 0.6f, 0.1f, 1.0f);
-    base_y -= line_gap;
-    AEGfxPrint(font_id, "  Gerald Wong",    col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Tommy Tan",      col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Soroor",         col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Prasanna Ghali", col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f);
-
-    base_y -= line_gap * 1.5f;
-
-    // ---- TEAM MEMBERS ----
-    AEGfxPrint(font_id, "Team Members", col1, worldToNorm(base_y), header_s,
-               0.9f, 0.6f, 0.1f, 1.0f);
-    base_y -= line_gap;
-    AEGfxPrint(font_id, "  Tan Choon Ming",       col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Dan Ng Cher Kai",       col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Peng Rong Jun Jerald",  col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Loh Kai Xin",           col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f); base_y -= line_gap;
-    AEGfxPrint(font_id, "  Ong Jin Ting",           col1, worldToNorm(base_y), name_s, 1.f, 1.f, 1.f, 1.f);
-
-    base_y -= line_gap * 2.0f;
-
-    // ---- FOOTER ----
-    drawCenteredText(font_id, "Press ESC to return", worldToNorm(base_y), 0.5f,
-                     0.0f, 0.0f, 0.6f, 0.6f, 0.6f, 1.0f);
+        case CreditsEntry::Type::Spacer:
+            base_y -= line_gap * 0.5f;
+            break;
+        }
+    }
 
     // Reset render mode
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -124,6 +183,7 @@ void CreditsScreen_Draw() {
 
 void CreditsScreen_Free() {
     if (unit_square) { AEGfxMeshFree(unit_square); unit_square = nullptr; }
+    g_credits_entries.clear();
 }
 
 void CreditsScreen_Unload() {

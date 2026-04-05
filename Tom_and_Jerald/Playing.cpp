@@ -24,12 +24,23 @@ namespace {
     //f32 window_width;								//Window Width
     //f32 window_height;								//Window Height
 
-    // --- FIX: RESTORED MISSING CONSTANTS ---
-    const f32 k_stage_duration = 120.0f;
-    const f32 k_damage_cooldown = 1.0f;
-    const int k_obstacle_count = 10;
+    // Gameplay constants — loaded from Assets/data/GameConfig.txt in Playing_Load.
+    // Defaults here are used if the file is missing.
+    f32 k_stage_duration          = 120.0f;
+    f32 k_damage_cooldown         = 1.0f;
+    int k_obstacle_count          = 10;
     const int MAX_ACTIVE_OBSTACLES = 10;
-    const f32 k_obstacle_spawn_cooldown = 3.0f;
+    f32 k_obstacle_spawn_cooldown = 3.0f;
+    f32 k_player_base_half_size   = 50.0f;
+    f32 k_player_min_half_size    = 10.0f;
+    f32 k_fuel_base_capacity      = 100.0f;
+    f32 k_fuel_burn_time          = 30.0f;
+    f32 k_fuel_passive_drain      = 1.0f;
+    f32 k_fuel_spawn_min          = 10.0f;
+    f32 k_fuel_spawn_max          = 20.0f;
+    f32 k_camera_magnitude        = 20.0f;
+    f32 k_portal_respawn_delay    = 5.0f;
+    bool g_debug_mode             = false;  // toggled with key 6
 
 
     // Camera
@@ -80,7 +91,6 @@ namespace {
         bool gResumeFromMaze = false;
 
         f32 gPortalRespawnTimer = 0.0f;
-        const f32 kPortalRespawnDelay = 5.0f;
         bool gPortalWaitingToRespawn = false;
     }
 
@@ -120,6 +130,23 @@ void Playing_Load() {
     ASSETS::Init_Images();
     ASSETS::Init_Font();
     font_id = ASSETS::Font();
+
+    // Load gameplay constants from designer-editable config file.
+    // If the file is missing, the defaults declared above are used.
+    auto cfg = LoadConfig("Assets/data/GameConfig.txt");
+    k_stage_duration          = ConfigFloat(cfg, "stage_duration",          k_stage_duration);
+    k_damage_cooldown         = ConfigFloat(cfg, "damage_cooldown",         k_damage_cooldown);
+    k_obstacle_count          = ConfigInt  (cfg, "obstacle_count",          k_obstacle_count);
+    k_obstacle_spawn_cooldown = ConfigFloat(cfg, "obstacle_spawn_cooldown", k_obstacle_spawn_cooldown);
+    k_player_base_half_size   = ConfigFloat(cfg, "player_base_half_size",   k_player_base_half_size);
+    k_player_min_half_size    = ConfigFloat(cfg, "player_min_half_size",    k_player_min_half_size);
+    k_fuel_base_capacity      = ConfigFloat(cfg, "fuel_base_capacity",      k_fuel_base_capacity);
+    k_fuel_burn_time          = ConfigFloat(cfg, "fuel_burn_time",          k_fuel_burn_time);
+    k_fuel_passive_drain      = ConfigFloat(cfg, "fuel_passive_drain",      k_fuel_passive_drain);
+    k_fuel_spawn_min          = ConfigFloat(cfg, "fuel_spawn_min",          k_fuel_spawn_min);
+    k_fuel_spawn_max          = ConfigFloat(cfg, "fuel_spawn_max",          k_fuel_spawn_max);
+    k_camera_magnitude        = ConfigFloat(cfg, "camera_magnitude",        k_camera_magnitude);
+    k_portal_respawn_delay    = ConfigFloat(cfg, "portal_respawn_delay",    k_portal_respawn_delay);
 }
 
 static void SavePlayingStateForMaze()
@@ -217,8 +244,8 @@ void Playing_Initialize() {
 
     // Changing Player size
     f32 size_reduction = Upgrades_GetSizeReduction();
-    f32 upgraded_half_size = 50.0f - size_reduction;
-    if (upgraded_half_size < 10.0f) upgraded_half_size = 10.0f;
+    f32 upgraded_half_size = k_player_base_half_size - size_reduction;
+    if (upgraded_half_size < k_player_min_half_size) upgraded_half_size = k_player_min_half_size;
     AEVec2Set(&(base_player.Position()), 0.0f, 0.0f);
     AEVec2Set(&(base_player.Half_Size()), upgraded_half_size, upgraded_half_size);
     // ==================================
@@ -229,16 +256,14 @@ void Playing_Initialize() {
     Credits_LoadFile("Assets/data/Cheese.txt");
     Credits_ResetRound();
 
-    f32 base_capacity = 100.0f;
+    f32 base_capacity = k_fuel_base_capacity;
     f32 upgraded_capacity = base_capacity * Upgrades_GetMaxFuelMultiplier();
-    // Drain rate: at full fuel, continuous thrust drains fuel in exactly 30 seconds.
-    // total_drain = passiveDrain + burnRate = upgraded_capacity / 30
-    const f32 k_passive_drain = 1.0f;
-    f32 burn_rate = (upgraded_capacity / 30.0f) - k_passive_drain;
-    pFuel = new JetpackFuel(upgraded_capacity, burn_rate, k_passive_drain);
+    // Drain rate: continuous thrust depletes fuel in exactly k_fuel_burn_time seconds.
+    f32 burn_rate = (upgraded_capacity / k_fuel_burn_time) - k_fuel_passive_drain;
+    pFuel = new JetpackFuel(upgraded_capacity, burn_rate, k_fuel_passive_drain);
     g_fuel_pickup.active = false;
     g_fuel_spawn_timer = 0.0f;
-    g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+    g_fuel_spawn_interval = randFloat(k_fuel_spawn_min, k_fuel_spawn_max);
 
     if (gResumeFromMaze && gSavedPlayingState.valid)
     {
@@ -289,7 +314,7 @@ void Playing_Initialize() {
     UI::noBtn.UI_Init(0.f, 0.f, 150.f, 150.f);
     UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
 
-    camera.Magnitude() = 20.0f;
+    camera.Magnitude() = k_camera_magnitude;
 
     camera.Position().x = base_player.Position().x;
     camera.Position().y = base_player.Position().y;
@@ -322,6 +347,7 @@ void Playing_Update() {
         return;
 	}
 
+    if (AEInputCheckTriggered(AEVK_6)) g_debug_mode = !g_debug_mode;  // toggle debug overlay
     if (AEInputCheckTriggered(AEVK_P)) { isPaused = !isPaused; } // toggle pause
 
     if (isPaused) {
@@ -499,7 +525,7 @@ void Playing_Update() {
 
             gMazePortal.active = false;
             gPortalWaitingToRespawn = true;
-            gPortalRespawnTimer = kPortalRespawnDelay;
+            gPortalRespawnTimer = k_portal_respawn_delay;
 
             next = GAME_STATE_MAZE;
             return;
@@ -519,7 +545,7 @@ void Playing_Update() {
                 g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
                 g_fuel_pickup.active = true;
                 g_fuel_spawn_timer = 0.0f;
-                g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+                g_fuel_spawn_interval = randFloat(k_fuel_spawn_min, k_fuel_spawn_max);
             }
         }
 
@@ -529,7 +555,7 @@ void Playing_Update() {
                 pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
                 g_fuel_pickup.active = false;
                 g_fuel_spawn_timer = 0.0f;
-                g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+                g_fuel_spawn_interval = randFloat(k_fuel_spawn_min, k_fuel_spawn_max);
             }
             if (std::abs(g_fuel_pickup.pos.x - camX) > AEGfxGetWinMaxX() + 500.0f) {
                 g_fuel_pickup.active = false;
@@ -737,6 +763,64 @@ void Playing_Draw() {
 
     graphics::particleDraw(unit_circle);
 
+    // ---- DEBUG OVERLAY — press 6 to toggle ----
+    if (g_debug_mode) {
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxTextureSet(NULL, 0.0f, 0.0f);
+
+        // Player bounding box — green
+        drawQuad(unit_square,
+                 base_player.Position().x, base_player.Position().y,
+                 base_player.Half_Size().x * 2.0f, base_player.Half_Size().y * 2.0f,
+                 0.0f, 1.0f, 0.0f, 0.4f);
+
+        // Maze portal bounding box — purple
+        if (gMazePortal.active)
+            drawQuad(unit_square,
+                     gMazePortal.pos.x, gMazePortal.pos.y,
+                     gMazePortal.half_size.x * 2.0f, gMazePortal.half_size.y * 2.0f,
+                     0.6f, 0.0f, 1.0f, 0.4f);
+
+        // Obstacle bounding boxes + asteroid speed readout
+        int ast_idx = 0;
+        char dbg_buf[128];
+        for (Obstacle const& obs : obstacles) {
+            switch (obs.type) {
+            case Asteroid:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 0.2f, 0.2f, 0.4f);
+                sprintf_s(dbg_buf, "AST[%d] vx:%.0f vy:%.0f", ast_idx,
+                          obs.velocity.x, obs.velocity.y);
+                AEGfxPrint(ASSETS::Font(), dbg_buf,
+                           -0.95f, 0.50f - ast_idx * 0.09f,
+                           0.45f, 1.0f, 0.5f, 0.5f, 1.0f);
+                ++ast_idx;
+                break;
+            case Spike:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 1.0f, 0.0f, 0.4f, obs.rotation);
+                break;
+            case Wall:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 0.5f, 0.0f, 0.4f, obs.rotation);
+                break;
+            default: break;
+            }
+        }
+
+        // Header / legend
+        AEGfxPrint(ASSETS::Font(),
+                   "[DEBUG 6:off] GREEN=player  RED=asteroid  YELLOW=spike  ORANGE=wall",
+                   -0.95f, 0.95f, 0.33f, 0.2f, 1.0f, 0.2f, 1.0f);
+        if (ast_idx == 0)
+            AEGfxPrint(ASSETS::Font(), "No asteroids active",
+                       -0.95f, 0.50f, 0.45f, 0.7f, 0.7f, 0.7f, 1.0f);
+    }
+    // ---- END DEBUG OVERLAY ----
+
     if (!isPaused) return;
 
     float camX = camera.Position().x;
@@ -827,7 +911,6 @@ void Playing_Free() {
 }
 
 void Playing_Unload() {
-    if (font_id != -1) { AEGfxDestroyFont(font_id); font_id = -1; }
     ASSETS::Unload_Images();
     ASSETS::Unload_Font();
     UI::resumeBtn.UI_Free();

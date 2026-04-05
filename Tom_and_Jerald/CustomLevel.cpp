@@ -49,13 +49,34 @@ namespace {
 
     f32 g_fuel_spawn_timer = 0.0f;
     f32 g_fuel_spawn_interval = 15.0f;
+
+    // Gameplay constants — loaded from Assets/data/GameConfig.txt in CustomLevel_Load
+    f32 k_cl_player_base_half_size = 20.0f;
+    f32 k_cl_player_min_half_size  = 10.0f;
+    f32 k_cl_fuel_base_capacity    = 100.0f;
+    f32 k_cl_fuel_burn_time        = 30.0f;
+    f32 k_cl_fuel_passive_drain    = 1.0f;
+    f32 k_cl_fuel_spawn_min        = 10.0f;
+    f32 k_cl_fuel_spawn_max        = 20.0f;
+    f32 k_cl_camera_magnitude      = 20.0f;
+    bool g_debug_mode              = false;  // toggled with key 6
 }
 
 void CustomLevel_Load() {
     ASSETS::Init_Images();
 	font_id = AEGfxCreateFont("Assets/liberation-mono.ttf", 32);
 	/*ASSETS::Init_Font();*/
-    
+
+    // Load designer-editable constants from config file
+    auto cfg = LoadConfig("Assets/data/GameConfig.txt");
+    k_cl_player_base_half_size = ConfigFloat(cfg, "custom_player_base_half_size", k_cl_player_base_half_size);
+    k_cl_player_min_half_size  = ConfigFloat(cfg, "custom_player_min_half_size",  k_cl_player_min_half_size);
+    k_cl_fuel_base_capacity    = ConfigFloat(cfg, "fuel_base_capacity",           k_cl_fuel_base_capacity);
+    k_cl_fuel_burn_time        = ConfigFloat(cfg, "fuel_burn_time",               k_cl_fuel_burn_time);
+    k_cl_fuel_passive_drain    = ConfigFloat(cfg, "fuel_passive_drain",           k_cl_fuel_passive_drain);
+    k_cl_fuel_spawn_min        = ConfigFloat(cfg, "fuel_spawn_min",               k_cl_fuel_spawn_min);
+    k_cl_fuel_spawn_max        = ConfigFloat(cfg, "fuel_spawn_max",               k_cl_fuel_spawn_max);
+    k_cl_camera_magnitude      = ConfigFloat(cfg, "camera_magnitude",             k_cl_camera_magnitude);
 }
 
 void CustomLevel_Initialize() {
@@ -75,8 +96,8 @@ void CustomLevel_Initialize() {
     damage_timer = 0.0f;
 
     f32 size_reduction = Upgrades_GetSizeReduction();
-    f32 upg_size = 20.0f - size_reduction;
-    if (upg_size < 10.0f) upg_size = 10.0f;
+    f32 upg_size = k_cl_player_base_half_size - size_reduction;
+    if (upg_size < k_cl_player_min_half_size) upg_size = k_cl_player_min_half_size;
 
     AEVec2Set(&(*custom_player).Position(), 0.0f, 0.0f);
     AEVec2Set(&(*custom_player).Half_Size(), upg_size, upg_size);
@@ -84,17 +105,16 @@ void CustomLevel_Initialize() {
     int max_health = (int)std::floor((*custom_player).Config().MaxHealth() * (1.0f + Upgrades_GetHealthIncrease()));
     (*custom_player).Health() = max_health;
 
-    camera.Magnitude() = 20.0f;
+    camera.Magnitude() = k_cl_camera_magnitude;
 	camera.Position() = (*custom_player).Position();
     AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
-    f32 upg_fuel = 100.0f * Upgrades_GetMaxFuelMultiplier();
-    const f32 k_passive_drain = 1.0f;
-    f32 burn_rate = (upg_fuel / 30.0f) - k_passive_drain;
-    pFuel = new JetpackFuel(upg_fuel, burn_rate, k_passive_drain);
+    f32 upg_fuel = k_cl_fuel_base_capacity * Upgrades_GetMaxFuelMultiplier();
+    f32 burn_rate = (upg_fuel / k_cl_fuel_burn_time) - k_cl_fuel_passive_drain;
+    pFuel = new JetpackFuel(upg_fuel, burn_rate, k_cl_fuel_passive_drain);
     g_fuel_pickup.active = false;
     g_fuel_spawn_timer = 0.0f;
-    g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+    g_fuel_spawn_interval = randFloat(k_cl_fuel_spawn_min, k_cl_fuel_spawn_max);
 
 
     // Get level to load from this file
@@ -119,6 +139,7 @@ void CustomLevel_Initialize() {
 void CustomLevel_Update() {
     f32 dt = (f32)AEFrameRateControllerGetFrameTime();
     if (AEInputCheckTriggered(AEVK_ESCAPE)) { next = GAME_STATE_MENU; return; }
+    if (AEInputCheckTriggered(AEVK_6)) g_debug_mode = !g_debug_mode;  // toggle debug overlay
     if (damage_timer > 0.0f) damage_timer -= dt;
 
     bool isFlying = (AEInputCheckCurr(AEVK_SPACE) || AEInputCheckCurr(AEVK_W) || AEInputCheckCurr(AEVK_UP)) && pFuel->HasFuel();
@@ -202,7 +223,7 @@ void CustomLevel_Update() {
             g_fuel_pickup.pos.y = randFloat(AEGfxGetWinMinY() + 50.0f, AEGfxGetWinMaxY() - 50.0f);
             g_fuel_pickup.active = true;
             g_fuel_spawn_timer = 0.0f;
-            g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+            g_fuel_spawn_interval = randFloat(k_cl_fuel_spawn_min, k_cl_fuel_spawn_max);
         }
     }
 
@@ -212,7 +233,7 @@ void CustomLevel_Update() {
             pFuel->RestoreFuel(pFuel->GetMaxFuel() * Upgrades_GetFuelRestorePercentage());
             g_fuel_pickup.active = false;
             g_fuel_spawn_timer = 0.0f;
-            g_fuel_spawn_interval = randFloat(10.0f, 20.0f);
+            g_fuel_spawn_interval = randFloat(k_cl_fuel_spawn_min, k_cl_fuel_spawn_max);
         }
         if (std::abs(g_fuel_pickup.pos.x - camX) > AEGfxGetWinMaxX() + 500.0f) {
             g_fuel_pickup.active = false;
@@ -353,6 +374,58 @@ void CustomLevel_Draw() {
     // Hot-reload flash notification
     if (g_reload_flash)
         AEGfxPrint(ASSETS::Font(), "LEVEL RELOADED", -0.35f, 0.0f, 0.8f, 0.2f, 1.0f, 0.3f, 1.0f);
+
+    // ---- DEBUG OVERLAY — press 6 to toggle ----
+    if (g_debug_mode) {
+        AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+        AEGfxTextureSet(NULL, 0.0f, 0.0f);
+
+        // Player bounding box — green
+        drawQuad(unit_square,
+                 (*custom_player).Position().x, (*custom_player).Position().y,
+                 (*custom_player).Half_Size().x * 2.0f, (*custom_player).Half_Size().y * 2.0f,
+                 0.0f, 1.0f, 0.0f, 0.4f);
+
+        // Obstacle bounding boxes + asteroid speed readout
+        int ast_idx = 0;
+        char dbg_buf[128];
+        auto& dbg_obs = obstacle_system.Obstacles();
+        for (Obstacle const& obs : dbg_obs) {
+            switch (obs.type) {
+            case Asteroid:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 0.2f, 0.2f, 0.4f);
+                sprintf_s(dbg_buf, "AST[%d] vx:%.0f vy:%.0f", ast_idx,
+                          obs.velocity.x, obs.velocity.y);
+                AEGfxPrint(font_id, dbg_buf,
+                           -0.95f, 0.50f - ast_idx * 0.09f,
+                           0.45f, 1.0f, 0.5f, 0.5f, 1.0f);
+                ++ast_idx;
+                break;
+            case Spike:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 1.0f, 0.0f, 0.4f, obs.rotation);
+                break;
+            case Wall:
+                drawQuad(unit_square, obs.position.x, obs.position.y,
+                         obs.half_size.x * 2.0f, obs.half_size.y * 2.0f,
+                         1.0f, 0.5f, 0.0f, 0.4f, obs.rotation);
+                break;
+            default: break;
+            }
+        }
+
+        // Legend
+        AEGfxPrint(font_id,
+                   "[DEBUG 6:off] GREEN=player  RED=asteroid  YELLOW=spike  ORANGE=wall",
+                   -0.95f, 0.95f, 0.33f, 0.2f, 1.0f, 0.2f, 1.0f);
+        if (ast_idx == 0)
+            AEGfxPrint(font_id, "No asteroids active",
+                       -0.95f, 0.50f, 0.45f, 0.7f, 0.7f, 0.7f, 1.0f);
+    }
+    // ---- END DEBUG OVERLAY ----
 }
 
 void CustomLevel_Free() {
