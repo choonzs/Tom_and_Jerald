@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    CreditsScreen.cpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  Loh Kai Xin kaixin.l@digipen.edu
 @brief
      Implements the scrolling Credits screen: parses entries from
      CreditsContent.txt and renders them with auto-scroll animation.

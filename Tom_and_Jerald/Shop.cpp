@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Shop.cpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  Loh Kai Xin kaixin.l@digipen.edu
 @brief
      Implements the upgrade Shop: displays purchasable upgrades, handles
      currency spending, and persists upgrade state to file.

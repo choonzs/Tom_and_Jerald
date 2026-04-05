@@ -1,7 +1,7 @@
 /*************************************************************************
 @file    Shop.hpp
-@Author  Loh Kai Xin kaixin.l@digipen.edu
-@Co-authors  Tan Choon Ming choonming.tan@digipen.edu
+@Author  Tan Choon Ming choonming.tan@digipen.edu
+@Co-authors  Loh Kai Xin kaixin.l@digipen.edu
 @brief
      Declares the Shop game-state lifecycle functions and the ShopState
      class.
