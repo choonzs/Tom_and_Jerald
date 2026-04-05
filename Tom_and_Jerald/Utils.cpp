@@ -145,15 +145,9 @@ void LoadLevelDataFromFile(std::string filename, f32& level_end_x,std::vector<Le
 				}
 
 				if (tile.type != 0) {
-					/*LevelTile tile{
-						type,
-						{startX + (c * TILE_SIZE) + TILE_SIZE / 2.0f, startY + (r * TILE_SIZE) + TILE_SIZE / 2.0f},
-						{TILE_SIZE / 2.0f, TILE_SIZE / 2.0f}
-					};*/
 					map_tiles.push_back(tile);
 					if (tile.pos.x > level_end_x) level_end_x = tile.pos.x;
-					//std::cout << "Loaded tile of type " << tile.type << " at position (" << tile.pos.x << ", " << tile.pos.y << ") with half-size (" << tile.half_size.x << ", " << tile.half_size.y << ") and velocity (" << tile.velocity.x << ", " << tile.velocity.y << ")\n";
-
+					
 					// Creating obstacle object based on tile type and randomizing FOR NOW its size and speed within a range
 					Obstacle 
 						new_obstacle(

@@ -374,17 +374,14 @@ void Playing_Update() {
             // Convert screen pixel coords to world space (accounting for camera)
             f32 mouseX = (mouseX_int - window_width * 0.5f) + camera.Position().x;
             f32 mouseY = -(mouseY_int - window_height * 0.5f) + camera.Position().y;
-			std::cout << "Mouse Clicked at: " << mouseX << ", " << mouseY << std::endl;
-			std::cout << "Resume Button at: " << UI::resumeBtn.posX << ", " << UI::resumeBtn.posY << std::endl;
-			std::cout << UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f) << std::endl;
-            if (UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
-                std::cout << "Resume hover" << std::endl; quitting_flag = FALSE; isPaused = false;
+			if (UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+                quitting_flag = FALSE; isPaused = false;
             }
             if (UI::restartBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
-                std::cout << "Restart hover" << std::endl;  next = GAME_STATE_RESTART; isPaused = false;
+                next = GAME_STATE_RESTART; isPaused = false;
             }
             if (UI::menuBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
-                std::cout << "Quit hover" << std::endl;  quitting_flag = TRUE;
+                quitting_flag = TRUE;
 				confirm_flag = TRUE;
             }
             if (confirm_flag) {

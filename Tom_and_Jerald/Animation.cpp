@@ -25,8 +25,7 @@ namespace ANIMATION {
         max_sprites = rows * cols;
         uv_width = 1.0f / static_cast<f32>(cols);                       //Explicit cast to f32
         uv_height = 1.0f / static_cast<f32>(rows);
-        //std::cout << "Anim_Init called: rows=" << rows << " cols=" << cols << "\n";//DEBUG LINE, comment out
-
+       
         RecalcUV();                                                     //Calculate UV for frame 0, prepares for Anim_Update()
     }
 
@@ -44,8 +43,7 @@ namespace ANIMATION {
         ifs >> tmp >> total_rows;
         ifs >> tmp >> total_cols;
         ifs >> tmp >> total_sprites;
-        //std::cout << "Import called: rows=" << total_rows << " cols=" << total_cols << "\n";//DEBUG LINE, comment out
-
+        
         Anim_Init(total_rows, total_cols);
         return true;
     }

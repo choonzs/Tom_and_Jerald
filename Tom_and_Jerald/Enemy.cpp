@@ -105,6 +105,18 @@ void Cat::Update(f32 delta_time, AEVec2 player_pos)
         m_pos.y = floor_y;
         m_jump_velocity = 0.0f;
     }
+
+    // If cat is too far offscreen to the left, snap it back just off left edge
+    const f32 cam_left = player_pos.x - (AEGfxGetWinMaxX() - AEGfxGetWinMinX()) * 0.5f;
+    const f32 too_far_threshold = cam_left - 200.0f; // 200px past left screen edge
+
+    if (m_pos.x < too_far_threshold)
+    {
+        // Place just off the left edge of the screen, not visible to player
+        m_pos.x = cam_left - m_half_size.x - 10.0f;
+        m_pos.y = floor_y;
+        m_jump_velocity = 0.0f;
+    }
 }
 
 // ---------------------------------------------------------------------------

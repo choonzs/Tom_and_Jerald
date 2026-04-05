@@ -191,4 +191,8 @@ f32 ConfigFloat(const std::map<std::string, std::string>& cfg,
 int ConfigInt  (const std::map<std::string, std::string>& cfg,
                 const std::string& key, int default_val);
 
+
+// For converting world space into screen space
+float ToScreenX(float worldX, float camX);
+float ToScreenY(float worldY, float camY);
 #endif // !UTILS_H
