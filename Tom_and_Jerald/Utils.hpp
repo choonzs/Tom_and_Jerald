@@ -169,4 +169,8 @@ void drawHealthBar(AEGfxVertexList* mesh, const Player& player, int max_health);
 *******************************************************************************/
 void LoadLevelDataFromFile(std::string filename, f32& level_end_x, std::vector<LevelTile>& out_tiles, ObstacleSystem& obstacle_system);
 
+
+// For converting world space into screen space
+float ToScreenX(float worldX, float camX);
+float ToScreenY(float worldY, float camY);
 #endif // !UTILS_H

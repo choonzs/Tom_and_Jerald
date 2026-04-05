@@ -90,6 +90,7 @@ namespace {
 
     s8 font_id = -1;
     BOOL quitting_flag = FALSE;
+	BOOL confirm_flag = FALSE;
 
     f32 stage_timer = 0.0f;
     f32 damage_timer = 0.0f;
@@ -338,12 +339,6 @@ void Playing_Update() {
         // ==================================================
 
         if (AEInputCheckTriggered(AEVK_LBUTTON)) {
-            float camX = camera.Position().x;
-            float camY = camera.Position().y;
-
-            //f32 half = 75.0f;
-
-                        
             f32 window_width = AEGfxGetWinMaxX() - AEGfxGetWinMinX();
             f32 window_height = AEGfxGetWinMaxY() - AEGfxGetWinMinY();
 
@@ -351,40 +346,30 @@ void Playing_Update() {
             AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
             // Convert screen pixel coords to world space (accounting for camera)
-            f32 mouseX = (static_cast<f32>(mouseX_int) - (window_width * 0.5f)) + camX;
-            f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f)) + camY;
-
-            bool hoverResume =
-                (mouseX >= UI::resumeBtn.posX && mouseX <= UI::resumeBtn.posX && mouseY >= UI::resumeBtn.posY && mouseY <= UI::resumeBtn.posY);
-
-            bool hoverRestart =
-                (mouseX >= UI::restartBtn.posX && mouseX <= UI::restartBtn.posX && mouseY >= UI::restartBtn.posY && mouseY <= UI::restartBtn.posY);
-
-            bool hoverBack =
-                (mouseX >= UI::menuBtn.posX && mouseX <= UI::menuBtn.posX && mouseY >= UI::menuBtn.posY && mouseY <= UI::menuBtn.posY);
-
-            bool hoverYes =
-                (mouseX >= UI::yesBtn.posX && mouseX <= UI::yesBtn.posX && mouseY >= UI::yesBtn.posY && mouseY <= UI::yesBtn.posY);
-
-            bool hoverNo =
-                (mouseX >= UI::noBtn.posX && mouseX <= UI::noBtn.posX && mouseY >= UI::noBtn.posY && mouseY <= UI::noBtn.posY);
-
-            if (hoverResume) {
-                quitting_flag = FALSE;
-                isPaused = false;
+            f32 mouseX = (mouseX_int - window_width * 0.5f) + camera.Position().x;
+            f32 mouseY = -(mouseY_int - window_height * 0.5f) + camera.Position().y;
+			std::cout << "Mouse Clicked at: " << mouseX << ", " << mouseY << std::endl;
+			std::cout << "Resume Button at: " << UI::resumeBtn.posX << ", " << UI::resumeBtn.posY << std::endl;
+			std::cout << UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f) << std::endl;
+            if (UI::resumeBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+                std::cout << "Resume hover" << std::endl; quitting_flag = FALSE; isPaused = false;
             }
-            if (hoverRestart) {
-                next = GAME_STATE_RESTART;
-                isPaused = false;
+            if (UI::restartBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+                std::cout << "Restart hover" << std::endl;  next = GAME_STATE_RESTART; isPaused = false;
             }
-            if (hoverBack) {
-                quitting_flag = TRUE;
+            if (UI::menuBtn.UI_IsHovered(mouseX, mouseY, 75.0f)) {
+                std::cout << "Quit hover" << std::endl;  quitting_flag = TRUE;
+				confirm_flag = TRUE;
             }
-            if (hoverYes) {
-                next = GAME_STATE_MENU;
-            }
-            if (hoverNo) {
-                quitting_flag = FALSE;
+            if (confirm_flag) {
+                if (UI::yesBtn.UI_IsHovered(mouseX, mouseY)) {
+                    next = GAME_STATE_MENU;
+                    confirm_flag = false;
+                }
+                if (UI::noBtn.UI_IsHovered(mouseX, mouseY)) {
+                    quitting_flag = false;
+                    confirm_flag = false;
+                }
             }
         }
 
@@ -400,14 +385,8 @@ void Playing_Update() {
         }
         else if (AEInputCheckTriggered(AEVK_2))
         {
-            //next = GAME_STATE_MENU;
             quitting_flag = TRUE;
         }
-        /*else if (AEInputCheckTriggered(AEVK_3))
-        {
-            next = GAME_STATE_QUIT;
-            quitting_flag = TRUE;
-        }*/
         else {
             //next = GAME_STATE_RESTART;
         }
@@ -797,11 +776,11 @@ void Playing_Draw() {
         AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f); // reset
 
         if (hoverYes) drawCenteredText(font_id, "YES [Y]",
-            (UI::yesBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::yesBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+           ToScreenY(UI::yesBtn.posY + labelDropY, camY), 0.7f,
+           ToScreenX(UI::yesBtn.posX, camX), 0.0f, 1.f, 1.f, 1.f, 1.f);
         if (hoverNo)  drawCenteredText(font_id, "NO [N]",
-            (UI::noBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::noBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+            ToScreenY(UI::noBtn.posY + labelDropY, camY), 0.7f,
+            ToScreenX(UI::noBtn.posX, camX), 0.0f, 1.f, 1.f, 1.f, 1.f);
     }
     else {
         // -- Normal pause screen --
@@ -817,17 +796,16 @@ void Playing_Draw() {
         AEGfxSetColorToAdd(hoverBack ? 0.3f : 0.f, hoverBack ? 0.3f : 0.f, 0.f, 0.f); UI::menuBtn.UI_Draw(ASSETS::UIAssets);
         AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f); // reset
 
-        if (hoverResume)  
-            drawCenteredText(font_id, "RESUME [R]",
-            (UI::resumeBtn.posY - camY + labelDropY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::resumeBtn.posX - camX) / AEGfxGetWinMaxX(),
-            0.0f, 1.f, 1.f, 1.f, 1.f);
+        
+        if (hoverResume)  drawCenteredText(font_id, "RESUME [R]", 
+            ToScreenY(UI::resumeBtn.posY + labelDropY, camY), 0.7f,
+            ToScreenX(UI::resumeBtn.posX, camX));
         if (hoverRestart) drawCenteredText(font_id, "RESTART [1]",
-            (UI::restartBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::restartBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+            ToScreenY(UI::restartBtn.posY + labelDropY, camY), 0.7f,
+            ToScreenX(UI::restartBtn.posX, camX), 0.0f, 1.f, 1.f, 1.f, 1.f);
         if (hoverBack)    drawCenteredText(font_id, "MAIN MENU [2]",
-            (UI::menuBtn.posY + labelDropY - camY) / AEGfxGetWinMaxY(), 0.7f,
-            (UI::menuBtn.posX - camX) / AEGfxGetWinMaxX(), 0.0f, 1.f, 1.f, 1.f, 1.f);
+            ToScreenY(UI::menuBtn.posY + labelDropY, camY), 0.7f,
+            ToScreenX(UI::menuBtn.posX, camX), 0.0f, 1.f, 1.f, 1.f, 1.f);
 
     }
 }
