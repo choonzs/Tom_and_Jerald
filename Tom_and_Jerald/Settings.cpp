@@ -173,10 +173,10 @@ void Slider::Draw(s8 font)
 
     // draw label and percentage 
     f32 labelY = mY / AEGfxGetWinMaxY();
-    AEGfxPrint(font, mLabel.c_str(), -0.8f, labelY, 0.7f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, mLabel.c_str(), -0.8f, labelY, 0.9f, 1.f, 1.f, 1.f, 1.f);
     char buffer[32];
     sprintf_s(buffer, 32, "%.0f%%", mValue * 100.f);
-    AEGfxPrint(font, buffer, 0.7f, labelY, 0.7f, 1.f, 1.f, 1.f, 1.f);
+    AEGfxPrint(font, buffer, 0.7f, labelY, 0.9f, 1.f, 1.f, 1.f, 1.f);
 }
 
 // resets slider value and handle back to default
