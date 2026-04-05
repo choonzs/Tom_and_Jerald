@@ -1,6 +1,6 @@
-#include "pch.hpp"
 
-// For testing
+
+#include "pch.hpp"
 #include "GameStateList.hpp"
 #include "Utils.hpp"
 #include "GameStateManager.hpp"
@@ -11,41 +11,53 @@
 #include "UI.hpp"
 
 namespace {
-	s8 font_id; // Reference to the font ID created in ImgFontInit, used for drawing text in this scene
+	//Assets
+	s8 font_id;										//Reference to font ID created in ImgFontInit, for drawing text
 	AEGfxVertexList* unit_square = nullptr;			//For Splashscreen drawing
 	AEGfxVertexList* gameLogo = nullptr;			//For Game logo
 	AEGfxVertexList* background = nullptr;			//For background
 
+	//Ceamera
 	Camera camera;
-
-	f32 delta_time;
-	f32 local_time;
-
-	f32 window_width;								//Window Width
-	f32 window_height;								//Window Height
-
-	BOOL mainMenu_flag;								//For main menu access, plays after teamname splashscreen
-	BOOL teamName_flag;								//For teamname splashscreen, plays after copyright splashscreen
-	BOOL quitting_flag; // Used to trigger quitting the game destructive action when player clicks escape or closes window
-
-
-	// Select Custom Level
-	BOOL levelSelectOpen{ false };
-	// txt files start w 1
-	unsigned int select_level{ 1 };
-	std::vector<std::string> level_files;
-	int levelSelectCursor = 0; // which item is highlighted
-	int levelScrollOffset = 0; // how much the list is scrolled
-	const int k_visible_rows = 5; // visible rows in the level select menu
-	// ========================
-
-	// Select Tutorial
-	BOOL tutorialPromptOpen{ false };
-
-	// Parallax using mouse
+	//Parallax using mouse
 	f32 parallax_x = 0.0f;
 	f32 parallax_y = 0.0f;
+
+	//Time/frame
+	f32 delta_time;									
+	f32 local_time;
+
+	//World coords
+	f32 window_width;				
+	f32 window_height;		
+
+	//Mouse coords									//For tracking for hovering on UI and parallax
+	s32 mouseX_int{};
+	s32 mouseY_int{};
+
+	//Flags
+	BOOL mainMenu_flag;								//For main menu access, plays after teamname splashscreen
+	BOOL teamName_flag;								//For teamname splashscreen, plays after copyright splashscreen
+	BOOL quitting_flag;								//Used to trigger quitting the game destructive action when player clicks escape or closes window
+	BOOL tutorialPromptOpen;				        //Used for tutorial prompt selection
+
+	//Values for UI buttons
+	const f32 btnSize = 200.0f;						//For button size
+	const f32 colSpacing = 325.0f;					//For spacing between buttons
+	const f32 rowTop = 50.0f;						//Top row coords
+	const f32 rowBot = -200.0f;						//Bottom row coords
+
+	//Select Custom Level
+	BOOL levelSelectOpen{ false };
+	//Txt files start w 1
+	unsigned int select_level{ 1 };
+	std::vector<std::string> level_files;
+	int levelSelectCursor = 0;						//Which item is highlighted
+	int levelScrollOffset = 0;						//How much the list is scrolled
+	const int k_visible_rows = 5;					//Visible rows in the level select menu
+
 }
+
 //Forward declarations
 static void ScanLevelFiles(std::vector<std::string>& level_files);
 
@@ -58,81 +70,92 @@ void MainMenu_Load() {
 
 //INITIALIZE
 void MainMenu_Initialize() {
+	//Initialize assets
 	createUnitSquare(&unit_square);
 	createUnitSquare(&gameLogo, 0.25f, 0.25f);
 	createUnitSquare(&background, 0.25f, 0.25f);
 
+	//Initialize blending modes
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxTextureSet(NULL, 0.0f, 0.0f);
 	AEGfxSetBackgroundColor(0.06f, 0.07f, 0.09f);
 
+	//Initialize camera position
 	AEGfxSetCamPosition(camera.Position().x, camera.Position().y);
 
+	//Initialize delta time
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
 
+	//Initialize window size
 	window_width = (AEGfxGetWinMaxX() - AEGfxGetWinMinX());
 	window_height = (AEGfxGetWinMaxY() - AEGfxGetWinMinY());
 
-	mainMenu_flag = FALSE; //False on default, triggers main menu after teamname
-	teamName_flag = FALSE; //False on defualt, triggers after splashscreen
+	//Initialize flags
+	mainMenu_flag = FALSE;							//False on default, triggers main menu after teamname
+	teamName_flag = FALSE;							//False on defualt, triggers after splashscreen
+	quitting_flag = FALSE;							//False on default, triggers when player clicks escape or closes window
+	tutorialPromptOpen = FALSE;						//False on default, triggers when player clicks on play
 
-	quitting_flag = FALSE; //False on default, triggers when player clicks escape or closes window
-
-	//ANIMATION______________________________
+	//Initialize animation
 	ANIMATION::gameLogo.ImportFromFile("Assets/AnimationData.txt");			//Total rows + columns file
-	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);							//Row, start col, frames, fps (GAMELOGO)
+	ANIMATION::gameLogo.Clip_Select(0, 0, 4, 5.0f);							//Row, start col, frames, fps for game logo
 
-	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");		//Total rows + columns file
-	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//Row, start col, frames, fps (BACKGROUND)
-	//UI BUTTONS-----------------------------
-	const f32 btnSize = 200.0f;
-	const f32 colSpacing = 325.0f;
-	const f32 rowTop = 50.0f;
-	const f32 rowBot = -200.0f;
+	ANIMATION::background.ImportFromFile("Assets/AnimationData.txt");
+	ANIMATION::background.Clip_Select(0, 0, 4, 2.0f);						//For background
 
-	// Top row: start, shop, lvlEditor, lvlSelector
-	UI::startBtn.UI_Init(-colSpacing * 1.5f, rowTop, btnSize, btnSize);
+	//Initialize buttons for UI
+	//Top row: start, shop, lvlEditor, lvlSelector
+	UI::startBtn.UI_Init(-colSpacing * 1.5f, rowTop, btnSize, btnSize);		//For game start button
 	UI::startBtn.UI_Select(UI::UIButtons::buttonKey::start);
-	UI::shopBtn.UI_Init(-colSpacing * 0.5f, rowTop, btnSize, btnSize);
+	UI::shopBtn.UI_Init(-colSpacing * 0.5f, rowTop, btnSize, btnSize);		//For shop button
 	UI::shopBtn.UI_Select(UI::UIButtons::buttonKey::shop);
-	UI::lvlEditBtn.UI_Init(colSpacing * 0.5f, rowTop, btnSize, btnSize);
+	UI::lvlEditBtn.UI_Init(colSpacing * 0.5f, rowTop, btnSize, btnSize);	//For level editor button
 	UI::lvlEditBtn.UI_Select(UI::UIButtons::buttonKey::lvlEditor);
-	UI::lvlSelectorBtn.UI_Init(colSpacing * 1.5f, rowTop, btnSize, btnSize);
+	UI::lvlSelectorBtn.UI_Init(colSpacing * 1.5f, rowTop, btnSize, btnSize);//For level selector button
 	UI::lvlSelectorBtn.UI_Select(UI::UIButtons::buttonKey::lvlSelector);
 
-	// Bottom row: highscore, settings, credits, exit
-	UI::highscoreBtn.UI_Init(-colSpacing * 1.5f, rowBot, btnSize, btnSize);
+	//Bottom row: highscore, settings, credits, exit
+	UI::highscoreBtn.UI_Init(-colSpacing * 1.5f, rowBot, btnSize, btnSize); //For highscore button
 	UI::highscoreBtn.UI_Select(UI::UIButtons::buttonKey::highscore);
-	UI::settingsBtn.UI_Init(-colSpacing * 0.5f, rowBot, btnSize, btnSize);
+	UI::settingsBtn.UI_Init(-colSpacing * 0.5f, rowBot, btnSize, btnSize);  //For settings button
 	UI::settingsBtn.UI_Select(UI::UIButtons::buttonKey::settings);
-	UI::creditsBtn.UI_Init(colSpacing * 0.5f, rowBot, btnSize, btnSize);
+	UI::creditsBtn.UI_Init(colSpacing * 0.5f, rowBot, btnSize, btnSize);	//For credits button
 	UI::creditsBtn.UI_Select(UI::UIButtons::buttonKey::credits);
-	UI::exitBtn.UI_Init(colSpacing * 1.5f, rowBot, btnSize, btnSize);
+	UI::exitBtn.UI_Init(colSpacing * 1.5f, rowBot, btnSize, btnSize);		//For exit button
 	UI::exitBtn.UI_Select(UI::UIButtons::buttonKey::exit);
-	//_______________________________________
 
+	//Yes and No buttons for tutorial prompt
+	UI::yesBtn.UI_Init(-150.0f, -90.0f, btnSize	, btnSize);					//For yes button
+	UI::yesBtn.UI_Select(UI::UIButtons::buttonKey::yes);
+	UI::noBtn.UI_Init(150.0f, -90.0f, btnSize, btnSize);					//For no button
+	UI::noBtn.UI_Select(UI::UIButtons::buttonKey::no);
+	UI::blankBtn.UI_Init(0.0f, -20.0f, 700.0f, 700.0f);                    //For pop-up window
+	UI::blankBtn.UI_Select(UI::UIButtons::buttonKey::blank);
+
+	//Initialize audio
 	backgroundAudio.Play();
 
-	// Show cursor please
+	//Show cursor
 	AEInputShowCursor(true);
 }
 
+//UPDATE
 void MainMenu_Update() {
+	//Update camera
 	camera.Update();
-	
+
+	//Update time
 	delta_time = (f32)AEFrameRateControllerGetFrameTime();
-	//ANIMATION______________________________
+
+	//Update animation according to time
 	ANIMATION::gameLogo.Anim_Update(delta_time);
 	ANIMATION::background.Anim_Update(delta_time);
-	//---------------------------------------
 
-	// Trying something with mouse
-	s32 mouseX_int{};
-	s32 mouseY_int{};
-
+	//Update cursor positon
 	AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
+	//TODO: figure this out and comment____________________________________
 	f32 nx = (static_cast<f32>(mouseX_int) / window_width) * 2.0f - 1.0f;
 	f32 ny = (static_cast<f32>(mouseY_int) / window_height) * 2.0f - 1.0f;
 
@@ -143,20 +166,22 @@ void MainMenu_Update() {
 
 	parallax_x += (target_x - parallax_x) * 0.1f;
 	parallax_y += (target_y - parallax_y) * 0.1f;
+	//______________________________________________________________________
 
-
-	if (AEInputCheckTriggered(AEVK_LBUTTON)) { //Player clicks a button
+	//Play audio on click
+	if (AEInputCheckTriggered(AEVK_LBUTTON)) {
 		clickAudio.Play();
 	}
 
-
+	//Update spashscreen to fade out
 	if (local_time < 3.0f) {
+		//Set teamname to not show first
 		teamName_flag = FALSE;
 
-		// Fade out: full opacity at 0s, invisible at 3s
+		//Fade out, full opacity at 0s, invisible at 3s
 		f32 splashScreenAlpha = 1.0f - (local_time / 3.0f);
 
-		//Default settings
+		//Default settings - MUST KEEP, prevents game crash
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 		AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
 		AEGfxSetColorToAdd(0.f, 0.0f, 0.0f, 0.0f);
@@ -165,64 +190,54 @@ void MainMenu_Update() {
 		//Runs the splashscreen
 		AEGfxSetTransparency(splashScreenAlpha);
 
-		//Draw the background
+		//Draw the background and splashscreen
 		AEGfxTextureSet(NULL, 1.0f, 1.0f);
 		drawQuad(background, 0, 0.0, window_width, window_height, 1.f, 1.f, 1.f, 1.f);
-
 		AEGfxTextureSet(ASSETS::copyrightLogo, 1.0f, 1.0f);
 		drawQuad(unit_square, 0, 0, window_width - 100.0f, window_height - 100.0f, 1.f, 1.f, 1.f, splashScreenAlpha);
 
-
-
+		//Constantly update time to create effect
 		local_time += delta_time;
-
 	}
 	else {
+		//Plays teamname screen after
 		teamName_flag = TRUE;
 	}
 
-	// Destructive confirmation for quitting the game
+	//Destructive confirmation for quitting the game
 	if (quitting_flag == TRUE) {
-		// Click Y to quit, N to cancel
+		//Press Y to quit, N to cancel
 		if (AEInputCheckTriggered(AEVK_Y)) {
-			// Quitting the game
+			//Quitting the game
 			next = GAME_STATE_QUIT;
 		}
 		else if (AEInputCheckTriggered(AEVK_N)) {
 			quitting_flag = FALSE;
 		}
 	}
-	// ===========================================
 
+	//After splashscreen and logo, run main menu
 	if (mainMenu_flag == TRUE) {
-		if (tutorialPromptOpen)
-		{
-			if (AEInputCheckTriggered(AEVK_ESCAPE))
-			{
+		//Open the prompt for tutorial
+		if (tutorialPromptOpen){
+			if (AEInputCheckTriggered(AEVK_ESCAPE)){
+				//Escape tutorial
 				tutorialPromptOpen = FALSE;
 				return;
 			}
 
-			if (AEInputCheckTriggered(AEVK_LBUTTON))
-			{
-				AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 
+			if (AEInputCheckTriggered(AEVK_LBUTTON)){
+
+				AEInputGetCursorPosition(&mouseX_int, &mouseY_int);
 				f32 mouseX = static_cast<f32>(mouseX_int) - (window_width * 0.5f);
 				f32 mouseY = -(static_cast<f32>(mouseY_int) - (window_height * 0.5f));
 
-				bool hoverYes = (mouseX >= -180.0f && mouseX <= -40.0f &&
-					mouseY >= -110.0f && mouseY <= -50.0f);
-
-				bool hoverNo = (mouseX >= 40.0f && mouseX <= 180.0f &&
-					mouseY >= -110.0f && mouseY <= -50.0f);
-
-				if (hoverYes)
-				{
+				if (UI::yesBtn.UI_IsHovered(mouseX, mouseY)) {
 					tutorialPromptOpen = FALSE;
 					next = GAME_STATE_TUTORIAL;
 				}
-				else if (hoverNo)
-				{
+				else if (UI::noBtn.UI_IsHovered(mouseX, mouseY)) {
 					tutorialPromptOpen = FALSE;
 					next = GAME_STATE_PLAYING;
 				}
@@ -536,31 +551,49 @@ void MainMenu_Draw() {
 			drawCenteredText(font_id, "WASD / ARROWS TO MOVE", -0.8f, 0.9f);
 		}
 
-		if (tutorialPromptOpen)
-		{
+		if (tutorialPromptOpen){
+
 			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxTextureSet(NULL, 0.0f, 0.0f);
 			AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
 			AEGfxSetTransparency(1.0f);
 
-			// dark overlay
+			// Dark overlay
 			drawQuad(unit_square, 0.0f, 0.0f, window_width, window_height, 0.0f, 0.0f, 0.0f, 0.55f);
 
-			// popup panel
-			drawQuad(unit_square, 0.0f, -20.0f, 520.0f, 240.0f, 0.08f, 0.09f, 0.12f, 0.95f);
+			// Panel and buttons from UI class
+			AEGfxSetColorToMultiply(0.3f, 0.3f, 0.3f, 1.0f);
+			UI::blankBtn.UI_Draw(ASSETS::UIAssets);
+			AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+			UI::yesBtn.UI_Draw(ASSETS::UIAssets);
+			UI::noBtn.UI_Draw(ASSETS::UIAssets);
 
-			// buttons
-			drawQuad(unit_square, -110.0f, -80.0f, 140.0f, 60.0f, 0.20f, 0.55f, 0.20f, 1.0f);
-			drawQuad(unit_square, 110.0f, -80.0f, 140.0f, 60.0f, 0.60f, 0.20f, 0.20f, 1.0f);
+			// Text - set render mode AFTER all quad draws
+			AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+			AEGfxSetColorToMultiply(1.0f, 1.0f, 1.0f, 1.0f);
+			AEGfxSetColorToAdd(0.0f, 0.0f, 0.0f, 0.0f);
+			AEGfxSetTransparency(1.0f);
 
-			AEGfxPrint(font_id, "Do you need a tutorial?", -0.22f, 0.08f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
-			f32 yesX = -110.0f / (window_width * 0.5f);
-			f32 noX = 110.0f / (window_width * 0.5f);
-			f32 y = -80.0f / (window_height * 0.5f);
+			drawCenteredText(font_id, "Do you need a tutorial?",
+				20.0f / (window_height * 0.5f),
+				1.3f,
+				0.0f, 0.0f,
+				0.f, 0.f, 0.f, 1.f);
 
-			AEGfxPrint(font_id, "YES", yesX - 0.05f, y - 0.02f, 0.7f, 1, 1, 1, 1);
-			AEGfxPrint(font_id, "NO", noX - 0.03f, y - 0.02f, 0.7f, 1, 1, 1, 1);
+			drawCenteredText(font_id, "YES",
+				-180.0f / (window_height * 0.5f),   // yesBtn posY normalized
+				1.2f,
+				-150.0f / (window_width * 0.5f),   // yesBtn posX normalized
+				0.0f,
+				0.f, 0.f, 0.f, 1.f);
+
+			drawCenteredText(font_id, "NO",
+				-180.0f / (window_height * 0.5f),   // noBtn posY normalized
+				1.2f,
+				150.0f / (window_width * 0.5f),    // noBtn posX normalized
+				0.0f,
+				0.f, 0.f, 0.f, 1.f);
 		}
 	}
 }
@@ -591,6 +624,9 @@ void MainMenu_Unload() {
 	UI::settingsBtn.UI_Free();
 	UI::creditsBtn.UI_Free();
 	UI::lvlSelectorBtn.UI_Free();
+	UI::yesBtn.UI_Free();
+	UI::noBtn.UI_Free();
+	UI::blankBtn.UI_Free();
 
 	ASSETS::Unload_Images();
 	ASSETS::Unload_Font();

@@ -84,5 +84,6 @@ namespace UI {
 	extern UIButtons settingsBtn;
 	extern UIButtons creditsBtn;
 	extern UIButtons lvlSelectorBtn;
+	extern UIButtons blankBtn;
 
 }//End namespace UI

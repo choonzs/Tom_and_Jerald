@@ -30,6 +30,7 @@ namespace UI {
     UIButtons settingsBtn;
     UIButtons creditsBtn;
     UIButtons lvlSelectorBtn;
+    UIButtons blankBtn;
 
     //Initialize buttons 
     void UIButtons::UI_Init(f32 x, f32 y, f32 w, f32 h) {
