@@ -35,6 +35,7 @@ Copyright © 2026 DigiPen, All rights reserved.
 int current{};
 int previous{};
 int next{};
+bool gSkipSplash = false;
 
 FP fpLoad = nullptr;
 FP fpInitialize = nullptr;
